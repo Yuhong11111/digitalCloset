@@ -88,7 +88,7 @@ def get_profile(request: Request):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
 
         
-@app.post("/login")
+@app.post("/auth/login")
 async def login_user(login_data: UserRequest, response: Response):
     try:
         # Find user in MongoDB
@@ -137,7 +137,7 @@ async def login_user(login_data: UserRequest, response: Response):
             "message": f"Login failed: {str(e)}"
         }
 
-@app.post("/signup")
+@app.post("/auth/signup")
 async def register_user(user_data: UserRequest, response: Response):
     try:
         existing_user = await db.users.find_one({"username": user_data.username})
@@ -151,7 +151,7 @@ async def register_user(user_data: UserRequest, response: Response):
         new_user = {
             "username": user_data.username,
             "password": hashed_password,
-            "created_at": datetime.utcnow()
+            # "created_at": datetime.utcnow()
         }
 
         result = await db.users.insert_one(new_user)

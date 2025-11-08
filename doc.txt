@@ -1,0 +1,28 @@
+Goal:
+Add clothing items with basic attributes (name, category, color, size, quantity, optional photo link).
+Browse/search/filter items by attribute.
+Edit/delete items safely (with undo or confirmation).
+Authentication with username+password; user-private data silo.
+Observability: basic metrics, error tracking, health checks.
+Conversational AI assistant (MVP+): users can ask natural-language questions (e.g., "show my black hoodies in M"), and the assistant executes searches and summarizes results.
+
+Planning:
+Week 1: Planning/design complete, repo & CI setup.
+Week 2: Backend slice (Clothing create/list) + DB indexes/seed; staging deploy.
+Week 3: Frontend slice integrated; auth; observability baseline.
+Week 4: Edit/delete, search/filters, assistant MVP (search + summarize), polish, canary to prod.
+
+
+Design:
+1. api planning:
+    authentication: post /auth/login; post /auth/signup; post /auth/logout
+    items: get /items; post /items; get /items/{id}; delete items/{id}
+    assistant: post /assistant/chat (sse streaming - a server push technology enabling a client to receive automatic updates from a server via an HTTP connection)
+    (for this api, we are handling one user message at a time, not the whole conversation,
+    to make sure backend have the whole chat history, we need to create a conversation databse with conversation_id)
+2. Data
+    user:{_id, username, password(hased)}
+    cloth:{_id, user_id, name, type, color, size, season, description}
+    conversation:{_id, user_id, title, create_at}
+    message:{_id, conversation_id, content, user_id}
+3. tool 

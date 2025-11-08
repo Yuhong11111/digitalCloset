@@ -17,7 +17,7 @@ export function Login() {
         setErrorMessage('');
         try {
             const baseUrl = 'http://localhost:8000';
-            const url = status === 'login' ? '/login' : '/signup';
+            const url = status === 'login' ? '/auth/login' : '/auth/signup';
             const response = await axios.post(`${baseUrl}${url}`, {
                 username,
                 password
