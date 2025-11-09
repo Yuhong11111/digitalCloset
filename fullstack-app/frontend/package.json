@@ -27,6 +27,16 @@
     "test": "react-scripts test --watchAll=false",
     "eject": "react-scripts eject"
   },
+  "jest": {
+    "moduleNameMapper": {
+      "^react-router-dom$": "<rootDir>/node_modules/react-router-dom/dist/index.js",
+      "^react-router$": "<rootDir>/node_modules/react-router/dist/development/index.js",
+      "^react-router/dom$": "<rootDir>/node_modules/react-router/dist/development/dom-export.js"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(axios|react-router|react-router-dom)/)"
+    ]
+  },
   "browserslist": {
     "production": [
       ">0.2%",
