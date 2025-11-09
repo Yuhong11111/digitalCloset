@@ -8,18 +8,20 @@ on:
 
 jobs:
   backend-tests:
+    name: Backend (lint & tests)
     runs-on: ubuntu-latest
     env:
       MONGODB_URL: ${{ secrets.MONGODB_URL }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      PYTHONPATH: ${{ github.workspace }}/fullstack-app/backend
 
     steps:
     - uses: actions/checkout@v3
     
     - name: Set up Python
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.8'
+        python-version: '3.9.6'
         
     - name: Install backend dependencies
       run: |

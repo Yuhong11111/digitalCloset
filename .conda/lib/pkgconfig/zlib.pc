@@ -1,0 +1,13 @@
+prefix=/Users/yuhong/Desktop/sl/digitalCloset/.conda
+exec_prefix=/Users/yuhong/Desktop/sl/digitalCloset/.conda
+libdir=/Users/yuhong/Desktop/sl/digitalCloset/.conda/lib
+sharedlibdir=/Users/yuhong/Desktop/sl/digitalCloset/.conda/lib
+includedir=/Users/yuhong/Desktop/sl/digitalCloset/.conda/include
+
+Name: zlib
+Description: zlib compression library
+Version: 1.2.13
+
+Requires:
+Libs: -L${libdir} -L${sharedlibdir} -lz
+Cflags: -I${includedir}
