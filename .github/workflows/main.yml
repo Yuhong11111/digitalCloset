@@ -9,7 +9,7 @@ on:
 jobs:
   backend-tests:
     name: Backend (lint & tests)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     env:
       MONGODB_URL: ${{ secrets.MONGODB_URL }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
@@ -35,7 +35,7 @@ jobs:
         pytest
 
   frontend-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     
     steps:
     - uses: actions/checkout@v3
@@ -57,7 +57,7 @@ jobs:
         
   deploy:
     needs: [backend-tests, frontend-tests]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.ref == 'refs/heads/main'
     
     steps:
