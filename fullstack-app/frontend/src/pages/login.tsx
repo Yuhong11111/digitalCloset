@@ -10,6 +10,7 @@ export function Login() {
     const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [email, setEmail] = useState('');
     const [status, setStatus] = useState('login'); // 'login' or 'signup'
     const { setId, setUsername: setContextUsername } = useContext(UserContext);
     const [errorMessage, setErrorMessage] = useState('');
@@ -20,12 +21,11 @@ export function Login() {
         try {
             const baseUrl = 'http://localhost:8000';
             const url = status === 'login' ? '/auth/login' : '/auth/signup';
-            const response = await axios.post(`${baseUrl}${url}`, {
-                username,
-                password
-            });
+            const payload = status === 'login'
+                ? { username, password }
+                : { username, password, email };
 
-            console.log("Response:", response);
+            const response = await axios.post(`${baseUrl}${url}`, payload);
 
             if (response.data.status === 'success') {
                 setContextUsername(username);
@@ -75,13 +75,18 @@ export function Login() {
                         onChange={ev => setPassword(ev.target.value)}
                         type="password" placeholder="Enter your password..." />
                 </Field.Root>
-                {/* <Field.Root required>
+                <Field.Root required={status === 'signup'}>
                     <Field.Label>
                         Email
-                        <Field.RequiredIndicator />
+                        {status === 'signup' && <Field.RequiredIndicator />}
                     </Field.Label>
-                    <Input placeholder="me@example.com" />
-                </Field.Root> */}
+                    <Input value={email}
+                        onChange={ev => setEmail(ev.target.value)}
+                        type="email"
+                        placeholder="me@example.com"
+                        disabled={status === 'login'}
+                    />
+                </Field.Root>
                 <Button type="submit" className="bg-blue-500 text-white block w-full rounded-sm p-2 mb-2 border">
                     {status === 'login' ? 'Login' : 'Sign Up'}
                 </Button>
