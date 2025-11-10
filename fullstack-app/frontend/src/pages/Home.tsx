@@ -1,30 +1,22 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Button, Flex } from '@chakra-ui/react';
 
 export function HomePage() {
     const navigate = useNavigate();
     return (
-        <div style={{ position: 'relative', height: '100vh' }}>
-            <button
-                style={{
-                    position: 'absolute',
-                    top: '20px',
-                    right: '20px',
-                    padding: '10px 20px',
-                    backgroundColor: 'blue',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer'
-                }}
-                onClick={() => navigate('/login')}
-            >
-                Log in/Sign in
-            </button>
+        <Flex height="50vh"
+            align="center"
+            justify="center"
+            gap={6}
+            direction="row">
             <h1>Welcome to the Digital Closet</h1>
+            <Button onClick={() => navigate('/login')}>
+                Log in/Sign in
+            </Button>
             {/* <button onClick={testBackendConnection}>Test Backend Connection</button> */}
-        </div>
+        </Flex>
     );
 }
 
