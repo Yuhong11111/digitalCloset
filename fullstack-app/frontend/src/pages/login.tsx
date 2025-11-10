@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 import { useContext, useState } from "react"
 import { UserContext } from "../components/UserContext";
-import { Box, Button, Flex, Field, Input } from "@chakra-ui/react";
+import { Box, Button, Flex, Field, Input, Spacer } from "@chakra-ui/react";
 import { RiArrowLeftLine } from "react-icons/ri";
 
 export function Login() {
@@ -87,19 +87,22 @@ export function Login() {
                         disabled={status === 'login'}
                     />
                 </Field.Root>
-                <Button type="submit" className="bg-blue-500 text-white block w-full rounded-sm p-2 mb-2 border">
-                    {status === 'login' ? 'Login' : 'Sign Up'}
-                </Button>
-                {status == 'login' && (
-                    <div>
-                        <Button onClick={() => setStatus('signup')}>Switch to Sign Up</Button>
-                    </div>
-                )}
-                {status == 'signup' && (
-                    <div>
-                        <Button onClick={() => setStatus('login')}>Switch to Login</Button>
-                    </div>
-                )}
+                <Flex direction="row" align="center" justify="center">
+                    <Button type="submit" className="bg-blue-500 text-white block w-full rounded-sm p-2 mb-2 border">
+                        {status === 'login' ? 'Login' : 'Sign Up'}
+                    </Button>
+                    <Spacer />
+                    {status == 'login' && (
+                        <div>
+                            <Button variant="plain" onClick={() => setStatus('signup')}>Switch to Sign Up</Button>
+                        </div>
+                    )}
+                    {status == 'signup' && (
+                        <div>
+                            <Button variant="plain" onClick={() => setStatus('login')}>Switch to Login</Button>
+                        </div>
+                    )}
+                </Flex>
                 {/* Add your login form here */}
             </form>
             <Box p={4}>
