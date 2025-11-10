@@ -12,9 +12,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 <div className="max-w-6xl mx-auto h-14 flex items-center justify-between px-4">
                     <div className="flex items-center gap-6 text-sm">
                         <NavLink to="/Closet" end>Closet</NavLink>
-                        <NavLink to="/outfits">Outfits</NavLink>
-                        <NavLink to="/assistant">Assistant</NavLink>
-                        <NavLink to="/settings">Settings</NavLink>
+                        <NavLink to="/outfits" end>Outfits</NavLink>
+                        <NavLink to="/assistant" end>Assistant</NavLink>
+                        <NavLink to="/settings" end>Settings</NavLink>
                     </div>
                 </div>
             </nav>

@@ -7,21 +7,54 @@ import Closet from './pages/Closet';
 import Outfits from './pages/Outfits';
 import Assistant from './pages/Assistant';
 import Settings from './pages/Settings';
+import { UserContextProvider } from './components/UserContext';
+import { ProtectedRoute } from './components/ProtectedRoute';
+
+axios.defaults.baseURL = 'http://localhost:3000';
+axios.defaults.withCredentials = true;
 
 function App() {
-  axios.defaults.baseURL = 'http://localhost:3000';
-  axios.defaults.withCredentials = true;
   return (
-    <Router >
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/closet" element={<Closet />} />
-        <Route path="/outfits" element={<Outfits />} />
-        <Route path="/assistant" element={<Assistant />} />
-        <Route path="/settings" element={<Settings />} />
-      </Routes>
-    </Router >
+    <UserContextProvider>
+      <Router >
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/closet"
+            element={
+              <ProtectedRoute>
+                <Closet />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/outfits"
+            element={
+              <ProtectedRoute>
+                <Outfits />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/assistant"
+            element={
+              <ProtectedRoute>
+                <Assistant />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+      </Router >
+    </UserContextProvider>
   );
 }
 

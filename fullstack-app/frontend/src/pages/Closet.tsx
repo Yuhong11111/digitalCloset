@@ -23,10 +23,10 @@ import AppLayout from "./AppLayout";
 
 export function Closet() {
     return <div>
-        <h1>Closet Page</h1>
-        <p>This is the Wardrobe page of the Digital Closet app.</p>
         <AppLayout>
         </AppLayout>
+        <h1>Closet Page</h1>
+        <p>This is the Wardrobe page of the Digital Closet app.</p>
     </div >;
 }
 
