@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
+    "@ark-ui/react": "^5.27.1",
     "@chakra-ui/react": "^3.29.0",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
@@ -36,10 +37,16 @@
     "moduleNameMapper": {
       "^react-router-dom$": "<rootDir>/node_modules/react-router-dom/dist/index.js",
       "^react-router$": "<rootDir>/node_modules/react-router/dist/development/index.js",
-      "^react-router/dom$": "<rootDir>/node_modules/react-router/dist/development/dom-export.js"
+      "^react-router/dom$": "<rootDir>/node_modules/react-router/dist/development/dom-export.js",
+      "^@ark-ui/react/anatomy$": "<rootDir>/node_modules/@ark-ui/react/dist/components/anatomy.js",
+      "^@ark-ui/react/factory$": "<rootDir>/node_modules/@ark-ui/react/dist/components/factory.js",
+      "^@ark-ui/react/environment$": "<rootDir>/node_modules/@ark-ui/react/dist/providers/environment/index.js",
+      "^@ark-ui/react/locale$": "<rootDir>/node_modules/@ark-ui/react/dist/providers/locale/index.js",
+      "^@ark-ui/react/utils$": "<rootDir>/node_modules/@ark-ui/react/dist/utils/index.js",
+      "^@ark-ui/react/(.*)$": "<rootDir>/node_modules/@ark-ui/react/dist/components/$1/index.js"
     },
     "transformIgnorePatterns": [
-      "node_modules/(?!(axios|react-router|react-router-dom)/)"
+      "node_modules/(?!(axios|react-router|react-router-dom|@chakra-ui|@ark-ui|@zag-js|framer-motion|proxy-compare|uqr)/)"
     ]
   },
   "browserslist": {
