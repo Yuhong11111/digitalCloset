@@ -4,15 +4,6 @@ import axios from 'axios';
 
 export function HomePage() {
     const navigate = useNavigate();
-
-    // const testBackendConnection = async () => {
-    //     try {
-    //         const response = await axios.get('http://localhost:8000/');
-    //         alert(response.data.message);
-    //     } catch (error) {
-    //         alert('Failed to connect to backend');
-    //     }
-    // };
     return (
         <div style={{ position: 'relative', height: '100vh' }}>
             <button

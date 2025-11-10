@@ -3,6 +3,7 @@ import axios from 'axios';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { HomePage } from './pages/Home';
 import Login from './pages/login';
+import { Closet } from './pages/Closet';
 
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/closet" element={<Closet />} />
       </Routes>
     </Router >
   );

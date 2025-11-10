@@ -26,7 +26,7 @@ export function Login() {
             if (response.data.status === 'success') {
                 setContextUsername(username);
                 setId(response.data.userId);
-                navigate('/');
+                navigate('/closet');
             } else {
                 setErrorMessage(response.data.message || 'An error occurred');
             }
