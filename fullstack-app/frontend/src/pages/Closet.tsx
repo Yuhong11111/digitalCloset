@@ -29,3 +29,5 @@ export function Closet() {
         </AppLayout>
     </div >;
 }
+
+export default Closet;  
