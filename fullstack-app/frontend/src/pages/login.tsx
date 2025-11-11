@@ -58,14 +58,6 @@ export function Login() {
                         onChange={ev => setUsername(ev.target.value)}
                         type="text" placeholder="Enter your username..." />
                 </Field.Root>
-                {/* <label>Username</label>
-                <input value={username}
-                    onChange={ev => setUsername(ev.target.value)}
-                    type="text" placeholder="Enter your username..." className="block w-full rounded-sm p-2 mb-2 border" /> */}
-                {/* <label>Password</label>
-                <input value={password}
-                    onChange={ev => setPassword(ev.target.value)}
-                    type="password" placeholder="Enter your password..." className="block w-full rounded-sm p-2 mb-2 border" /> */}
                 <Field.Root required>
                     <Field.Label>
                         Password

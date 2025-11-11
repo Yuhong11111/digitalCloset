@@ -32,15 +32,20 @@ export default function AppLayout({ children }: AppLayoutProps) {
         }
     }
 
+    const linkStyles = ({ isActive }: { isActive: boolean }) => ({
+        fontWeight: isActive ? '700' : '400',
+        color: isActive ? '#111' : '#555',
+    });
+
     return (
         <div className="min-h-screen bg-stone-50 text-stone-900">
             <nav className="border-b border-stone-200 bg-white/80 backdrop-blur">
                 <Flex direction={"row"}>
                     <Box p={4} gap={4} display="flex" alignItems="center">
-                        <NavLink to="/Closet" end>Closet</NavLink>
-                        <NavLink to="/outfits" end>Outfits</NavLink>
-                        <NavLink to="/assistant" end>Assistant</NavLink>
-                        <NavLink to="/settings" end>Settings</NavLink>
+                        <NavLink to="/closet" style={linkStyles}>Closet</NavLink>
+                        <NavLink to="/outfits" style={linkStyles}>Outfits</NavLink>
+                        <NavLink to="/assistant" style={linkStyles}>Assistant</NavLink>
+                        <NavLink to="/settings" style={linkStyles}>Settings</NavLink>
                     </Box>
                     <Box ml="auto" p={4}>
                         <Menu.Root positioning={{ placement: "bottom-end" }}>
