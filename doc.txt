@@ -21,7 +21,7 @@ Design:
     (for this api, we are handling one user message at a time, not the whole conversation,
     to make sure backend have the whole chat history, we need to create a conversation databse with conversation_id)
 2. Data
-    user:{_id, username, password(hased)}
+    user:{_id, username, password(hased), email}
     cloth:{_id, user_id, name, type, color, size, season, description}
     conversation:{_id, user_id, title, create_at}
     message:{_id, conversation_id, content, user_id}
