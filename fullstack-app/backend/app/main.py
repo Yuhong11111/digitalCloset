@@ -29,7 +29,8 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
 
 # Add these constants near the top of the file
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+# ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 100
 
 def create_access_token(data: dict):
     to_encode = data.copy()
@@ -69,6 +70,7 @@ app.include_router(routes.router)
 class UserRequest(BaseModel):
     username: str
     password: str
+    email: str = None  # Optional for login, required for signup
 
 @app.get("/")
 def read_root():
@@ -151,6 +153,7 @@ async def register_user(user_data: UserRequest, response: Response):
         new_user = {
             "username": user_data.username,
             "password": hashed_password,
+            "email": user_data.email,
             # "created_at": datetime.utcnow()
         }
 
@@ -183,6 +186,10 @@ async def register_user(user_data: UserRequest, response: Response):
             "status": "error"
         }
 
+@app.post("/auth/logout")
+async def logout_user(response: Response):
+    response.delete_cookie(key="token")
+    return {"message": "Logged out successfully"}
 
 @app.get("/test-db")
 async def test_db():

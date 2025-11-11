@@ -19,15 +19,37 @@
 */
 
 import AppLayout from "./AppLayout";
+import { Flex, Input, Box, Button, Spacer, Group, ButtonGroup } from "@chakra-ui/react";
 
 
 export function Closet() {
-    return <div>
+    return (
         <AppLayout>
-        </AppLayout>
-        <h1>Closet Page</h1>
-        <p>This is the Wardrobe page of the Digital Closet app.</p>
-    </div >;
+            <Flex direction="column" minH="100vh" overflowY="auto">
+                <Flex p={4} gap={4}>
+                    <h1>Welcome to your Closet!</h1>
+                </Flex>
+                <Flex flexWrap="wrap">
+                    <Box margin={5} gap={4} display="flex" alignItems="center">
+                        <Group attached w="full" maxW="sm">
+                            <Input w="28rem" flex="10" placeholder={"for search, filter, sort controls"} />
+                            <Button variant="outline">
+                                Search
+                            </Button>
+                        </Group>
+                        <ButtonGroup variant="ghost">
+                            <Button>Filter</Button>
+                            <Button>Sort</Button>
+                        </ButtonGroup>
+                    </Box>
+                    <Spacer />
+                    <Box margin={15}>
+                        <Button colorPalette={"blue"}>Add Item</Button>
+                    </Box>
+                </Flex>
+            </Flex>
+        </AppLayout >
+    );
 }
 
 export default Closet;  
