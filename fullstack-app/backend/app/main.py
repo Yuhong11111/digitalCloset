@@ -10,6 +10,8 @@ import bcrypt
 from datetime import datetime, timedelta
 import os
 import logging
+from typing import Optional
+from pydantic import HttpUrl
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -71,6 +73,17 @@ class UserRequest(BaseModel):
     username: str
     password: str
     email: str = None  # Optional for login, required for signup
+
+# pydantic model for item requests(request from frontend)
+class ItemRequest(BaseModel):
+    name: str
+    category: str
+    color: str
+    season: str
+    imageUrl: Optional[HttpUrl] = None   # Optional URL for image
+    favorite: bool = False               # Boolean flag
+    notes: Optional[str] = None
+    ownerId: str  # ID of the user who owns the item
 
 @app.get("/")
 def read_root():
@@ -190,6 +203,23 @@ async def register_user(user_data: UserRequest, response: Response):
 async def logout_user(response: Response):
     response.delete_cookie(key="token")
     return {"message": "Logged out successfully"}
+
+@app.post("/items")
+async def create_item(item_data: ItemRequest, reponse: Response):
+    new_item = {
+            "name": item_data.name,
+            "category": item_data.category,
+            "color": item_data.color,
+            "season": item_data.season,
+            "imageUrl": item_data.imageUrl,
+            "favorite": item_data.favorite,
+            "notes": item_data.notes,
+            "ownerId": item_data.ownerId,
+            # "created_at": datetime.utcnow()
+        }
+
+    result = await db.clothes.insert_one(new_item)
+    return {"status": "success", "item": item_data}
 
 @app.get("/test-db")
 async def test_db():

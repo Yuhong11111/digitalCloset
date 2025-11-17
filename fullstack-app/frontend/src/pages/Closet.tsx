@@ -49,6 +49,7 @@ export function Closet() {
                         <Button colorPalette={"blue"} onClick={() => { navigate('/add') }}>Add Item</Button>
                     </Box>
                 </Flex>
+                <Spacer />
             </Flex>
         </AppLayout >
     );

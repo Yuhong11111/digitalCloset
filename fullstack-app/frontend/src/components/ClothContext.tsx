@@ -10,7 +10,7 @@ export interface ClothItem {
   color: string;
   size: string;
   season: SeasonTag;
-  brand: string;
+  // brand: string;
   imageUrl?: string;
   description?: string;
   favirite?: boolean;
