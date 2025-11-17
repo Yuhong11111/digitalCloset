@@ -1,11 +1,15 @@
-import { Flex, Fieldset, Stack, Field, Input, NativeSelect, For, Button, Box, FileUpload, Icon } from "@chakra-ui/react";
+import { Flex, Fieldset, Stack, Field, Input, NativeSelect, For, Button, Box, FileUpload, Icon, InputGroup, Span, Textarea } from "@chakra-ui/react";
 import AppLayout from "./AppLayout"
 import { useClothContext } from "../hooks/useClothContext";
 import { ClothingCategory, SeasonTag } from "../components/ClothContext"
 import { LuUpload } from "react-icons/lu"
+import { useState } from "react"
+
+const MAX_CHARACTERS = 200;
 
 
 export function AddItem() {
+    const [value, setValue] = useState("")
     const defaultSeason: SeasonTag = "all";
     const categories: ClothingCategory[] = ["top", "bottom", "outerwear", "footwear", "accessory"];
     const seasons: SeasonTag[] = ["all", "spring", "summer", "fall", "winter"];
@@ -26,25 +30,25 @@ export function AddItem() {
                             </Stack>
 
                             <Fieldset.Content>
-                                <Field.Root>
-                                    <Field.Label>Name</Field.Label>
+                                <Field.Root required>
+                                    <Field.Label>Name <Field.RequiredIndicator /></Field.Label>
                                     <Input name="name" />
                                 </Field.Root>
-                                <Field.Root>
-                                    <Field.Label>Color</Field.Label>
+                                <Field.Root required>
+                                    <Field.Label>Color <Field.RequiredIndicator /></Field.Label>
                                     <Input name="name" />
                                 </Field.Root>
-                                <Field.Root>
-                                    <Field.Label>Size</Field.Label>
+                                <Field.Root required>
+                                    <Field.Label>Size <Field.RequiredIndicator /></Field.Label>
                                     <Input name="name" />
                                 </Field.Root>
-                                <Field.Root>
-                                    <Field.Label>Brand</Field.Label>
+                                <Field.Root required>
+                                    <Field.Label>Brand <Field.RequiredIndicator /></Field.Label>
                                     <Input name="name" />
                                 </Field.Root>
 
                                 <Field.Root required>
-                                    <Field.Label>Category</Field.Label>
+                                    <Field.Label>Category <Field.RequiredIndicator /></Field.Label>
                                     <NativeSelect.Root>
                                         <NativeSelect.Field name="category" defaultValue={categories[0]}>
                                             <For each={categories}>
@@ -59,7 +63,7 @@ export function AddItem() {
                                     </NativeSelect.Root>
                                 </Field.Root>
                                 <Field.Root required>
-                                    <Field.Label>Season</Field.Label>
+                                    <Field.Label>Season <Field.RequiredIndicator /></Field.Label>
                                     <NativeSelect.Root>
                                         <NativeSelect.Field name="season" defaultValue={defaultSeason}>
                                             <For each={seasons}>
@@ -72,6 +76,27 @@ export function AddItem() {
                                         </NativeSelect.Field>
                                         <NativeSelect.Indicator />
                                     </NativeSelect.Root>
+                                </Field.Root>
+                                <Field.Root>
+                                    <Field.Label>Description</Field.Label>
+                                    <InputGroup
+                                        endElement={
+                                            <Span color="fg.muted" textStyle="xs">
+                                                {value.length} / {MAX_CHARACTERS}
+                                            </Span>
+                                        }
+                                    >
+                                        <Textarea
+                                            placeholder="Enter item description..."
+                                            value={value}
+                                            maxLength={MAX_CHARACTERS}
+                                            onChange={(e) =>
+                                                setValue(e.currentTarget.value.slice(0, MAX_CHARACTERS))
+                                            }
+                                            minH="120px"           // ✅ height control
+                                            resize="vertical"      // ✅ allow user to resize (or use "none")
+                                        />
+                                    </InputGroup>
                                 </Field.Root>
                                 <FileUpload.Root maxW="xl" alignItems="stretch" maxFiles={10}>
                                     <FileUpload.HiddenInput />
