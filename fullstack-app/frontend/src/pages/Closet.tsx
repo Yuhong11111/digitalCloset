@@ -20,9 +20,11 @@
 
 import AppLayout from "./AppLayout";
 import { Flex, Input, Box, Button, Spacer, Group, ButtonGroup } from "@chakra-ui/react";
+import { useNavigate } from 'react-router-dom';
 
 
 export function Closet() {
+    const navigate = useNavigate();
     return (
         <AppLayout>
             <Flex direction="column" minH="100vh" overflowY="auto">
@@ -44,7 +46,7 @@ export function Closet() {
                     </Box>
                     <Spacer />
                     <Box margin={15}>
-                        <Button colorPalette={"blue"}>Add Item</Button>
+                        <Button colorPalette={"blue"} onClick={() => { navigate('/add') }}>Add Item</Button>
                     </Box>
                 </Flex>
             </Flex>

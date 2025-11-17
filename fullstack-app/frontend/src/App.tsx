@@ -9,6 +9,7 @@ import Assistant from './pages/Assistant';
 import Settings from './pages/Settings';
 import { UserContextProvider } from './components/UserContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import AddItem from './pages/AddItem';
 
 axios.defaults.baseURL = 'http://localhost:3000';
 axios.defaults.withCredentials = true;
@@ -18,6 +19,10 @@ function App() {
     <UserContextProvider>
       <Router >
         <Routes>
+          <Route path="/add" element={
+            <ProtectedRoute>
+              <AddItem />
+            </ProtectedRoute>} />
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           <Route

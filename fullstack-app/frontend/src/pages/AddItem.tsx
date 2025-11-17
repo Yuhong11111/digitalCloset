@@ -1,0 +1,102 @@
+import { Flex, Fieldset, Stack, Field, Input, NativeSelect, For, Button, Box, FileUpload, Icon } from "@chakra-ui/react";
+import AppLayout from "./AppLayout"
+import { useClothContext } from "../hooks/useClothContext";
+import { ClothingCategory, SeasonTag } from "../components/ClothContext"
+import { LuUpload } from "react-icons/lu"
+
+
+export function AddItem() {
+    const defaultSeason: SeasonTag = "all";
+    const categories: ClothingCategory[] = ["top", "bottom", "outerwear", "footwear", "accessory"];
+    const seasons: SeasonTag[] = ["all", "spring", "summer", "fall", "winter"];
+    return (
+        <AppLayout>
+            <Flex direction="column" minH="100vh" overflowY="auto">
+                <Flex p={4} gap={4}>
+                    <h1>Add Item Page - Under Construction</h1>
+                </Flex>
+                <form className="max-w-md mx-auto mt-8 p-4 border rounded">
+                    <Flex direction="column" gap={6} p={10}>
+                        <Fieldset.Root size="lg" maxW="md">
+                            <Stack>
+                                <Fieldset.Legend>Item details</Fieldset.Legend>
+                                <Fieldset.HelperText>
+                                    Please provide your item details below.
+                                </Fieldset.HelperText>
+                            </Stack>
+
+                            <Fieldset.Content>
+                                <Field.Root>
+                                    <Field.Label>Name</Field.Label>
+                                    <Input name="name" />
+                                </Field.Root>
+                                <Field.Root>
+                                    <Field.Label>Color</Field.Label>
+                                    <Input name="name" />
+                                </Field.Root>
+                                <Field.Root>
+                                    <Field.Label>Size</Field.Label>
+                                    <Input name="name" />
+                                </Field.Root>
+                                <Field.Root>
+                                    <Field.Label>Brand</Field.Label>
+                                    <Input name="name" />
+                                </Field.Root>
+
+                                <Field.Root required>
+                                    <Field.Label>Category</Field.Label>
+                                    <NativeSelect.Root>
+                                        <NativeSelect.Field name="category" defaultValue={categories[0]}>
+                                            <For each={categories}>
+                                                {(item) => (
+                                                    <option key={item} value={item}>
+                                                        {item}
+                                                    </option>
+                                                )}
+                                            </For>
+                                        </NativeSelect.Field>
+                                        <NativeSelect.Indicator />
+                                    </NativeSelect.Root>
+                                </Field.Root>
+                                <Field.Root required>
+                                    <Field.Label>Season</Field.Label>
+                                    <NativeSelect.Root>
+                                        <NativeSelect.Field name="season" defaultValue={defaultSeason}>
+                                            <For each={seasons}>
+                                                {(item) => (
+                                                    <option key={item} value={item}>
+                                                        {item}
+                                                    </option>
+                                                )}
+                                            </For>
+                                        </NativeSelect.Field>
+                                        <NativeSelect.Indicator />
+                                    </NativeSelect.Root>
+                                </Field.Root>
+                                <FileUpload.Root maxW="xl" alignItems="stretch" maxFiles={10}>
+                                    <FileUpload.HiddenInput />
+                                    <FileUpload.Dropzone>
+                                        <Icon size="md" color="fg.muted">
+                                            <LuUpload />
+                                        </Icon>
+                                        <FileUpload.DropzoneContent>
+                                            <Box>Drag and drop files here</Box>
+                                            <Box color="fg.muted">.png, .jpg up to 5MB</Box>
+                                        </FileUpload.DropzoneContent>
+                                    </FileUpload.Dropzone>
+                                    <FileUpload.List />
+                                </FileUpload.Root>
+                            </Fieldset.Content>
+
+                            <Button type="submit" alignSelf="flex-start">
+                                Submit
+                            </Button>
+                        </Fieldset.Root>
+                    </Flex>
+                </form>
+            </Flex>
+        </AppLayout >
+    );
+}
+
+export default AddItem;
