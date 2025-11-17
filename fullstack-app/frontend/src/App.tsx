@@ -10,6 +10,7 @@ import Settings from './pages/Settings';
 import { UserContextProvider } from './components/UserContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import AddItem from './pages/AddItem';
+import { ClothContextProvider } from './components/ClothContext';
 
 axios.defaults.baseURL = 'http://localhost:3000';
 axios.defaults.withCredentials = true;
@@ -17,49 +18,51 @@ axios.defaults.withCredentials = true;
 function App() {
   return (
     <UserContextProvider>
-      <Router >
-        <Routes>
-          <Route path="/add" element={
-            <ProtectedRoute>
-              <AddItem />
-            </ProtectedRoute>
-          } />
-          <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<Login />} />
-          <Route
-            path="/closet"
-            element={
+      <ClothContextProvider>
+        <Router >
+          <Routes>
+            <Route path="/add" element={
               <ProtectedRoute>
-                <Closet />
+                <AddItem />
               </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/outfits"
-            element={
-              <ProtectedRoute>
-                <Outfits />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/assistant"
-            element={
-              <ProtectedRoute>
-                <Assistant />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/settings"
-            element={
-              <ProtectedRoute>
-                <Settings />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Router >
+            } />
+            <Route path="/" element={<HomePage />} />
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/closet"
+              element={
+                <ProtectedRoute>
+                  <Closet />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/outfits"
+              element={
+                <ProtectedRoute>
+                  <Outfits />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/assistant"
+              element={
+                <ProtectedRoute>
+                  <Assistant />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <ProtectedRoute>
+                  <Settings />
+                </ProtectedRoute>
+              }
+            />
+          </Routes>
+        </Router >
+      </ClothContextProvider>
     </UserContextProvider>
   );
 }

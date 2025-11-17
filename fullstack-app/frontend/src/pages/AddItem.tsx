@@ -17,12 +17,14 @@ import { ClothingCategory, SeasonTag } from "../components/ClothContext";
 import { useClothContext } from "../hooks/useClothContext";
 import axios from "axios";
 import { UserContext } from "../components/UserContext";
+import { useNavigate } from 'react-router-dom';
 
 const categories: ClothingCategory[] = ["top", "bottom", "outerwear", "footwear", "accessory"];
 const seasons: SeasonTag[] = ["all", "spring", "summer", "fall", "winter"];
 
 export default function AddItem() {
-    // const { addItem } = useClothContext();
+    const { refreshClothes } = useClothContext();
+    const navigate = useNavigate();
 
     const { id: userId } = useContext(UserContext);
 
@@ -52,9 +54,9 @@ export default function AddItem() {
         setIsSubmitting(true);
         if (!userId) {
             console.error('No user id—redirect to login or show an error');
+            setIsSubmitting(false);
             return;
         }
-        // try {
         const url = 'http://localhost:8000/items';
         const payload = {
             name,
@@ -66,37 +68,20 @@ export default function AddItem() {
             notes: notes || undefined,
             ownerId: userId,
         };
-        // console.log("Submitting payload:", payload);
-        const response = await axios.post(url, payload);
-        console.log("Response from server:", response);
-        if (response.data.status === "success") {
-            console.log("Item added successfully");
-            // resetForm();
+        try {
+            const response = await axios.post(url, payload);
+            if (response.data.status === "success") {
+                await refreshClothes();
+                resetForm();
+                navigate('/closet');
+            } else {
+                console.error("Failed to add item:", response.data);
+            }
+        } catch (error) {
+            console.error("Failed to add item", error);
+        } finally {
+            setIsSubmitting(false);
         }
-        // else {
-        //     const errorData = await response.json();
-        //     const description = errorData.message || "Unable to add item.";
-        //     console.error("Failed to add item:", description);
-        // }
-        // }
-        // try {
-        //   await addItem({
-        //     name,
-        //     category,
-        //     color,
-        //     season,
-        //     imageUrl: imageData || undefined,
-        //     favorite,
-        //     notes: notes || undefined,
-        //   });
-        //   console.log("Item added successfully");
-        //   resetForm();
-        // } catch (error) {
-        //   const description = error instanceof Error ? error.message : "Unable to add item.";
-        //   console.error("Failed to add item:", description);
-        // } finally {
-        //   setIsSubmitting(false);
-        // }
     };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -214,6 +199,9 @@ export default function AddItem() {
                     </Grid>
                     <Button type="submit" mt={8} colorScheme="blue">
                         Save Item
+                    </Button>
+                    <Button mt={8} onClick={() => { navigate('/closet') }} ml={4} variant="ghost">
+                        Back to Closet
                     </Button>
                 </form>
             </Box>

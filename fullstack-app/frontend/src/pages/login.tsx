@@ -34,7 +34,7 @@ export function Login() {
             } else {
                 setErrorMessage(response.data.message || 'An error occurred');
             }
-            console.log(response.data);
+            // console.log(response.data);
         } catch (errorMessage: any) {
             setErrorMessage(errorMessage.response?.data?.message || 'An error occurred');
         }

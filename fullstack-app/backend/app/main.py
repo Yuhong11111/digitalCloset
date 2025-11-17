@@ -221,6 +221,15 @@ async def create_item(item_data: ItemRequest, reponse: Response):
     result = await db.clothes.insert_one(new_item)
     return {"status": "success", "item": item_data}
 
+@app.get("/items")
+async def get_items(owner_id: str):
+    items_cursor = db.clothes.find({"ownerId": owner_id})
+    items = []
+    async for item in items_cursor:
+        item["_id"] = str(item["_id"])  # Convert ObjectId to string
+        items.append(item)
+    return items
+
 @app.get("/test-db")
 async def test_db():
     try:
