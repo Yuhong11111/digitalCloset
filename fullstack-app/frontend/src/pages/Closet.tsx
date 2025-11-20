@@ -32,8 +32,8 @@ export function Closet() {
     // const [items, setItems] = React.useState<any[]>([]);
     const { clothes } = useContext(ClothContext);
 
-    if (!clothes || clothes.length === 0)
-        return <Text>No clothes found.</Text>;
+    // if (!clothes || clothes.length === 0)
+    //     return <Text>No clothes found.</Text>;
 
 
     return (
