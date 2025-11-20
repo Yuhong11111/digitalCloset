@@ -6,6 +6,7 @@ python-multipart
 motor
 python-dotenv
 pydantic-settings
+email-validator
 pytest==7.4.3
 httpx==0.25.1
 pytest-asyncio==0.21.1
