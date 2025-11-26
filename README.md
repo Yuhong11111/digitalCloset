@@ -7,7 +7,7 @@ People own lots of clothing but lack a simple way to track what they have, find 
 
 ## Technologies Used
 
-- Frontend: React, TypeScript, Tailwind CSS
+- Frontend: React, TypeScript, Chakra
 - Backend: FastAPI, MongoDB
 - Authentication: JWT
 
