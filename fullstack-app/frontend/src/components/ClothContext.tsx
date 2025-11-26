@@ -59,7 +59,7 @@ export function ClothContextProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     fetchClothes();
-  }, [fetchClothes]);
+  }, [fetchClothes]);//if we change to ownerId, it mean we will refetch clothes when ownerId changes
 
   return (
     <ClothContext.Provider value={{ clothes, setClothes, isLoading, refreshClothes: fetchClothes }}>

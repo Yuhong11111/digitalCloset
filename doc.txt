@@ -17,12 +17,17 @@ Design:
 1. api planning:
     authentication: post /auth/login; post /auth/signup; post /auth/logout
     items: get /items; post /items; get /items/{id}; delete items/{id}
-    assistant: post /assistant/chat (sse streaming - a server push technology enabling a client to receive automatic updates from a server via an HTTP connection)
+    assistant: post /ai/assistant
+    For this API, we only send one combined message per request (which contains the whole needed context).
+    (Update: rather than having an conversation database, we use single prompt + last 4-6 message
+    implement conversation databse can be after application stablized)
     (for this api, we are handling one user message at a time, not the whole conversation,
     to make sure backend have the whole chat history, we need to create a conversation databse with conversation_id)
 2. Data
     user:{_id, username, password(hased), email}
     cloth:{_id, user_id, name, type, color, size, season, description}
-    conversation:{_id, user_id, title, create_at}
-    message:{_id, conversation_id, content, user_id}
+    (future: 
+        conversation:{_id, user_id, title, create_at}
+        message:{_id, conversation_id, content, user_id}
+    )
 3. tool 
