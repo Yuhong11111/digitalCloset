@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import auth, items, profile, system
+from app.api import auth, items, profile, system, assistant
 from app.core.config import settings
 
 app = FastAPI()
@@ -28,3 +28,4 @@ app.include_router(system.router)
 app.include_router(profile.router)
 app.include_router(auth.router)
 app.include_router(items.router)
+app.include_router(assistant.router)

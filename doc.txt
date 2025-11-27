@@ -31,3 +31,5 @@ Design:
         message:{_id, conversation_id, content, user_id}
     )
 3. tool 
+    the ai agent has access to the database and only get the cloth for the user
+    rather than all clothes whether it is in the database or search online.
