@@ -37,7 +37,7 @@ export function Assistant() {
         // Don’t send if a request is already in progress.
         if (!input.trim() || isLoading) return;
         const userInput = input;
-        const updatedMessages = [...messages, { role: "user", content: userInput }];
+        const updatedMessages = [...messages, { role: "user" as const, content: userInput }];
         setMessages(updatedMessages);
         setInput("");
         setIsLoading(true);
@@ -111,8 +111,8 @@ export function Assistant() {
                                 />
                                 <Button
                                     colorScheme="blue"
-                                    // isLoading={isLoading}
-                                    // isDisabled={isLoading || !input.trim()}
+                                    loading={isLoading}
+                                    disabled={isLoading || !input.trim()}
                                     onClick={sendMessage}
                                 >
                                     Send
