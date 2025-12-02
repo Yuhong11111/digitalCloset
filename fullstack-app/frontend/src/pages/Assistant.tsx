@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useContext } from 'react';
 import AppLayout from './AppLayout';
 import {
     Flex,
@@ -11,6 +11,7 @@ import {
 } from '@chakra-ui/react';
 import type { Message } from '../components/Message';
 import axios from 'axios';
+import { UserContext } from "../components/UserContext";
 
 // leave last 6 messages + new user input
 function getMessages(messages: Message[], newUserInput: string): Message[] {
@@ -32,6 +33,7 @@ export function Assistant() {
     ]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const { id: userId } = useContext(UserContext);
     const isMounted = useRef(true);
 
     // run once then the component mounts
@@ -58,6 +60,7 @@ export function Assistant() {
             const url = 'http://localhost:8000/assistant';
             const payload = {
                 message: messagesToPrompt(getMessages(messages, userInput)),
+                userId: userId,
                 max_tokens: 200,
             }
             const response = await axios.post(url, payload);
