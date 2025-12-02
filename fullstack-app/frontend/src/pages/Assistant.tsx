@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import AppLayout from './AppLayout';
 import {
     Flex,
@@ -32,8 +32,20 @@ export function Assistant() {
     ]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const isMounted = useRef(true);
 
-    const sendMessage = async () => {
+    // run once then the component mounts
+    useEffect(() => {
+        // React automatically treats the returned function in useEffect as a cleanup function.
+        // and React calls it automatically on unmount.
+        isMounted.current = true;
+        return () => {
+            // When the component is about to be removed from the screen, mark it as unmounted
+            isMounted.current = false;
+        };
+    }, []); //The empty array [] means it will not run again
+
+    async function sendMessage() {
         // Don’t send if a request is already in progress.
         if (!input.trim() || isLoading) return;
         const userInput = input;
@@ -41,6 +53,7 @@ export function Assistant() {
         setMessages(updatedMessages);
         setInput("");
         setIsLoading(true);
+        // console.log("Sending message:", userInput);
         try {
             const url = 'http://localhost:8000/assistant';
             const payload = {
@@ -49,12 +62,20 @@ export function Assistant() {
             }
             const response = await axios.post(url, payload);
             const data = response.data;
-            // console.log("Assistant response:", data);
-            setMessages([...updatedMessages, { role: "assistant", content: data.response || "No response" }]);
+            // console.log("Received response:", data);
+            // console.log(isMounted.current);
+            if (isMounted.current) {
+                // console.log("Updating messages with assistant response");
+                setMessages([...updatedMessages, { role: "assistant", content: data.response || "No response" }]);
+            }
         } catch (error) {
-            setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong." }]);
+            if (isMounted.current) {
+                setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong." }]);
+            }
         } finally {
-            setIsLoading(false);
+            if (isMounted.current) {
+                setIsLoading(false);
+            }
         }
     };
 
