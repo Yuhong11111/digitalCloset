@@ -13,3 +13,12 @@ class ItemRequest(BaseModel):
     favorite: bool = False               # Boolean flag
     notes: Optional[str] = None
     ownerId: str  # ID of the user who owns the item
+
+class ItemResponse(BaseModel):
+    name: str
+    category: str
+    color: str
+    season: str
+    # imageUrl: Optional[HttpUrl] = None   # Optional URL for image
+    # favorite: bool = False               # Boolean flag
+    notes: Optional[str] = None

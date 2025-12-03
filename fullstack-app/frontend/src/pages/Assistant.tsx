@@ -33,6 +33,7 @@ export function Assistant() {
     ]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [suggestedItems, setSuggestedItems] = useState<Array<{ name?: string; color?: string; category?: string; season?: string }>>([]);
     const { id: userId } = useContext(UserContext);
     const isMounted = useRef(true);
 
@@ -65,11 +66,14 @@ export function Assistant() {
             }
             const response = await axios.post(url, payload);
             const data = response.data;
+            const answer = data.response;
+            const referencedItems = data.items;
+            setSuggestedItems(referencedItems);
             // console.log("Received response:", data);
             // console.log(isMounted.current);
             if (isMounted.current) {
                 // console.log("Updating messages with assistant response");
-                setMessages([...updatedMessages, { role: "assistant", content: data.response || "No response" }]);
+                setMessages([...updatedMessages, { role: "assistant", content: answer || "No response" }]);
             }
         } catch (error) {
             if (isMounted.current) {
@@ -147,7 +151,23 @@ export function Assistant() {
 
                     {/* RIGHT: Outfit list → 1/3 width */}
                     <Box flex="1" p="4" bg="#F3F4F6" color="grey">
-                        Outfit Suggestions will appear here.
+                        <Text fontWeight="bold" mb={3}>
+                            Outfit Suggestions
+                        </Text>
+                        {suggestedItems.length === 0 ? (
+                            <Text color="gray.500">Ask about a specific color or item to see matching pieces.</Text>
+                        ) : (
+                            <Stack gap={4}>
+                                {suggestedItems.map((item, idx) => (
+                                    <Box key={`${item.name}-${idx}`} p={3} bg="white" borderRadius="md" shadow="sm">
+                                        <Text fontWeight="semibold">{item.name || "Unnamed item"}</Text>
+                                        <Text fontSize="sm" color="gray.600">
+                                            {[item.color, item.category, item.season].filter(Boolean).join(" • ")}
+                                        </Text>
+                                    </Box>
+                                ))}
+                            </Stack>
+                        )}
                     </Box>
 
                 </Flex>
