@@ -1,5 +1,6 @@
 name: CI/CD Pipeline
 
+# Trigger the workflow on push or pull request to the main branch
 on:
   push:
     branches: [ main ]
@@ -14,10 +15,11 @@ jobs:
       MONGODB_URL: ${{ secrets.MONGODB_URL }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      PYTHONPATH: ${{ github.workspace }}/fullstack-app/backend
+      PYTHONPATH: ${{ github.workspace }}/fullstack-app/backend #Python import resolution
 
     steps:
-    - uses: actions/checkout@v3
+    #Loads your repository into the workflow runner.
+    - uses: actions/checkout@v3 #It is a GitHub Action that downloads your repository’s code into the runner.
     
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -55,11 +57,15 @@ jobs:
       run: |
         cd fullstack-app/frontend
         npm test
+
+  # Builds your backend and frontend into Docker images
+  # Pushes those images to Docker Hub
+  # Allows your production server to pull and run them
         
   deploy:
-    needs: [backend-tests, frontend-tests]
+    needs: [backend-tests, frontend-tests] #If either backend or frontend tests fail → the deployment will NOT run
     runs-on: ubuntu-22.04
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' #Only run the deploy job if the workflow is running on the main branch.
     
     steps:
     - uses: actions/checkout@v3
