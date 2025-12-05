@@ -32,8 +32,9 @@ export default function AddItem() {
     const [category, setCategory] = useState<ClothingCategory>("top");
     const [color, setColor] = useState("");
     const [season, setSeason] = useState<SeasonTag>("all");
-    const [imageData, setImageData] = useState("");
+    const [imagePreview, setImagePreview] = useState("");
     const [imageFileName, setImageFileName] = useState("");
+    const [imageFile, setImageFile] = useState<File | null>(null);
     const [notes, setNotes] = useState("");
     const [favorite, setFavorite] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,7 +44,8 @@ export default function AddItem() {
         setCategory("top");
         setColor("");
         setSeason("all");
-        setImageData("");
+        setImagePreview("");
+        setImageFile(null);
         setImageFileName("");
         setNotes("");
         setFavorite(false);
@@ -58,18 +60,23 @@ export default function AddItem() {
             return;
         }
         const url = 'http://localhost:8000/items';
-        const payload = {
-            name,
-            category,
-            color,
-            season,
-            imageUrl: imageData || undefined,
-            favorite,
-            notes: notes || undefined,
-            ownerId: userId,
-        };
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("category", category);
+        formData.append("color", color);
+        formData.append("season", season);
+        formData.append("favorite", String(favorite));
+        if (notes) formData.append("notes", notes);
+        formData.append("ownerId", userId);
+        if (imageFile) {
+            formData.append("image", imageFile);
+        }
         try {
-            const response = await axios.post(url, payload);
+            const response = await axios.post(url, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
+            });
             if (response.data.status === "success") {
                 await refreshClothes();
                 resetForm();
@@ -88,16 +95,18 @@ export default function AddItem() {
         const file = event.target.files?.[0];
         if (!file) return;
 
+        setImageFile(file);
         const reader = new FileReader();
         reader.onloadend = () => {
-            setImageData(reader.result as string);
+            setImagePreview(reader.result as string);
             setImageFileName(file.name);
         };
         reader.readAsDataURL(file);
     };
 
     const clearImage = () => {
-        setImageData("");
+        setImagePreview("");
+        setImageFile(null);
         setImageFileName("");
     };
 
@@ -153,10 +162,10 @@ export default function AddItem() {
                         <Box gridColumn={["auto", "span 2"]}>
                             <label className="block text-sm font-medium text-gray-700">Image</label>
                             <Input type="file" accept="image/*" onChange={handleFileChange} />
-                            {imageData && (
+                            {imagePreview && (
                                 <Box mt={3}>
                                     <Image
-                                        src={imageData}
+                                        src={imagePreview}
                                         alt={name || "Preview"}
                                         maxH="200px"
                                         objectFit="cover"
@@ -197,7 +206,7 @@ export default function AddItem() {
                             </Switch.Root>
                         </Box>
                     </Grid>
-                    <Button type="submit" mt={8} colorScheme="blue">
+                    <Button type="submit" mt={8} colorScheme="blue" loading={isSubmitting} disabled={isSubmitting}>
                         Save Item
                     </Button>
                     <Button mt={8} onClick={() => { navigate('/closet') }} ml={4} variant="ghost">

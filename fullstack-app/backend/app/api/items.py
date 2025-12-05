@@ -1,22 +1,40 @@
-from fastapi import APIRouter, HTTPException, Query
+import base64
+from typing import Optional
+
+from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
 
 from app.db.mongo import db
-from app.schemas.item import ItemRequest
 
 router = APIRouter(prefix="/items", tags=["items"])
 
 
 @router.post("")
-async def create_item(item_data: ItemRequest):
+async def create_item(
+    name: str = Form(...),
+    category: str = Form(...),
+    color: str = Form(...),
+    season: str = Form(...),
+    favorite: bool = Form(False),
+    notes: Optional[str] = Form(None),
+    ownerId: str = Form(...),
+    image: Optional[UploadFile] = File(None),
+):
+    image_data: Optional[str] = None
+    if image is not None:
+        content = await image.read()
+        mime = image.content_type or "application/octet-stream"
+        encoded = base64.b64encode(content).decode("utf-8")
+        image_data = f"data:{mime};base64,{encoded}"
+
     new_item = {
-        "name": item_data.name,
-        "category": item_data.category,
-        "color": item_data.color,
-        "season": item_data.season,
-        "imageUrl": item_data.imageUrl,
-        "favorite": item_data.favorite,
-        "notes": item_data.notes,
-        "ownerId": item_data.ownerId,
+        "name": name,
+        "category": category,
+        "color": color,
+        "season": season,
+        "imageUrl": image_data,
+        "favorite": favorite,
+        "notes": notes,
+        "ownerId": ownerId,
     }
     result = await db.clothes.insert_one(new_item)
     if not result.inserted_id:
@@ -33,4 +51,3 @@ async def get_items(owner_id: str = Query(..., alias="owner_id")):
         item["_id"] = str(item["_id"])
         items.append(item)
     return items
-
