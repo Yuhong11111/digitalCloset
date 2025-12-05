@@ -92,11 +92,12 @@ export default function AddItem() {
     };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
+        const file = event.target.files?.[0]; //only take the first file
         if (!file) return;
 
         setImageFile(file);
-        const reader = new FileReader();
+        // following is only for ui display
+        const reader = new FileReader(); //FileReader is a browser API that can convert files into strings so you can preview them.
         reader.onloadend = () => {
             setImagePreview(reader.result as string);
             setImageFileName(file.name);
