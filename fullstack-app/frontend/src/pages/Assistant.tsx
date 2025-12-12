@@ -34,7 +34,6 @@ export function Assistant() {
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [suggestedItems, setSuggestedItems] = useState<Array<{ name?: string; color?: string; category?: string; season?: string }>>([]);
-    const { id: userId } = useContext(UserContext);
     const isMounted = useRef(true);
 
     // run once then the component mounts
@@ -61,13 +60,12 @@ export function Assistant() {
             const url = 'http://localhost:8000/assistant';
             const payload = {
                 message: messagesToPrompt(getMessages(messages, userInput)),
-                userId: userId,
                 max_tokens: 200,
-            }
+            };
             const response = await axios.post(url, payload);
             const data = response.data;
             const answer = data.response;
-            const referencedItems = data.items;
+            const referencedItems = data.referencedItems ?? [];
             setSuggestedItems(referencedItems);
             // console.log("Received response:", data);
             // console.log(isMounted.current);

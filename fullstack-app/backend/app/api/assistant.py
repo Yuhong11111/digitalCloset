@@ -1,10 +1,13 @@
-from fastapi import APIRouter, HTTPException
+import json
+from typing import Any, Dict, List, Optional, Set
+
+from fastapi import APIRouter, Depends, HTTPException
 from openai import OpenAI
 from pydantic import BaseModel
+
+from app.api.deps import get_current_user
 from app.db.mongo import db
 from app.schemas.item import ItemResponse
-from typing import List
-import json
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
 
@@ -12,12 +15,11 @@ client = OpenAI()
 
 class AIRequest(BaseModel):
     message: str
-    userId: str
     max_tokens: int = 150
 
 class AIResponse(BaseModel):
-    response: str 
-    items: List[ItemResponse] = []
+    response: str
+    referencedItems: List[ItemResponse] = []
 
 SYSTEM_PROMPT = """
 You are a closet assistant.
@@ -38,9 +40,9 @@ Your job:
 """
 
 
-async def get_cloth(owner_id: str):
+async def get_cloth(owner_id: Optional[str]) -> List[Dict[str, Any]]:
     if not owner_id:
-        return "No closet data provided."
+        return []
     cursor = db.clothes.find({"ownerId": owner_id})
     # items_text = []
     items_structured = []
@@ -82,9 +84,13 @@ async def get_cloth(owner_id: str):
 
 
 @router.post("", response_model=AIResponse)
-async def get_ai_assistance(request: AIRequest):
+async def get_ai_assistance(
+    request: AIRequest,
+    current_user=Depends(get_current_user),
+):
     try:
-        cloth_list = await get_cloth(request.userId)
+        user_id = current_user.get("userId")
+        cloth_list = await get_cloth(user_id)
         payload = {
             "closet_items": cloth_list,
             "question": request.message
@@ -148,13 +154,10 @@ async def get_ai_assistance(request: AIRequest):
         answer: str = data["answer"]
         selected_ids = set(data["selected_item_ids"])
         # reply_text = response.output_text
-        selected_items = [
-            item for item in cloth_list
-            if item["id"] in selected_ids
-        ]
+        selected_items = [item for item in cloth_list if item["id"] in selected_ids]
         return AIResponse(
             response=answer,
-            items=[ItemResponse(**item) for item in selected_items],
+            referencedItems=[ItemResponse(**item) for item in selected_items],
         )
     except Exception as e:
         # you might want to log e here
