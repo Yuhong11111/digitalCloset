@@ -30,6 +30,12 @@ Design:
         conversation:{_id, user_id, title, create_at}
         message:{_id, conversation_id, content, user_id}
     )
+
+    optimization: currently we are using ownerID to fetch all the clothes from the user;
+    in future, when the database size increase, we can optimize it by
+        1. adding index on ownerID(MongoDB uses a B-tree index internally to directly locate all documents with that ownerId — no scanning.)
+        2. Instead of always pulling the full wardrobe, I’d expose a search-style tool that lets the AI request items by filters like color, type, or season. 
+           That way, the database only returns a small subset of relevant clothes, which is both faster and cheaper for the LLM to process.
 3. tool 
     the ai agent has access to the database and only get the cloth for the user
     rather than all clothes whether it is in the database or search online.
