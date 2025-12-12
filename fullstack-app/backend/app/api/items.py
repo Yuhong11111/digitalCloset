@@ -1,8 +1,9 @@
 import base64
 from typing import Optional
 
-from fastapi import APIRouter, File, Form, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 
+from app.api.deps import get_current_user
 from app.db.mongo import db
 
 router = APIRouter(prefix="/items", tags=["items"])
@@ -16,8 +17,8 @@ async def create_item(
     season: str = Form(...),
     favorite: bool = Form(False),
     notes: Optional[str] = Form(None),
-    ownerId: str = Form(...),
     image: Optional[UploadFile] = File(None),
+    current_user=Depends(get_current_user),
 ):
     image_data: Optional[str] = None
     if image is not None:
@@ -34,7 +35,7 @@ async def create_item(
         "imageUrl": image_data,
         "favorite": favorite,
         "notes": notes,
-        "ownerId": ownerId,
+        "ownerId": current_user.get("userId"),
     }
     result = await db.clothes.insert_one(new_item)
     if not result.inserted_id:
@@ -44,7 +45,8 @@ async def create_item(
 
 
 @router.get("")
-async def get_items(owner_id: str = Query(..., alias="owner_id")):
+async def get_items(current_user=Depends(get_current_user)):
+    owner_id = current_user.get("userId")
     cursor = db.clothes.find({"ownerId": owner_id})
     items = []
     async for item in cursor:

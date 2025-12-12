@@ -13,6 +13,7 @@ import AddItem from './pages/AddItem';
 import { ClothContextProvider } from './components/ClothContext';
 
 axios.defaults.baseURL = 'http://localhost:3000';
+// So every Axios request uses that base URL and automatically includes credentials
 axios.defaults.withCredentials = true;
 
 function App() {

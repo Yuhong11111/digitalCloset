@@ -98,26 +98,26 @@ async def get_ai_assistance(request: AIRequest):
             instructions=f"""{SYSTEM_PROMPT}
             You are a digital closet assistant.
 
-You receive a JSON object with two fields, which is {payload}:
-- "closet_items": a list of clothing items (id, name, color, category, season, image_url)
-- "question": the user's question about their clothes.
+            You receive a JSON object with two fields, which is {payload}:
+            - "closet_items": a list of clothing items (id, name, color, category, season, image_url)
+            - "question": the user's question about their clothes.
 
-Your job:
-1. Answer the user's question in natural language.
-2. Identify which specific items from "closet_items" you are referring to.
+            Your job:
+            1. Answer the user's question in natural language.
+            2. Identify which specific items from "closet_items" you are referring to.
 
-You MUST respond with ONLY valid JSON (no extra text, no backticks).
-The JSON must have exactly this structure:
+            You MUST respond with ONLY valid JSON (no extra text, no backticks).
+            The JSON must have exactly this structure:
 
-{{
-  "answer": "string",
-  "selected_item_ids": ["id1", "id2", ...]
-}}
+            {{
+            "answer": "string",
+            "selected_item_ids": ["id1", "id2", ...]
+            }}
 
-Rules:
-- "selected_item_ids" must contain only ids that actually exist in "closet_items".
-- If no item matches, use an empty array [].
-""",
+            Rules:
+            - "selected_item_ids" must contain only ids that actually exist in "closet_items".
+            - If no item matches, use an empty array [].
+            """,
             input=request.message,
             # response_format={
             #     "type": "json_schema",

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 import bcrypt
-from jose import jwt
+from jose import JWTError, jwt
 
 from app.core.config import settings
 
@@ -25,3 +25,7 @@ def create_access_token(data: dict, expires_delta: int = ACCESS_TOKEN_EXPIRE_MIN
     expire = datetime.utcnow() + timedelta(minutes=expires_delta)
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, settings.JWT_SECRET, algorithm="HS256")
+
+
+def decode_access_token(token: str) -> dict:
+    return jwt.decode(token, settings.JWT_SECRET, algorithms=["HS256"])

@@ -27,6 +27,7 @@ async def login_user(login_data: UserRequest, response: Response):
         token_data = {"userId": str(existing_user["_id"]), "username": existing_user["username"]}
         token = create_access_token(token_data)
         # Set cookie
+        # Even though it's not in the JSON body, the token goes back to the browser in the Set-Cookie header. The browser automatically stores it.
         response.set_cookie(
             key="token",
             value=token,
