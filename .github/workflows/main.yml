@@ -61,6 +61,51 @@ jobs:
   # Builds your backend and frontend into Docker images
   # Pushes those images to Docker Hub
   # Allows your production server to pull and run them
+
+  build-and-push-images:
+  name: Build & Push Docker Images
+  needs: [backend-tests, frontend-tests]
+  runs-on: ubuntu-22.04
+  if: github.ref == 'refs/heads/main'
+
+  env:
+    DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+    DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+    IMAGE_TAG: ${{ github.sha }}
+
+  steps:
+    - uses: actions/checkout@v3
+
+    - name: Log in to Docker Hub
+      run: |
+        echo "${DOCKERHUB_TOKEN}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+
+    # Backend image
+    - name: Build backend image
+      run: |
+        docker build \
+          -t ${DOCKERHUB_USERNAME}/fullstack-backend:${IMAGE_TAG} \
+          -t ${DOCKERHUB_USERNAME}/fullstack-backend:latest \
+          fullstack-app/backend
+
+    - name: Push backend image
+      run: |
+        docker push ${DOCKERHUB_USERNAME}/fullstack-backend:${IMAGE_TAG}
+        docker push ${DOCKERHUB_USERNAME}/fullstack-backend:latest
+
+    # Frontend image
+    - name: Build frontend image
+      run: |
+        docker build \
+          -t ${DOCKERHUB_USERNAME}/fullstack-frontend:${IMAGE_TAG} \
+          -t ${DOCKERHUB_USERNAME}/fullstack-frontend:latest \
+          fullstack-app/frontend
+
+    - name: Push frontend image
+      run: |
+        docker push ${DOCKERHUB_USERNAME}/fullstack-frontend:${IMAGE_TAG}
+        docker push ${DOCKERHUB_USERNAME}/fullstack-frontend:latest
+
         
   deploy:
     needs: [backend-tests, frontend-tests] #If either backend or frontend tests fail → the deployment will NOT run
