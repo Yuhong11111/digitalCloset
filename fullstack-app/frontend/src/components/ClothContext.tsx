@@ -1,6 +1,7 @@
 import { createContext, useEffect, PropsWithChildren, useState, useContext, useCallback } from "react";
 import axios from "axios";
 import { UserContext } from "./UserContext";
+import { API_BASE_URL } from "../config";
 
 export type ClothingCategory = "top" | "bottom" | "outerwear" | "footwear" | "accessory";
 export type SeasonTag = "spring" | "summer" | "fall" | "winter" | "all";
@@ -45,7 +46,7 @@ export function ClothContextProvider({ children }: PropsWithChildren) {
     }
     setIsLoading(true);
     try {
-      const response = await axios.get<ClothItem[]>("http://localhost:8000/items", {
+      const response = await axios.get<ClothItem[]>(`${API_BASE_URL}/items`, {
         params: { owner_id: ownerId }
       });
       setClothes(response.data ?? []);
