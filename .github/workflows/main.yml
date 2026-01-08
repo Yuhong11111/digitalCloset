@@ -107,6 +107,7 @@ jobs:
         docker push ${DOCKERHUB_USERNAME}/fullstack-frontend:latest
 
         
+  # fake deploy job for demonstration purposes
   deploy:
     needs: [backend-tests, frontend-tests] #If either backend or frontend tests fail → the deployment will NOT run
     runs-on: ubuntu-22.04
@@ -120,3 +121,26 @@ jobs:
         echo "Add your deployment steps here"
       env:
         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+
+# ==========================================================
+# NO DEPLOY JOB HERE (INTENTIONAL)
+#
+# Reason:
+# - This project is deployed using Azure App Service (Container).
+# - The Azure tenant is managed by a school/organization account.
+# - Creating Azure Service Principals is blocked by tenant policy.
+#
+# Deployment Strategy Used Instead:
+# - Azure "Continuous Deployment for the main container" is enabled.
+# - Azure listens for Docker Hub image updates (tag: latest).
+# - When CI pushes a new image, Azure automatically:
+#     1. Pulls the updated image
+#     2. Restarts the container
+#
+# This means:
+# - CI (GitHub Actions) handles testing + image publishing
+# - CD (deployment) is handled by Azure via Docker Hub webhooks
+#
+# If tenant permissions are relaxed in the future, a deploy job
+# using azure/login + az webapp restart can be added here.
+# ==========================================================
