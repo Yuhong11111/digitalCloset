@@ -5,6 +5,7 @@ import { useContext, useState } from "react"
 import { UserContext } from "../components/UserContext";
 import { Box, Button, Flex, Field, Input, Spacer } from "@chakra-ui/react";
 import { RiArrowLeftLine } from "react-icons/ri";
+import { API_BASE_URL } from "../config";
 
 export function Login() {
     const navigate = useNavigate();
@@ -19,13 +20,12 @@ export function Login() {
         ev.preventDefault();
         setErrorMessage('');
         try {
-            const baseUrl = 'http://localhost:8000';
             const url = status === 'login' ? '/auth/login' : '/auth/signup';
             const payload = status === 'login'
                 ? { username, password }
                 : { username, password, email };
 
-            const response = await axios.post(`${baseUrl}${url}`, payload);
+            const response = await axios.post(`${API_BASE_URL}${url}`, payload);
 
             if (response.data.status === 'success') {
                 setContextUsername(username);

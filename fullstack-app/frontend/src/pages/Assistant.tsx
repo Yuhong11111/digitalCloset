@@ -12,6 +12,7 @@ import {
 import type { Message } from '../components/Message';
 import axios from 'axios';
 import { UserContext } from "../components/UserContext";
+import { API_BASE_URL } from '../config';
 
 // leave last 6 messages + new user input
 function getMessages(messages: Message[], newUserInput: string): Message[] {
@@ -57,7 +58,7 @@ export function Assistant() {
         setIsLoading(true);
         // console.log("Sending message:", userInput);
         try {
-            const url = 'http://localhost:8000/assistant';
+            const url = `${API_BASE_URL}/assistant`;
             const payload = {
                 message: messagesToPrompt(getMessages(messages, userInput)),
                 max_tokens: 200,

@@ -4,6 +4,7 @@ import { Avatar, Menu, Portal, Flex, Box } from "@chakra-ui/react";
 import { UserContext } from "../components/UserContext";
 import { useContext } from "react"
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 type AppLayoutProps = {
     children?: ReactNode;
@@ -22,9 +23,8 @@ export default function AppLayout({ children }: AppLayoutProps) {
     }, [username]);
 
     async function handleLogout() {
-        const baseUrl = 'http://localhost:8000';
         try {
-            const response = await axios.post(`${baseUrl}/auth/logout`);
+            const response = await axios.post(`${API_BASE_URL}/auth/logout`);
             // console.log(response.data.message);
             navigate('/');
         } catch (error) {

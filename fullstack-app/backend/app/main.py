@@ -15,14 +15,16 @@ app = FastAPI()
 # no need to load env because settings.py already does it
 
 # Configure CORS
+# Parse origins and remove empty strings
+allowed_origins = [origin.strip() for origin in settings.CORS_ORIGINS.split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS.split(","),
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# load_dotenv()  # Load environment variables from .env file
 
 app.include_router(system.router)
 app.include_router(profile.router)

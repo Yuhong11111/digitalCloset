@@ -11,8 +11,9 @@ import { UserContextProvider } from './components/UserContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import AddItem from './pages/AddItem';
 import { ClothContextProvider } from './components/ClothContext';
+import { API_BASE_URL } from './config';
 
-axios.defaults.baseURL = 'http://localhost:3000';
+axios.defaults.baseURL = API_BASE_URL;
 // So every Axios request uses that base URL and automatically includes credentials
 axios.defaults.withCredentials = true;
 

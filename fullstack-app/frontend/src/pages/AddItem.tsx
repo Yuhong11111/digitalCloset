@@ -18,6 +18,7 @@ import { useClothContext } from "../hooks/useClothContext";
 import axios from "axios";
 import { UserContext } from "../components/UserContext";
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from "../config";
 
 const categories: ClothingCategory[] = ["top", "bottom", "outerwear", "footwear", "accessory"];
 const seasons: SeasonTag[] = ["all", "spring", "summer", "fall", "winter"];
@@ -59,7 +60,7 @@ export default function AddItem() {
             setIsSubmitting(false);
             return;
         }
-        const url = 'http://localhost:8000/items';
+        const url = `${API_BASE_URL}/items`;
         const formData = new FormData();
         formData.append("name", name);
         formData.append("category", category);
