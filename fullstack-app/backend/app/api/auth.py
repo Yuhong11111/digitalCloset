@@ -33,7 +33,7 @@ async def login_user(login_data: UserRequest, response: Response):
             value=token,
             httponly=True,
             secure=True,
-            samesite="lax",
+            samesite="none",
             max_age=1800,
         )
         return {
