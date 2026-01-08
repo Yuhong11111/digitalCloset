@@ -1,5 +1,6 @@
 import os
 import sys
+from uuid import uuid4
 
 from fastapi.testclient import TestClient
 
@@ -17,9 +18,13 @@ def test_read_main():
     assert response.status_code == 200
 
 def test_signup():
+    # Use unique username to avoid conflicts
+    unique_username = f"testuser_{uuid4().hex[:8]}"
     response = client.post(
         "/auth/signup",
-        json={"username": "testuser", "password": "testpass", "email": "testuser@example.com"}
+        json={"username": unique_username, "password": "testpass", "email": "testuser@example.com"}
     )
-    assert response.status_code == 200
+    print(f"Response status: {response.status_code}")
+    print(f"Response body: {response.json()}")
+    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.json()}"
     assert "status" in response.json()
