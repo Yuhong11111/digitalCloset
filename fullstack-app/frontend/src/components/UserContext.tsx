@@ -1,4 +1,5 @@
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 import { createContext, useEffect, PropsWithChildren } from "react";
 import { useState } from "react"
 
@@ -28,7 +29,7 @@ export function UserContextProvider({ children }: PropsWithChildren) {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const response = await axios.get('/profile');
+                const response = await axios.get(`${API_BASE_URL}/profile`);
                 setUsername(response.data?.username ?? null);
                 setId(response.data?.userId ?? null);
             } catch {

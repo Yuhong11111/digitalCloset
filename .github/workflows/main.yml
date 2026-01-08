@@ -71,6 +71,7 @@ jobs:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       IMAGE_TAG: ${{ github.sha }}
+      REACT_APP_BACKEND_URL: ${{ secrets.REACT_APP_BACKEND_URL }}
     steps:
     - uses: actions/checkout@v3
 
@@ -95,6 +96,7 @@ jobs:
     - name: Build frontend image
       run: |
         docker build \
+          --build-arg REACT_APP_BACKEND_URL=${REACT_APP_BACKEND_URL} \
           -t ${DOCKERHUB_USERNAME}/fullstack-frontend:${IMAGE_TAG} \
           -t ${DOCKERHUB_USERNAME}/fullstack-frontend:latest \
           fullstack-app/frontend
