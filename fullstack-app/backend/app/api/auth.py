@@ -52,7 +52,7 @@ async def register_user(user_data: UserRequest, response: Response):
     try:
         existing_user = await db.users.find_one({"username": user_data.username})
         if existing_user:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Username already registered")
+            return {"status": "error", "message": "Username already registered"}
 
         hashed_password = hash_password(user_data.password)
         new_user = {
@@ -79,8 +79,6 @@ async def register_user(user_data: UserRequest, response: Response):
             "username": user_data.username,
             "status": "success",
         }
-    except HTTPException:
-        raise
     except Exception as exc:
         logger.error("Registration failed: %s", exc)
         return {"message": f"Registration failed: {exc}", "status": "error"}
