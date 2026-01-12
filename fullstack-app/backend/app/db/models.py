@@ -1,0 +1,52 @@
+"""
+SQLAlchemy models for PostgreSQL
+"""
+from sqlalchemy import Column, String, DateTime, Boolean, Text, ForeignKey, Integer
+from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID
+from datetime import datetime
+import uuid
+
+from app.db.database import Base
+
+
+class User(Base):
+    """User model"""
+    __tablename__ = "users"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    username = Column(String(50), unique=True, nullable=False, index=True)
+    password = Column(String(255), nullable=False)
+    email = Column(String(100), unique=True, nullable=True, index=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    items = relationship("ClothItem", back_populates="owner", cascade="all, delete-orphan")
+
+    def __repr__(self):
+        return f"<User {self.username}>"
+
+
+class ClothItem(Base):
+    """Clothing item model"""
+    __tablename__ = "cloth_items"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    owner_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = Column(String(100), nullable=False)
+    category = Column(String(50), nullable=False)  # top, bottom, outerwear, footwear, accessory
+    color = Column(String(50), nullable=False)
+    size = Column(String(20), nullable=True)
+    season = Column(String(50), nullable=False)  # spring, summer, fall, winter, all
+    image_url = Column(Text, nullable=True)
+    notes = Column(Text, nullable=True)
+    favorite = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Relationships
+    owner = relationship("User", back_populates="items")
+
+    def __repr__(self):
+        return f"<ClothItem {self.name}>"
