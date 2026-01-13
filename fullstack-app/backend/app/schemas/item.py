@@ -10,7 +10,7 @@ class ItemResponse(BaseModel):
     category: Optional[str] = None
     color: Optional[str] = None
     season: Optional[str] = None
-    note: Optional[str] = None
+    notes: Optional[str] = None
 
 
 class ItemRequest(BaseModel):
@@ -29,7 +29,7 @@ class ItemRequest(BaseModel):
         color: str = Form(...),
         season: str = Form(...),
         favorite: bool = Form(False),
-        note: Optional[str] = Form(None),
+        notes: Optional[str] = Form(None),
     ) -> "ItemRequest":
         return cls(
             name=name,
@@ -37,5 +37,5 @@ class ItemRequest(BaseModel):
             color=color,
             season=season,
             favorite=favorite,
-            note=note,
+            notes=notes,
         )

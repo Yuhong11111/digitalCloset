@@ -1,12 +1,16 @@
 import json
 from typing import Any, Dict, List, Optional, Set
 
+import uuid
+
 from fastapi import APIRouter, Depends, HTTPException
 from openai import OpenAI
 from pydantic import BaseModel
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
-from app.db.mongo import db
+from app.db.database import get_db
 from app.schemas.item import ItemResponse
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
@@ -25,7 +29,7 @@ SYSTEM_PROMPT = """
 You are a closet assistant.
 
 You receive:
-- closet_items: a list of items with fields id, name, color, category, season, note
+- closet_items: a list of items with fields id, name, color, category, season, notes
 - question: the user's question
 
 Your job:
@@ -40,40 +44,35 @@ Your job:
 """
 
 
-async def get_cloth(owner_id: Optional[str]) -> List[Dict[str, Any]]:
+def get_cloth(db: Session, owner_id: Optional[str]) -> List[Dict[str, Any]]:
     if not owner_id:
         return []
-    cursor = db.clothes.find({"ownerId": owner_id})
-    # items_text = []
-    items_structured = []
-    async for item in cursor:
-        id = item.get("_id")
-        name = item.get("name") or "Unnamed item"
-        category = item.get("category")
-        color = item.get("color")
-        season = item.get("season")
-        note = item.get("note") or "empty note"
-        # parts = [name]
-        # if category:
-        #     parts.append(category)
-        # if color:
-        #     parts.append(color)
-        # if season:
-        #     parts.append(season)
-        # if note and note != "empty note":
-        #     parts.append(f"note: {note}")
-        # # an item would be like: "Blue Shirt, top, blue, summer"
-        # items_text.append(", ".join(parts))
 
-        items_structured.append({
-            "id": str(id),
-            "name": name,
-            "category": category,
-            "color": color,
-            "season": season,
-            "note": note,
-        })
-    # return "\n".join(items_text), items_structured
+    try:
+        owner_uuid = uuid.UUID(owner_id)
+    except ValueError:
+        return []
+
+    query = text(
+        "SELECT id, name, category, color, season, notes "
+        "FROM cloth_items WHERE owner_id = :owner_id"
+    )
+    results = db.execute(query, {"owner_id": owner_uuid}).fetchall()
+
+    items_structured = []
+    for item in results:
+        row = item._mapping
+        items_structured.append(
+            {
+                "id": str(row["id"]),
+                "name": row["name"] or "Unnamed item",
+                "category": row["category"],
+                "color": row["color"],
+                "season": row["season"],
+                "notes": row["notes"] or "empty note",
+            }
+        )
+
     return items_structured
 
 # def clothToString(items: list[str]) -> str:
@@ -87,10 +86,11 @@ async def get_cloth(owner_id: Optional[str]) -> List[Dict[str, Any]]:
 async def get_ai_assistance(
     request: AIRequest,
     current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     try:
         user_id = current_user.get("userId")
-        cloth_list = await get_cloth(user_id)
+        cloth_list = get_cloth(db, user_id)
         payload = {
             "closet_items": cloth_list,
             "question": request.message
