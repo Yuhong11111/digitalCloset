@@ -2,24 +2,20 @@ import base64
 from typing import Optional
 import uuid
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.database import get_db
-from app.db.models import ClothItem
+from app.schemas.item import ItemRequest
 
 router = APIRouter(prefix="/items", tags=["items"])
 
 
 @router.post("")
 async def create_item(
-    name: str = Form(...),
-    category: str = Form(...),
-    color: str = Form(...),
-    season: str = Form(...),
-    favorite: bool = Form(False),
-    notes: Optional[str] = Form(None),
+    item: ItemRequest = Depends(ItemRequest.as_form),
     image: Optional[UploadFile] = File(None),
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -32,34 +28,41 @@ async def create_item(
         image_data = f"data:{mime};base64,{encoded}"
 
     try:
-        # Create new item using ORM
-        new_item = ClothItem(
-            id=uuid.uuid4(),
-            owner_id=uuid.UUID(current_user.get("userId")),
-            name=name,
-            category=category,
-            color=color,
-            season=season,
-            image_url=image_data,
-            favorite=favorite,
-            notes=notes,
+        owner_id = uuid.UUID(current_user.get("userId"))
+        insert_query = text(
+            "INSERT INTO cloth_items "
+            "(id, owner_id, name, category, color, season, image_url, favorite, notes, created_at, updated_at) "
+            "VALUES (gen_random_uuid(), :owner_id, :name, :category, :color, :season, :image_url, :favorite, :notes, NOW(), NOW()) "
+            "RETURNING id, owner_id, name, category, color, season, image_url, favorite, notes"
         )
-        db.add(new_item)
+        result = db.execute(
+            insert_query,
+            {
+                "owner_id": owner_id,
+                "name": item.name,
+                "category": item.category,
+                "color": item.color,
+                "season": item.season,
+                "image_url": image_data,
+                "favorite": item.favorite,
+                "notes": item.notes,
+            },
+        )
+        new_item = dict(result.first()._mapping)
         db.commit()
-        db.refresh(new_item)
-        
+
         return {
             "status": "success",
             "item": {
-                "_id": str(new_item.id),
-                "name": new_item.name,
-                "category": new_item.category,
-                "color": new_item.color,
-                "season": new_item.season,
-                "imageUrl": new_item.image_url,
-                "favorite": new_item.favorite,
-                "notes": new_item.notes,
-                "ownerId": str(new_item.owner_id),
+                "_id": str(new_item["id"]),
+                "name": new_item["name"],
+                "category": new_item["category"],
+                "color": new_item["color"],
+                "season": new_item["season"],
+                "imageUrl": new_item["image_url"],
+                "favorite": new_item["favorite"],
+                "notes": new_item["notes"],
+                "ownerId": str(new_item["owner_id"]),
             }
         }
     except Exception as exc:
@@ -74,22 +77,25 @@ async def get_items(
 ):
     try:
         owner_id = uuid.UUID(current_user.get("userId"))
-        # Get all items for this user using ORM
-        items = db.query(ClothItem).filter(ClothItem.owner_id == owner_id).all()
-        
+        query = text(
+            "SELECT id, owner_id, name, category, color, season, image_url, favorite, notes "
+            "FROM cloth_items WHERE owner_id = :owner_id"
+        )
+        results = db.execute(query, {"owner_id": owner_id}).fetchall()
+
         return [
             {
-                "_id": str(item.id),
-                "name": item.name,
-                "category": item.category,
-                "color": item.color,
-                "season": item.season,
-                "imageUrl": item.image_url,
-                "favorite": item.favorite,
-                "notes": item.notes,
-                "ownerId": str(item.owner_id),
+                "_id": str(item._mapping["id"]),
+                "name": item._mapping["name"],
+                "category": item._mapping["category"],
+                "color": item._mapping["color"],
+                "season": item._mapping["season"],
+                "imageUrl": item._mapping["image_url"],
+                "favorite": item._mapping["favorite"],
+                "notes": item._mapping["notes"],
+                "ownerId": str(item._mapping["owner_id"]),
             }
-            for item in items
+            for item in results
         ]
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to fetch items: {str(exc)}")

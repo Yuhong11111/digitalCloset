@@ -1,5 +1,5 @@
 """
-SQLAlchemy models for PostgreSQL
+SQLAlchemy models for PostgreSQL tables: User and ClothItem
 """
 from sqlalchemy import Column, String, DateTime, Boolean, Text, ForeignKey, Integer
 from sqlalchemy.orm import relationship

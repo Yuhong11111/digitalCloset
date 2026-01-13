@@ -1,5 +1,6 @@
 from typing import Optional
 
+from fastapi import Form
 from pydantic import BaseModel
 
 
@@ -11,3 +12,30 @@ class ItemResponse(BaseModel):
     season: Optional[str] = None
     note: Optional[str] = None
 
+
+class ItemRequest(BaseModel):
+    name: str
+    category: str
+    color: str
+    season: str
+    favorite: bool = False
+    notes: Optional[str] = None
+
+    @classmethod
+    def as_form(
+        cls,
+        name: str = Form(...),
+        category: str = Form(...),
+        color: str = Form(...),
+        season: str = Form(...),
+        favorite: bool = Form(False),
+        note: Optional[str] = Form(None),
+    ) -> "ItemRequest":
+        return cls(
+            name=name,
+            category=category,
+            color=color,
+            season=season,
+            favorite=favorite,
+            note=note,
+        )

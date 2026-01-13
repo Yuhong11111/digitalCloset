@@ -8,7 +8,7 @@ from app.core.config import settings
 # Create database engine
 engine = create_engine(
     settings.DATABASE_URL,
-    echo=True,  # Set to True for SQL debugging
+    echo=False,  # Set to True for SQL debugging
     pool_pre_ping=True,  # Verify connections before using them
 )
 
