@@ -104,7 +104,7 @@ export function Closet() {
                                 <Button variant={item.favorite ? "solid" : "outline"} colorScheme="pink">
                                     {item.favorite ? "★ Favorite" : "♡ Mark Favorite"}
                                 </Button>
-                                <Button variant="ghost">Edit</Button>
+                                <Button onClick={() => navigate(`/edit/${item._id}`)} variant='subtle'>Edit</Button>
                             </Card.Footer>
                         </Card.Root>
                     ))}

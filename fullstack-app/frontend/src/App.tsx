@@ -62,6 +62,12 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/edit/:id"
+              element={
+                <ProtectedRoute>
+                  <AddItem />
+                </ProtectedRoute>} />
           </Routes>
         </Router >
       </ClothContextProvider>

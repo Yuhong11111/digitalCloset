@@ -49,3 +49,34 @@ class ItemRequest(BaseModel):
 class CreateItemResponse(BaseModel):
     status: str
     item: ItemResponse
+
+class ItemPatchRequest(BaseModel):
+    name: Optional[str] = None
+    category: Optional[str] = None
+    color: Optional[str] = None
+    season: Optional[str] = None
+    favorite: Optional[bool] = None
+    notes: Optional[str] = None
+
+    @classmethod
+    def as_form(
+        cls,
+        name: Optional[str] = Form(None),
+        category: Optional[str] = Form(None),
+        color: Optional[str] = Form(None),
+        season: Optional[str] = Form(None),
+        favorite: Optional[bool] = Form(None),
+        notes: Optional[str] = Form(None),
+    ) -> "ItemPatchRequest":
+        return cls(
+            name=name,
+            category=category,
+            color=color,
+            season=season,
+            favorite=favorite,
+            notes=notes,
+        )
+
+class PatchResponse(BaseModel):
+    status: str
+    item: ItemPatchRequest
