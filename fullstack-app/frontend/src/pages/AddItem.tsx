@@ -12,6 +12,7 @@ import {
     For,
 } from "@chakra-ui/react";
 import { FormEvent, useContext, useState } from "react";
+import { useParams } from "react-router-dom";
 import AppLayout from "./AppLayout";
 import { ClothingCategory, SeasonTag } from "../components/ClothContext";
 import { useClothContext } from "../hooks/useClothContext";
@@ -39,6 +40,10 @@ export default function AddItem() {
     const [notes, setNotes] = useState("");
     const [favorite, setFavorite] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // edit mode
+    const params = useParams<{ id: string }>();
+    const isEditMode = Boolean(params.id);
 
     const resetForm = () => {
         setName("");
@@ -209,7 +214,7 @@ export default function AddItem() {
                         </Box>
                     </Grid>
                     <Button type="submit" mt={8} colorScheme="blue" loading={isSubmitting} disabled={isSubmitting}>
-                        Save Item
+                        {isEditMode ? "Update Item" : "Add Item"}
                     </Button>
                     <Button mt={8} onClick={() => { navigate('/closet') }} ml={4} variant="ghost">
                         Back to Closet
