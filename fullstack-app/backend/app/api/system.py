@@ -1,8 +1,10 @@
 import logging
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
-from app.db.mongo import db
+from app.db.database import get_db
 
 logger = logging.getLogger(__name__)
 
@@ -15,14 +17,13 @@ async def read_root():
 
 
 @router.get("/test-db")
-async def test_db():
+async def test_db(db: Session = Depends(get_db)):
     try:
-        collections = await db.list_collection_names()
-        return {"database": "Closet", "collections": collections, "status": "connected"}
+        db.execute(text("SELECT 1"))
+        return {"database": "postgresql", "status": "connected"}
     except Exception as exc:
         logger.error("Database operation failed: %s", exc)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Database connection failed: {exc}",
         )
-

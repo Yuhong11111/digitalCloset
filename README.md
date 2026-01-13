@@ -8,7 +8,7 @@ People own lots of clothing but lack a simple way to track what they have, find 
 ## Technologies Used
 
 - Frontend: React, TypeScript, Chakra
-- Backend: FastAPI, MongoDB
+- Backend: FastAPI, PostgreSQL (SQLAlchemy)
 - Authentication: JWT
 
 ## Setup
@@ -20,6 +20,8 @@ cd fullstack-app/backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
+cd /Users/yuhong/Desktop/sl/digitalCloset
+python init_db.py
 uvicorn app.main:app --reload
 ```
 
@@ -36,7 +38,7 @@ npm start
 Create a `.env` file in the backend directory with:
 
 ```
-MONGODB_URL=your_mongodb_url
+DATABASE_URL=postgresql+psycopg2://user:password@localhost:5432/closet_db
 JWT_SECRET=your_jwt_secret
 ```
 
