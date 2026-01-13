@@ -1,5 +1,5 @@
 import base64
-from typing import Optional
+from typing import Optional, List
 import uuid
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
@@ -69,7 +69,7 @@ async def create_item(
         raise HTTPException(status_code=500, detail=f"Failed to create item: {str(exc)}")
 
 
-@router.get("", response_model=list[ItemResponse], response_model_by_alias=True)
+@router.get("", response_model=List[ItemResponse], response_model_by_alias=True)
 async def get_items(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
