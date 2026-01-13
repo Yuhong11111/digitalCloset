@@ -11,17 +11,16 @@ import {
     Textarea,
     For,
 } from "@chakra-ui/react";
-import { FormEvent, useContext, useState } from "react";
-import { useParams } from "react-router-dom";
+import { FormEvent, useContext, useEffect, useState } from "react";
+import { useNavigate, useParams } from 'react-router-dom';
 import AppLayout from "./AppLayout";
 import { ClothingCategory, SeasonTag } from "../components/ClothContext";
 import { useClothContext } from "../hooks/useClothContext";
 import axios from "axios";
 import { UserContext } from "../components/UserContext";
-import { useNavigate } from 'react-router-dom';
 import { API_BASE_URL } from "../config";
 
-const categories: ClothingCategory[] = ["top", "bottom", "outerwear", "footwear", "accessory"];
+const categories: ClothingCategory[] = ["top", "bottom", "outerwear", "footwear", "accessory", "others"];
 const seasons: SeasonTag[] = ["all", "spring", "summer", "fall", "winter"];
 
 export default function AddItem() {
@@ -40,10 +39,38 @@ export default function AddItem() {
     const [notes, setNotes] = useState("");
     const [favorite, setFavorite] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [originalItem, setOriginalItem] = useState<any | null>(null);
 
     // edit mode
     const params = useParams<{ id: string }>();
     const isEditMode = Boolean(params.id);
+
+    useEffect(() => {
+        if (!isEditMode) return;
+
+        async function fetchItemData() {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/items/${params.id}`);
+                const item = response.data;
+                setName(item.name);
+                setCategory(item.category);
+                setColor(item.color);
+                setSeason(item.season);
+                setNotes(item.notes || "");
+                setFavorite(item.favorite || false);
+                setOriginalItem(item);
+                if (item.imageUrl) {
+                    setImagePreview(item.imageUrl);
+                    const urlParts = item.imageUrl.split('/');
+                    setImageFileName(urlParts[urlParts.length - 1]);
+                }
+            } catch (error) {
+                console.error("Failed to fetch item data", error);
+            }
+        }
+
+        fetchItemData();
+    }, [isEditMode, params.id]);
 
     const resetForm = () => {
         setName("");
@@ -65,24 +92,78 @@ export default function AddItem() {
             setIsSubmitting(false);
             return;
         }
-        const url = `${API_BASE_URL}/items`;
         const formData = new FormData();
-        formData.append("name", name);
-        formData.append("category", category);
-        formData.append("color", color);
-        formData.append("season", season);
-        formData.append("favorite", String(favorite));
-        if (notes) formData.append("notes", notes);
-        formData.append("ownerId", userId);
-        if (imageFile) {
-            formData.append("image", imageFile);
+
+        if (isEditMode) {
+            if (!originalItem) {
+                console.error("Missing original item data for patch.");
+                setIsSubmitting(false);
+                return;
+            }
+
+            let hasChanges = false;
+            if (name !== originalItem.name) {
+                formData.append("name", name);
+                hasChanges = true;
+            }
+            if (category !== originalItem.category) {
+                formData.append("category", category);
+                hasChanges = true;
+            }
+            if (color !== originalItem.color) {
+                formData.append("color", color);
+                hasChanges = true;
+            }
+            if (season !== originalItem.season) {
+                formData.append("season", season);
+                hasChanges = true;
+            }
+            if (Boolean(originalItem.favorite) !== favorite) {
+                formData.append("favorite", String(favorite));
+                hasChanges = true;
+            }
+
+            const originalNotes = originalItem.notes || "";
+            if (notes !== originalNotes) {
+                formData.append("notes", notes);
+                hasChanges = true;
+            }
+            if (imageFile) {
+                formData.append("image", imageFile);
+                hasChanges = true;
+            }
+
+            if (!hasChanges) {
+                setIsSubmitting(false);
+                navigate('/closet');
+                return;
+            }
+        } else {
+            formData.append("name", name);
+            formData.append("category", category);
+            formData.append("color", color);
+            formData.append("season", season);
+            formData.append("favorite", String(favorite));
+            if (notes) formData.append("notes", notes);
+            formData.append("ownerId", userId);
+            if (imageFile) {
+                formData.append("image", imageFile);
+            }
         }
+
         try {
-            const response = await axios.post(url, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data"
-                }
-            });
+            const url = isEditMode ? `${API_BASE_URL}/items/${params.id}` : `${API_BASE_URL}/items`;
+            const response = isEditMode
+                ? await axios.patch(url, formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
+                })
+                : await axios.post(url, formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data"
+                    }
+                });
             if (response.data.status === "success") {
                 await refreshClothes();
                 resetForm();
@@ -121,7 +202,7 @@ export default function AddItem() {
         <AppLayout>
             <Box maxW="3xl" mx="auto" mt={8} p={6} borderWidth="1px" borderRadius="lg" bg="white">
                 <Heading size="md" mb={6}>
-                    Add New Item
+                    {isEditMode ? "Edit Clothing Item" : "Add New Clothing Item"}
                 </Heading>
                 <form onSubmit={handleSubmit}>
                     <Grid templateColumns={["1fr", "repeat(2, 1fr)"]} gap={6}>
