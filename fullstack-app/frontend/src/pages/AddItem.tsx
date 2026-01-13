@@ -294,12 +294,39 @@ export default function AddItem() {
                             </Switch.Root>
                         </Box>
                     </Grid>
-                    <Button type="submit" mt={8} colorScheme="blue" loading={isSubmitting} disabled={isSubmitting}>
+                    <Button type="submit" mt={8} colorPalette={"blue"} loading={isSubmitting} disabled={isSubmitting}>
                         {isEditMode ? "Update Item" : "Add Item"}
                     </Button>
                     <Button mt={8} onClick={() => { navigate('/closet') }} ml={4} variant="ghost">
                         Back to Closet
                     </Button>
+                    {isEditMode && (
+                        <Button
+                            float="right"
+                            variant="outline"
+                            mt={8}
+                            colorPalette={"red"}
+                            onClick={async () => {
+                                if (!params.id) return;
+                                const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+                                if (!confirmDelete) return;
+
+                                try {
+                                    const response = await axios.delete(`${API_BASE_URL}/items/${params.id}`);
+                                    if (response.data.status === "success") {
+                                        await refreshClothes();
+                                        navigate('/closet');
+                                    } else {
+                                        console.error("Failed to delete item:", response.data);
+                                    }
+                                } catch (error) {
+                                    console.error("Failed to delete item", error);
+                                }
+                            }}
+                        >
+                            Delete Item
+                        </Button>
+                    )}
                 </form>
             </Box>
         </AppLayout>

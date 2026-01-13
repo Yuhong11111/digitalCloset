@@ -215,3 +215,32 @@ async def update_item(
     except Exception as exc:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to update item: {str(exc)}")
+
+
+@router.delete("/{item_id}", response_model_by_alias=True)
+async def delete_item(
+    item_id: str,
+    current_user=Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    try:
+        owner_id = uuid.UUID(current_user.get("userId"))
+        try:
+            item_uuid = uuid.UUID(item_id)
+        except ValueError:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid item id")
+
+        delete_query = text("DELETE FROM cloth_items WHERE id = :item_id AND owner_id = :owner_id RETURNING id")
+        result = db.execute(delete_query, {"item_id": item_uuid, "owner_id": owner_id})
+        deleted_item = result.fetchone()
+        if not deleted_item:
+            raise HTTPException(status_code=404, detail="Item not found")
+
+        db.commit()
+        return {
+            "status": "success",
+            "message": "Item deleted successfully"
+        }
+    except Exception as exc:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to delete item: {str(exc)}")
