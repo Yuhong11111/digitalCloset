@@ -1,16 +1,21 @@
 from typing import Optional
 
 from fastapi import Form
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ItemResponse(BaseModel):
-    id: str
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str = Field(alias="_id")
     name: str
     category: Optional[str] = None
     color: Optional[str] = None
     season: Optional[str] = None
+    size: Optional[str] = None
+    imageUrl: Optional[str] = None
     notes: Optional[str] = None
+    favorite: Optional[bool] = None
 
 
 class ItemRequest(BaseModel):
@@ -39,3 +44,8 @@ class ItemRequest(BaseModel):
             favorite=favorite,
             notes=notes,
         )
+
+
+class CreateItemResponse(BaseModel):
+    status: str
+    item: ItemResponse

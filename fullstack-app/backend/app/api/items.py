@@ -8,12 +8,12 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.database import get_db
-from app.schemas.item import ItemRequest
+from app.schemas.item import CreateItemResponse, ItemRequest, ItemResponse
 
 router = APIRouter(prefix="/items", tags=["items"])
 
 
-@router.post("")
+@router.post("", response_model=CreateItemResponse, response_model_by_alias=True)
 async def create_item(
     item: ItemRequest = Depends(ItemRequest.as_form),
     image: Optional[UploadFile] = File(None),
@@ -62,7 +62,6 @@ async def create_item(
                 "imageUrl": new_item["image_url"],
                 "favorite": new_item["favorite"],
                 "notes": new_item["notes"],
-                "ownerId": str(new_item["owner_id"]),
             }
         }
     except Exception as exc:
@@ -70,7 +69,7 @@ async def create_item(
         raise HTTPException(status_code=500, detail=f"Failed to create item: {str(exc)}")
 
 
-@router.get("")
+@router.get("", response_model=list[ItemResponse], response_model_by_alias=True)
 async def get_items(
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
@@ -93,7 +92,6 @@ async def get_items(
                 "imageUrl": item._mapping["image_url"],
                 "favorite": item._mapping["favorite"],
                 "notes": item._mapping["notes"],
-                "ownerId": str(item._mapping["owner_id"]),
             }
             for item in results
         ]
