@@ -20,9 +20,10 @@
 
 import AppLayout from "./AppLayout";
 import { Flex, Input, Box, Button, Spacer, Group, ButtonGroup, Card, Image, Text } from "@chakra-ui/react";
+import axios from "axios";
 import { useNavigate } from 'react-router-dom';
-import { useContext, useEffect } from "react";
-import { ClothContext, ClothContextProvider } from "../components/ClothContext";
+import { useClothContext } from "../hooks/useClothContext";
+import { API_BASE_URL } from "../config";
 
 
 export function Closet() {
@@ -30,10 +31,26 @@ export function Closet() {
     // const { id: userId } = useContext(UserContext);
     // const { username } = useContext(UserContext);
     // const [items, setItems] = React.useState<any[]>([]);
-    const { clothes } = useContext(ClothContext);
+    const { clothes, refreshClothes } = useClothContext();
 
-    // if (!clothes || clothes.length === 0)
+    // if (!clothes || clothes.length === 0)xw
     //     return <Text>No clothes found.</Text>;
+
+    // change favorite status
+    const toggleFavorite = async (itemId: string, currentFavorite?: boolean) => {
+        try {
+            const formData = new FormData();
+            formData.append("favorite", String(!currentFavorite));
+            await axios.patch(`${API_BASE_URL}/items/${itemId}`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+            await refreshClothes();
+        } catch (error) {
+            console.error("Failed to update favorite", error);
+        }
+    };
 
 
     return (
@@ -101,7 +118,11 @@ export function Closet() {
                             </Card.Body>
 
                             <Card.Footer>
-                                <Button variant={item.favorite ? "solid" : "outline"} colorScheme="pink">
+                                <Button
+                                    onClick={() => toggleFavorite(item._id, item.favorite)}
+                                    variant={item.favorite ? "solid" : "outline"}
+                                    colorScheme="pink"
+                                >
                                     {item.favorite ? "★ Favorite" : "♡ Mark Favorite"}
                                 </Button>
                                 <Button onClick={() => navigate(`/edit/${item._id}`)} variant='subtle'>Edit</Button>
