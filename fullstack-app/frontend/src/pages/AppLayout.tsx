@@ -40,7 +40,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
     return (
         <div className="min-h-screen bg-stone-50 text-stone-900">
             <nav className="border-b border-stone-200 bg-white/80 backdrop-blur">
-                <Flex direction={"row"}>
+                <Flex direction={"row"} px={4}>
                     <Box p={4} gap={4} display="flex" alignItems="center">
                         <NavLink to="/closet" style={linkStyles}>Closet</NavLink>
                         <NavLink to="/outfits" style={linkStyles}>Outfits</NavLink>

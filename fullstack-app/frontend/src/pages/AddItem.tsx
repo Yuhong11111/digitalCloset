@@ -294,7 +294,7 @@ export default function AddItem() {
                             </Switch.Root>
                         </Box>
                     </Grid>
-                    <Button type="submit" mt={8} colorPalette={"blue"} loading={isSubmitting} disabled={isSubmitting}>
+                    <Button type="submit" mt={8} bg="#E8DAD0" loading={isSubmitting} disabled={isSubmitting} color="ink" _hover={{ bg: "#d4c1b3ff" }}>
                         {isEditMode ? "Update Item" : "Add Item"}
                     </Button>
                     <Button mt={8} onClick={() => { navigate('/closet') }} ml={4} variant="ghost">
@@ -305,7 +305,9 @@ export default function AddItem() {
                             float="right"
                             variant="outline"
                             mt={8}
-                            colorPalette={"red"}
+                            bg="red.300"
+                            color="red.800"
+                            _hover={{ bg: "red.200" }}
                             onClick={async () => {
                                 if (!params.id) return;
                                 const confirmDelete = window.confirm("Are you sure you want to delete this item?");
