@@ -4,10 +4,10 @@ const customConfig = {
   theme: {
     tokens: {
       colors: {
-        canvas: { value: '#f8f5f1' },
-        ink: { value: '#000000ff' },
-        primary: { value: '#1f2937' },
-        accent: { value: '#3b82f6' },
+        canvas: { value: '#f8f5f1ff' },
+        ink: { value: 'gray.900' },
+        primary: { value: '#161717ff' },
+        accent: { value: 'orange.200' },
       },
       fonts: {
         body: { value: 'Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif' },

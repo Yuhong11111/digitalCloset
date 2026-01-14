@@ -19,7 +19,7 @@
 */
 
 import AppLayout from "./AppLayout";
-import { Flex, Input, Box, Button, Spacer, Group, ButtonGroup, Card, Image, Text } from "@chakra-ui/react";
+import { Flex, Input, Box, Button, ButtonGroup, Card, Image, Text, Heading, NativeSelect } from "@chakra-ui/react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import { useClothContext } from "../hooks/useClothContext";
@@ -55,27 +55,65 @@ export function Closet() {
 
     return (
         <AppLayout>
-            <Flex direction="column" minH="100vh" overflowY="auto">
-                <Flex p={4} gap={4}>
+            <Flex direction="column" minH="100vh" overflowY="auto" px={5} bg="canvas">
+                <Flex align="center" justify="space-between" px={4} pt={6} pb={3}>
                     <h1>Welcome to your Closet!</h1>
+                    <Button
+                        bg="#E8DAD0"
+                        color="ink"
+                        borderRadius="xl"
+                        px={5}
+                        h="45px"
+                        onClick={() => { navigate('/add') }}
+                        _hover={{ bg: "#d4c1b3ff" }}
+                    >
+                        + Add Item
+                    </Button>
                 </Flex>
-                <Flex flexWrap="wrap">
-                    <Box margin={5} gap={4} display="flex" alignItems="center">
-                        <Group attached w="full" maxW="sm">
-                            <Input w="28rem" flex="10" placeholder={"for search, filter, sort controls"} />
-                            <Button variant="outline">
-                                Search
-                            </Button>
-                        </Group>
-                        <ButtonGroup variant="ghost">
-                            <Button>Filter</Button>
-                            <Button>Sort</Button>
-                        </ButtonGroup>
+                <Flex direction="row" align="center" gap={3} px={4} pb={4} justify="flex-start" flexWrap="wrap">
+                    <Box maxW="500px" w="full">
+                        <Input
+                            placeholder="Search items..."
+                            bg="#f6f2efff"
+                            borderColor="gray.300"
+                            borderRadius="lg"
+                            size="lg"
+                            h="45px"
+                            _placeholder={{ color: "gray.500" }}
+                        />
                     </Box>
-                    <Spacer />
-                    <Box margin={15}>
-                        <Button colorPalette={"blue"} onClick={() => { navigate('/add') }}>Add Item</Button>
-                    </Box>
+                    <NativeSelect.Root size="md" w="fit-content" minW="unset" bg="#f6eee8ff" borderRadius="xl">
+                        <NativeSelect.Field
+                            w="full"
+                            pr="7"
+                            borderRadius="xl"
+                            h="45px"
+                            fontWeight="600"
+                            fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
+                        // sx={{ "& option": { fontWeight: "600" } }}
+                        >
+                            <option>Filter</option>
+                            <option>All</option>
+                            <option>Favorites</option>
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                    </NativeSelect.Root>
+                    <NativeSelect.Root size="md" w="fit-content" minW="unset" bg="#f6eee8ff" borderRadius="xl">
+                        <NativeSelect.Field
+                            borderRadius="xl"
+                            w="full"
+                            pr="7"
+                            h="45px"
+                            fontWeight="600"
+                            fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
+                        // sx={{ "& option": { fontWeight: "600" } }}
+                        >
+                            <option>Sort: Recently Added</option>
+                            <option>Alphabetical</option>
+                            <option>Season</option>
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                    </NativeSelect.Root>
                 </Flex>
                 <Flex wrap="wrap" gap={6} padding={6}>
                     {clothes.map((item) => (
@@ -83,8 +121,11 @@ export function Closet() {
                             key={item._id}
                             maxW="sm"
                             overflow="hidden"
-                            boxShadow="md"
+                            boxShadow="sm"
                             borderRadius="xl"
+                            borderWidth="1px"
+                            borderColor="gray.100"
+                            bg="#f6f2efff"
                         >
                             {item.imageUrl ? (
                                 <Image
@@ -96,7 +137,10 @@ export function Closet() {
                             ) : (
                                 <Box
                                     height="220px"
-                                    bg="gray.100"
+                                    bg="gray.50"
+                                    borderRadius="lg"
+                                    mx={4}
+                                    mt={4}
                                     display="flex"
                                     alignItems="center"
                                     justifyContent="center"
@@ -105,7 +149,7 @@ export function Closet() {
                                 </Box>
                             )}
 
-                            <Card.Body gap="2">
+                            <Card.Body gap="2" px={4}>
                                 <Card.Title textTransform="capitalize">{item.name}</Card.Title>
                                 <Card.Description>
                                     {item.color} · {item.category} · {item.season}
@@ -117,15 +161,13 @@ export function Closet() {
                                 )}
                             </Card.Body>
 
-                            <Card.Footer>
-                                <Button
-                                    onClick={() => toggleFavorite(item._id, item.favorite)}
-                                    variant={item.favorite ? "solid" : "outline"}
-                                    colorScheme="pink"
-                                >
-                                    {item.favorite ? "★ Favorite" : "♡ Mark Favorite"}
-                                </Button>
-                                <Button onClick={() => navigate(`/edit/${item._id}`)} variant='subtle'>Edit</Button>
+                            <Card.Footer px={4} pb={4}>
+                                <ButtonGroup size="sm" variant="outline">
+                                    <Button onClick={() => toggleFavorite(item._id, item.favorite)} borderRadius="md" bg="#f3ede9ff" _hover={{ bg: "#e8dcd3ff" }}>
+                                        {item.favorite ? "♥ Favorite" : "♡ Favorite"}
+                                    </Button>
+                                    <Button onClick={() => navigate(`/edit/${item._id}`)} borderRadius="md" bg="#F1E8E2" _hover={{ bg: "#e8dcd3ff" }}>Edit</Button>
+                                </ButtonGroup>
                             </Card.Footer>
                         </Card.Root>
                     ))}
