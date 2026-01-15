@@ -1,11 +1,13 @@
-import React from "react"
+import React from "react";
 import { useNavigate } from 'react-router-dom';
 import axios from "axios";
-import { useContext, useState } from "react"
+import { useContext, useState } from "react";
 import { UserContext } from "../components/UserContext";
-import { Box, Button, Flex, Field, Input, Spacer } from "@chakra-ui/react";
+import { Box, Button, Flex, Field, Input, Text, Heading, Icon } from "@chakra-ui/react";
 import { RiArrowLeftLine } from "react-icons/ri";
+import { FiKey, FiMail, FiUser } from "react-icons/fi";
 import { API_BASE_URL } from "../config";
+import { pageBackgroundStyles } from "../theme";
 
 export function Login() {
     const navigate = useNavigate();
@@ -41,67 +43,125 @@ export function Login() {
     }
 
     return (
-        <Flex direction={"column"} align="center" justify="center" gap={6} >
-            <form onSubmit={handleSubmit} className="max-w-md mx-auto mt-8 p-4 border rounded" >
-                <h1>{status === 'login' ? 'Login Page' : 'Sign Up Page'}</h1>
-                {errorMessage && (
-                    <div style={{ color: 'red', marginBottom: '10px' }}>
-                        {errorMessage}
-                    </div>
-                )}
-                <Field.Root required>
-                    <Field.Label>
-                        Username
-                        <Field.RequiredIndicator />
-                    </Field.Label>
-                    <Input value={username}
-                        onChange={ev => setUsername(ev.target.value)}
-                        type="text" placeholder="Enter your username..." />
-                </Field.Root>
-                <Field.Root required>
-                    <Field.Label>
-                        Password
-                        <Field.RequiredIndicator />
-                    </Field.Label>
-                    <Input value={password}
-                        onChange={ev => setPassword(ev.target.value)}
-                        type="password" placeholder="Enter your password..." />
-                </Field.Root>
-                <Field.Root required={status === 'signup'}>
-                    <Field.Label>
-                        Email
-                        {status === 'signup' && <Field.RequiredIndicator />}
-                    </Field.Label>
-                    <Input value={email}
-                        onChange={ev => setEmail(ev.target.value)}
-                        type="email"
-                        placeholder="me@example.com"
-                        disabled={status === 'login'}
-                    />
-                </Field.Root>
-                <Flex direction="row" align="center" justify="center">
-                    <Button type="submit" className="bg-blue-500 text-white block w-full rounded-sm p-2 mb-2 border">
-                        {status === 'login' ? 'Login' : 'Sign Up'}
-                    </Button>
-                    <Spacer />
-                    {status == 'login' && (
-                        <div>
-                            <Button variant="plain" onClick={() => setStatus('signup')}>Switch to Sign Up</Button>
-                        </div>
+        <Flex
+            direction="column"
+            minH="100vh"
+            overflowY="auto"
+            px={6}
+            {...pageBackgroundStyles}
+        >
+            <Flex direction="column" align="center" justify="center" flex="1" py={{ base: 10, md: 14 }} position="relative" zIndex={1}>
+                <Box
+                    w="full"
+                    maxW="420px"
+                    bg="white"
+                    borderRadius="3xl"
+                    boxShadow="sm"
+                    borderWidth="1px"
+                    borderColor="gray.100"
+                    p={{ base: 6, md: 8 }}
+                >
+                    <Heading
+                        size="xl"
+                        fontWeight="800"
+                        fontFamily="'Outfit', 'Nunito', system-ui, sans-serif"
+                        mb={2}
+                    >
+                        {status === 'login' ? 'Welcome back' : 'Create your account'}
+                    </Heading>
+                    <Text color="gray.600" mb={6}>
+                        {status === 'login'
+                            ? 'Sign in to keep styling your wardrobe.'
+                            : 'Join and start building your digital closet.'}
+                    </Text>
+
+                    {errorMessage && (
+                        <Box bg="#ffe9e5" color="#b42318" borderRadius="lg" px={3} py={2} mb={4}>
+                            {errorMessage}
+                        </Box>
                     )}
-                    {status == 'signup' && (
-                        <div>
-                            <Button variant="plain" onClick={() => setStatus('login')}>Switch to Login</Button>
-                        </div>
-                    )}
-                </Flex>
-                {/* Add your login form here */}
-            </form>
-            <Box p={4}>
-                <Button variant="surface" onClick={() => { navigate('/') }}><RiArrowLeftLine />Back to Main Page</Button>
-            </Box>
+
+                    <form onSubmit={handleSubmit}>
+                        <Flex direction="column" gap={4}>
+                            <Field.Root required>
+                                <Field.Label fontWeight="600" color="gray.600">
+                                    Username <Field.RequiredIndicator />
+                                </Field.Label>
+                                <Box position="relative">
+                                    <Icon as={FiUser} position="absolute" left="12px" top="50%" transform="translateY(-50%)" color="gray.400" />
+                                    <Input
+                                        pl="38px"
+                                        value={username}
+                                        onChange={ev => setUsername(ev.target.value)}
+                                        type="text"
+                                        placeholder="Enter your username..."
+                                        h="46px"
+                                        borderRadius="xl"
+                                    />
+                                </Box>
+                            </Field.Root>
+                            <Field.Root required>
+                                <Field.Label fontWeight="600" color="gray.600">
+                                    Password <Field.RequiredIndicator />
+                                </Field.Label>
+                                <Box position="relative">
+                                    <Icon as={FiKey} position="absolute" left="12px" top="50%" transform="translateY(-50%)" color="gray.400" />
+                                    <Input
+                                        pl="38px"
+                                        value={password}
+                                        onChange={ev => setPassword(ev.target.value)}
+                                        type="password"
+                                        placeholder="Enter your password..."
+                                        h="46px"
+                                        borderRadius="xl"
+                                    />
+                                </Box>
+                            </Field.Root>
+                            <Field.Root required={status === 'signup'}>
+                                <Field.Label fontWeight="600" color="gray.600">
+                                    Email {status === 'signup' && <Field.RequiredIndicator />}
+                                </Field.Label>
+                                <Box position="relative">
+                                    <Icon as={FiMail} position="absolute" left="12px" top="50%" transform="translateY(-50%)" color="gray.400" />
+                                    <Input
+                                        pl="38px"
+                                        value={email}
+                                        onChange={ev => setEmail(ev.target.value)}
+                                        type="email"
+                                        placeholder="me@example.com"
+                                        disabled={status === 'login'}
+                                        h="46px"
+                                        borderRadius="xl"
+                                    />
+                                </Box>
+                            </Field.Root>
+                            <Button
+                                type="submit"
+                                bg="#ead7c7"
+                                color="ink"
+                                borderRadius="2xl"
+                                h="48px"
+                                fontWeight="700"
+                                _hover={{ bg: "#e1c8b5" }}
+                            >
+                                {status === 'login' ? 'Login' : 'Sign Up'}
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                onClick={() => setStatus(status === 'login' ? 'signup' : 'login')}
+                            >
+                                {status === 'login' ? 'Switch to Sign Up' : 'Switch to Login'}
+                            </Button>
+                        </Flex>
+                    </form>
+                </Box>
+                <Button variant="ghost" mt={6} onClick={() => { navigate('/') }}>
+                    <RiArrowLeftLine />
+                    Back to Main Page
+                </Button>
+            </Flex>
         </Flex>
-    )
+    );
 }
 
 export default Login;

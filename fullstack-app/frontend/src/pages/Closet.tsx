@@ -19,11 +19,13 @@
 */
 
 import AppLayout from "./AppLayout";
-import { Flex, Input, Box, Button, ButtonGroup, Card, Image, Text, Heading, NativeSelect } from "@chakra-ui/react";
+import { Flex, Input, Box, Button, ButtonGroup, Card, Image, Text, Heading, NativeSelect, SimpleGrid, Badge, Icon } from "@chakra-ui/react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
+import { FiSearch, FiSliders, FiArrowDown, FiPlus, FiGrid, FiHeart } from "react-icons/fi";
 import { useClothContext } from "../hooks/useClothContext";
 import { API_BASE_URL } from "../config";
+import { pageBackgroundStyles } from "../theme";
 
 
 export function Closet() {
@@ -32,6 +34,8 @@ export function Closet() {
     // const { username } = useContext(UserContext);
     // const [items, setItems] = React.useState<any[]>([]);
     const { clothes, refreshClothes } = useClothContext();
+    const totalItems = clothes.length;
+    const favoriteCount = clothes.filter((item) => item.favorite).length;
 
     // if (!clothes || clothes.length === 0)xw
     //     return <Text>No clothes found.</Text>;
@@ -55,77 +59,178 @@ export function Closet() {
 
     return (
         <AppLayout>
-            <Flex direction="column" minH="100vh" overflowY="auto" px={5} bg="canvas">
-                <Flex align="center" justify="space-between" px={4} pt={6} pb={3}>
-                    <h1>Welcome to your Closet!</h1>
+            <Flex
+                direction="column"
+                minH="100vh"
+                overflowY="auto"
+                px={6}
+                {...pageBackgroundStyles}
+            >
+                <Flex align="center" justify="space-between" pt={8} pb={4} position="relative" zIndex={1}>
+                    <Box>
+                        <Heading
+                            size="3xl"
+                            fontWeight="1000"
+                            letterSpacing="-0.02em"
+                            fontFamily="'Outfit', 'Nunito', system-ui, sans-serif"
+                        >
+                            Welcome to your Closet
+                        </Heading>
+                        <Text color="gray.600" mt={2}>Curate your wardrobe with clarity and style.</Text>
+                    </Box>
                     <Button
-                        bg="#E8DAD0"
+                        bg="#ead7c7"
                         color="ink"
-                        borderRadius="xl"
-                        px={5}
-                        h="45px"
+                        borderRadius="2xl"
+                        px={6}
+                        h="48px"
+                        fontWeight="700"
                         onClick={() => { navigate('/add') }}
-                        _hover={{ bg: "#d4c1b3ff" }}
+                        _hover={{ bg: "#e1c8b5" }}
                     >
-                        + Add Item
+                        <Icon as={FiPlus} mr={2} />
+                        Add Item
                     </Button>
                 </Flex>
-                <Flex direction="row" align="center" gap={3} px={4} pb={4} justify="flex-start" flexWrap="wrap">
-                    <Box maxW="500px" w="full">
+
+                <Flex gap={3} pb={4} flexWrap="wrap" align="center" position="relative" zIndex={1}>
+                    <Box
+                        bg="white"
+                        borderRadius="2xl"
+                        boxShadow="sm"
+                        px={4}
+                        py={3}
+                        display="flex"
+                        gap={4}
+                        alignItems="center"
+                    >
+                        <Box
+                            w="42px"
+                            h="42px"
+                            borderRadius="full"
+                            bg="#f4e6d9"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                        >
+                            <Icon as={FiGrid} color="#8b6f5a" />
+                        </Box>
+                        <Box>
+                            <Text fontSize="sm" color="gray.500">Total Items</Text>
+                            <Text fontWeight="700" fontSize="lg">{totalItems}</Text>
+                        </Box>
+                        <Box borderLeft="1px solid" borderColor="gray.200" h="28px" />
+                        <Box
+                            w="42px"
+                            h="42px"
+                            borderRadius="full"
+                            bg="#f4e6d9"
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="center"
+                        >
+                            <Icon as={FiHeart} color="#8b6f5a" />
+                        </Box>
+                        <Box>
+                            <Text fontSize="sm" color="gray.500">Favorites</Text>
+                            <Text fontWeight="700" fontSize="lg">{favoriteCount}</Text>
+                        </Box>
+                    </Box>
+                    <Box
+                        bg="white"
+                        borderRadius="2xl"
+                        boxShadow="sm"
+                        px={4}
+                        py={3}
+                        display="flex"
+                        alignItems="center"
+                        gap={3}
+                        flex="1"
+                        minW="260px"
+                        position="relative"
+                    >
+                        <Icon as={FiSearch} color="gray.400" />
                         <Input
                             placeholder="Search items..."
-                            bg="#f6f2efff"
-                            borderColor="gray.300"
-                            borderRadius="lg"
-                            size="lg"
-                            h="45px"
-                            _placeholder={{ color: "gray.500" }}
+                            bg="transparent"
+                            border="none"
+                            _focusVisible={{ boxShadow: "none" }}
+                            _placeholder={{ color: "gray.400" }}
                         />
+                        <Button size="sm" borderRadius="full" bg="#f1e7de" _hover={{ bg: "#eadcd0" }}>
+                            Search
+                        </Button>
                     </Box>
-                    <NativeSelect.Root size="md" w="fit-content" minW="unset" bg="#f6eee8ff" borderRadius="xl">
-                        <NativeSelect.Field
-                            w="full"
-                            pr="7"
-                            borderRadius="xl"
-                            h="45px"
-                            fontWeight="600"
-                            fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
-                        // sx={{ "& option": { fontWeight: "600" } }}
-                        >
-                            <option>Filter</option>
-                            <option>All</option>
-                            <option>Favorites</option>
-                        </NativeSelect.Field>
-                        <NativeSelect.Indicator />
-                    </NativeSelect.Root>
-                    <NativeSelect.Root size="md" w="fit-content" minW="unset" bg="#f6eee8ff" borderRadius="xl">
-                        <NativeSelect.Field
-                            borderRadius="xl"
-                            w="full"
-                            pr="7"
-                            h="45px"
-                            fontWeight="600"
-                            fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
-                        // sx={{ "& option": { fontWeight: "600" } }}
-                        >
-                            <option>Sort: Recently Added</option>
-                            <option>Alphabetical</option>
-                            <option>Season</option>
-                        </NativeSelect.Field>
-                        <NativeSelect.Indicator />
-                    </NativeSelect.Root>
+                    <Flex gap={2} flexWrap="wrap">
+                        <Box position="relative">
+                            <Icon
+                                as={FiSliders}
+                                position="absolute"
+                                left="12px"
+                                top="50%"
+                                transform="translateY(-50%)"
+                                color="gray.400"
+                                zIndex={1}
+                            />
+                            <NativeSelect.Root size="md" w="fit-content" minW="unset" bg="white" borderRadius="xl" boxShadow="sm">
+                                <NativeSelect.Field
+                                    w="full"
+                                    pl="36px"
+                                    pr="7"
+                                    borderRadius="xl"
+                                    h="40px"
+                                    fontWeight="600"
+                                    fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
+                                >
+                                    <option>Filter</option>
+                                    <option>All</option>
+                                    <option>Favorites</option>
+                                </NativeSelect.Field>
+                                <NativeSelect.Indicator />
+                            </NativeSelect.Root>
+                        </Box>
+                        <Box position="relative">
+                            <Icon
+                                as={FiArrowDown}
+                                position="absolute"
+                                left="12px"
+                                top="50%"
+                                transform="translateY(-50%)"
+                                color="gray.400"
+                                zIndex={1}
+                            />
+                            <NativeSelect.Root size="md" w="fit-content" minW="unset" bg="white" borderRadius="xl" boxShadow="sm">
+                                <NativeSelect.Field
+                                    borderRadius="xl"
+                                    w="full"
+                                    pl="36px"
+                                    pr="7"
+                                    h="40px"
+                                    fontWeight="600"
+                                    fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
+                                >
+                                    <option>Sort: Recently Added</option>
+                                    <option>Alphabetical</option>
+                                    <option>Season</option>
+                                </NativeSelect.Field>
+                                <NativeSelect.Indicator />
+                            </NativeSelect.Root>
+                        </Box>
+                    </Flex>
                 </Flex>
-                <Flex wrap="wrap" gap={6} padding={6}>
+
+                <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={6} pb={10} position="relative" zIndex={1}>
                     {clothes.map((item) => (
                         <Card.Root
                             key={item._id}
-                            maxW="sm"
                             overflow="hidden"
-                            boxShadow="sm"
-                            borderRadius="xl"
+                            borderRadius="2xl"
                             borderWidth="1px"
                             borderColor="gray.100"
-                            bg="#f6f2efff"
+                            bg="white"
+                            boxShadow="sm"
+                            transition="transform 0.2s ease, box-shadow 0.2s ease"
+                            _hover={{ transform: "translateY(-4px)", boxShadow: "lg" }}
                         >
                             {item.imageUrl ? (
                                 <Image
@@ -137,10 +242,7 @@ export function Closet() {
                             ) : (
                                 <Box
                                     height="220px"
-                                    bg="gray.50"
-                                    borderRadius="lg"
-                                    mx={4}
-                                    mt={4}
+                                    bgGradient="linear(to-br, #f7efe8, #efe4db)"
                                     display="flex"
                                     alignItems="center"
                                     justifyContent="center"
@@ -149,10 +251,15 @@ export function Closet() {
                                 </Box>
                             )}
 
-                            <Card.Body gap="2" px={4}>
-                                <Card.Title textTransform="capitalize">{item.name}</Card.Title>
+                            <Card.Body gap="2" px={4} pt={4}>
+                                <Flex align="center" justify="space-between">
+                                    <Card.Title textTransform="capitalize">{item.name}</Card.Title>
+                                    <Badge colorPalette="orange" variant="subtle" borderRadius="full">
+                                        {item.season}
+                                    </Badge>
+                                </Flex>
                                 <Card.Description>
-                                    {item.color} · {item.category} · {item.season}
+                                    {item.color} · {item.category}
                                 </Card.Description>
                                 {item.notes && (
                                     <Text fontSize="sm" color="gray.500">
@@ -163,15 +270,15 @@ export function Closet() {
 
                             <Card.Footer px={4} pb={4}>
                                 <ButtonGroup size="sm" variant="outline">
-                                    <Button onClick={() => toggleFavorite(item._id, item.favorite)} borderRadius="md" bg="#f3ede9ff" _hover={{ bg: "#e8dcd3ff" }}>
+                                    <Button onClick={() => toggleFavorite(item._id, item.favorite)} borderRadius="md" bg="#f7f0ea" _hover={{ bg: "#eadfd6" }}>
                                         {item.favorite ? "♥ Favorite" : "♡ Favorite"}
                                     </Button>
-                                    <Button onClick={() => navigate(`/edit/${item._id}`)} borderRadius="md" bg="#F1E8E2" _hover={{ bg: "#e8dcd3ff" }}>Edit</Button>
+                                    <Button onClick={() => navigate(`/edit/${item._id}`)} borderRadius="md" bg="#f2e7de" _hover={{ bg: "#eadfd6" }}>Edit</Button>
                                 </ButtonGroup>
                             </Card.Footer>
                         </Card.Root>
                     ))}
-                </Flex>
+                </SimpleGrid>
             </Flex>
         </AppLayout >
     );

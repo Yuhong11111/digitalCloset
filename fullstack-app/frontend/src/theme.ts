@@ -51,3 +51,27 @@ const customConfig = {
 
 export const system = createSystem(defaultConfig, customConfig);
 
+export const pageBackgroundStyles = {
+  bgGradient: "linear(to-br, #fffaf6 0%, #f2e8df 45%, #fdf7f1 100%)",
+  position: "relative",
+  _before: {
+    content: '""',
+    position: "absolute",
+    top: "-140px",
+    right: "-140px",
+    w: "320px",
+    h: "320px",
+    bgGradient: "radial(#f0dccb 0%, transparent 70%)",
+    opacity: 0.7,
+    pointerEvents: "none",
+  },
+  _after: {
+    content: '""',
+    position: "absolute",
+    inset: 0,
+    bgImage: "radial-gradient(#eadfd6 1px, transparent 1px)",
+    bgSize: "28px 28px",
+    opacity: 0.18,
+    pointerEvents: "none",
+  },
+};
