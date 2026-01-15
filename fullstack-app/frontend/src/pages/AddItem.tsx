@@ -10,6 +10,9 @@ import {
     Switch,
     Textarea,
     For,
+    Flex,
+    Text,
+    Icon,
 } from "@chakra-ui/react";
 import { FormEvent, useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
@@ -18,7 +21,9 @@ import { ClothingCategory, SeasonTag } from "../components/ClothContext";
 import { useClothContext } from "../hooks/useClothContext";
 import axios from "axios";
 import { UserContext } from "../components/UserContext";
+import { FiArrowLeft, FiImage, FiStar } from "react-icons/fi";
 import { API_BASE_URL } from "../config";
+import { pageBackgroundStyles } from "../theme";
 
 const categories: ClothingCategory[] = ["top", "bottom", "outerwear", "footwear", "accessory", "others"];
 const seasons: SeasonTag[] = ["all", "spring", "summer", "fall", "winter"];
@@ -200,137 +205,224 @@ export default function AddItem() {
 
     return (
         <AppLayout>
-            <Box maxW="3xl" mx="auto" mt={8} p={6} borderWidth="1px" borderRadius="lg" bg="white">
-                <Heading size="md" mb={6}>
-                    {isEditMode ? "Edit Clothing Item" : "Add New Clothing Item"}
-                </Heading>
-                <form onSubmit={handleSubmit}>
-                    <Grid templateColumns={["1fr", "repeat(2, 1fr)"]} gap={6}>
-                        <Box>
-                            <label className="block text-sm font-medium text-gray-700">Name</label>
-                            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Black T-Shirt" />
-                        </Box>
-                        <Box>
-                            <label className="block text-sm font-medium text-gray-700">Category</label>
-                            <NativeSelect.Root>
-                                <NativeSelect.Field
-                                    value={category}
-                                    onChange={(e) => setCategory(e.target.value as ClothingCategory)}
-                                >
-                                    <For each={categories}>
-                                        {(option) => (
-                                            <option key={option} value={option}>
-                                                {option}
-                                            </option>
-                                        )}
-                                    </For>
-                                </NativeSelect.Field>
-                                <NativeSelect.Indicator />
-                            </NativeSelect.Root>
-                        </Box>
-                        <Box>
-                            <label className="block text-sm font-medium text-gray-700">Color</label>
-                            <Input value={color} onChange={(e) => setColor(e.target.value)} placeholder="e.g., Navy" />
-                        </Box>
-                        <Box>
-                            <label className="block text-sm font-medium text-gray-700">Season</label>
-                            <NativeSelect.Root>
-                                <NativeSelect.Field value={season} onChange={(e) => setSeason(e.target.value as SeasonTag)}>
-                                    <For each={seasons}>
-                                        {(option) => (
-                                            <option key={option} value={option}>
-                                                {option}
-                                            </option>
-                                        )}
-                                    </For>
-                                </NativeSelect.Field>
-                                <NativeSelect.Indicator />
-                            </NativeSelect.Root>
-                        </Box>
-                        <Box gridColumn={["auto", "span 2"]}>
-                            <label className="block text-sm font-medium text-gray-700">Image</label>
-                            <Input type="file" accept="image/*" onChange={handleFileChange} />
-                            {imagePreview && (
-                                <Box mt={3}>
-                                    <Image
-                                        src={imagePreview}
-                                        alt={name || "Preview"}
-                                        maxH="200px"
-                                        objectFit="cover"
-                                        borderRadius="md"
-                                        borderWidth="1px"
-                                    />
-                                    <ButtonGroup mt={2} size="xs">
-                                        <Button variant="ghost" onClick={clearImage}>
-                                            Remove
-                                        </Button>
-                                        {imageFileName && (
-                                            <Button variant="ghost">
-                                                {imageFileName}
-                                            </Button>
-                                        )}
-                                    </ButtonGroup>
-                                </Box>
-                            )}
-                        </Box>
-                        <Box gridColumn={["auto", "span 2"]}>
-                            <label className="block text-sm font-medium text-gray-700">Notes</label>
-                            <Textarea
-                                value={notes}
-                                onChange={(e) => setNotes(e.target.value)}
-                                placeholder="Fabric, brand, outfit ideas..."
-                                rows={3}
-                            />
-                        </Box>
-                        <Box display="flex" alignItems="center" gap="2">
-                            <Switch.Root
-                                checked={favorite}
-                                onCheckedChange={(e) => {
-                                    setFavorite(e.checked)
-                                }}>
-                                <Switch.HiddenInput />
-                                <Switch.Control />
-                                <Switch.Label>Favorite</Switch.Label>
-                            </Switch.Root>
-                        </Box>
-                    </Grid>
-                    <Button type="submit" mt={8} bg="#E8DAD0" loading={isSubmitting} disabled={isSubmitting} color="ink" _hover={{ bg: "#d4c1b3ff" }}>
-                        {isEditMode ? "Update Item" : "Add Item"}
-                    </Button>
-                    <Button mt={8} onClick={() => { navigate('/closet') }} ml={4} variant="ghost">
+            <Flex
+                direction="column"
+                minH="100vh"
+                overflowY="auto"
+                px={6}
+                {...pageBackgroundStyles}
+            >
+                <Flex align="center" justify="space-between" pt={8} pb={6} position="relative" zIndex={1}>
+                    <Box>
+                        <Heading
+                            size="2xl"
+                            fontWeight="800"
+                            letterSpacing="-0.02em"
+                            fontFamily="'Outfit', 'Nunito', system-ui, sans-serif"
+                        >
+                            {isEditMode ? "Edit Clothing Item" : "Add New Clothing Item"}
+                        </Heading>
+                        <Text color="gray.600" mt={2}>Capture the details so future outfits feel effortless.</Text>
+                    </Box>
+                    <Button variant="ghost" onClick={() => { navigate('/closet') }}>
+                        <Icon as={FiArrowLeft} mr={2} />
                         Back to Closet
                     </Button>
-                    {isEditMode && (
-                        <Button
-                            float="right"
-                            variant="outline"
-                            mt={8}
-                            bg="red.300"
-                            color="red.800"
-                            _hover={{ bg: "red.200" }}
-                            onClick={async () => {
-                                if (!params.id) return;
-                                const confirmDelete = window.confirm("Are you sure you want to delete this item?");
-                                if (!confirmDelete) return;
+                </Flex>
 
-                                try {
-                                    const response = await axios.delete(`${API_BASE_URL}/items/${params.id}`);
-                                    if (response.data.status === "success") {
-                                        await refreshClothes();
-                                        navigate('/closet');
-                                    } else {
-                                        console.error("Failed to delete item:", response.data);
-                                    }
-                                } catch (error) {
-                                    console.error("Failed to delete item", error);
-                                }
-                            }}
-                        >
-                            Delete Item
-                        </Button>
-                    )}
-                </form>
-            </Box>
+                <Box
+                    maxW="4xl"
+                    mx="auto"
+                    w="full"
+                    bg="white"
+                    borderRadius="3xl"
+                    boxShadow="sm"
+                    borderWidth="1px"
+                    borderColor="gray.100"
+                    p={{ base: 6, md: 8 }}
+                    position="relative"
+                    zIndex={1}
+                >
+                    <form onSubmit={handleSubmit}>
+                        <Grid templateColumns={["1fr", "repeat(2, 1fr)"]} gap={6}>
+                            <Box>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>Name</Text>
+                                <Input
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    placeholder="e.g., Black T-Shirt"
+                                    h="46px"
+                                    borderRadius="xl"
+                                    borderColor="gray.200"
+                                    bg="white"
+                                />
+                            </Box>
+                            <Box>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>Category</Text>
+                                <NativeSelect.Root>
+                                    <NativeSelect.Field
+                                        value={category}
+                                        onChange={(e) => setCategory(e.target.value as ClothingCategory)}
+                                        borderRadius="xl"
+                                        h="46px"
+                                        fontWeight="600"
+                                        fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
+                                    >
+                                        <For each={categories}>
+                                            {(option) => (
+                                                <option key={option} value={option}>
+                                                    {option}
+                                                </option>
+                                            )}
+                                        </For>
+                                    </NativeSelect.Field>
+                                    <NativeSelect.Indicator />
+                                </NativeSelect.Root>
+                            </Box>
+                            <Box>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>Color</Text>
+                                <Input
+                                    value={color}
+                                    onChange={(e) => setColor(e.target.value)}
+                                    placeholder="e.g., Navy"
+                                    h="46px"
+                                    borderRadius="xl"
+                                    borderColor="gray.200"
+                                    bg="white"
+                                />
+                            </Box>
+                            <Box>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>Season</Text>
+                                <NativeSelect.Root>
+                                    <NativeSelect.Field
+                                        value={season}
+                                        onChange={(e) => setSeason(e.target.value as SeasonTag)}
+                                        borderRadius="xl"
+                                        h="46px"
+                                        fontWeight="600"
+                                        fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
+                                    >
+                                        <For each={seasons}>
+                                            {(option) => (
+                                                <option key={option} value={option}>
+                                                    {option}
+                                                </option>
+                                            )}
+                                        </For>
+                                    </NativeSelect.Field>
+                                    <NativeSelect.Indicator />
+                                </NativeSelect.Root>
+                            </Box>
+                            <Box gridColumn={["auto", "span 2"]}>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>Image</Text>
+                                <Box
+                                    borderWidth="1px"
+                                    borderStyle="dashed"
+                                    borderColor="gray.300"
+                                    borderRadius="xl"
+                                    p={4}
+                                    bg="#fbf7f3"
+                                >
+                                    <Flex align="center" gap={3}>
+                                        <Icon as={FiImage} color="gray.500" />
+                                        <Input type="file" accept="image/*" onChange={handleFileChange} bg="white" borderRadius="lg" />
+                                    </Flex>
+                                </Box>
+                                {imagePreview && (
+                                    <Box mt={3}>
+                                        <Image
+                                            src={imagePreview}
+                                            alt={name || "Preview"}
+                                            maxH="200px"
+                                            objectFit="cover"
+                                            borderRadius="xl"
+                                            borderWidth="1px"
+                                            borderColor="gray.100"
+                                        />
+                                        <ButtonGroup mt={2} size="xs">
+                                            <Button variant="ghost" onClick={clearImage}>
+                                                Remove
+                                            </Button>
+                                            {imageFileName && (
+                                                <Button variant="ghost">
+                                                    {imageFileName}
+                                                </Button>
+                                            )}
+                                        </ButtonGroup>
+                                    </Box>
+                                )}
+                            </Box>
+                            <Box gridColumn={["auto", "span 2"]}>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>Notes</Text>
+                                <Textarea
+                                    value={notes}
+                                    onChange={(e) => setNotes(e.target.value)}
+                                    placeholder="Fabric, brand, outfit ideas..."
+                                    rows={3}
+                                    borderRadius="xl"
+                                    borderColor="gray.200"
+                                    bg="white"
+                                />
+                            </Box>
+                            <Box display="flex" alignItems="center" gap="3">
+                                <Icon as={FiStar} color={favorite ? "#c17852" : "gray.400"} />
+                                <Switch.Root
+                                    checked={favorite}
+                                    onCheckedChange={(e) => {
+                                        setFavorite(e.checked)
+                                    }}>
+                                    <Switch.HiddenInput />
+                                    <Switch.Control />
+                                    <Switch.Label>Favorite</Switch.Label>
+                                </Switch.Root>
+                            </Box>
+                        </Grid>
+                        <Flex mt={8} align="center" justify="space-between" flexWrap="wrap" gap={3}>
+                            <Button
+                                type="submit"
+                                bg="#ead7c7"
+                                loading={isSubmitting}
+                                disabled={isSubmitting}
+                                color="ink"
+                                borderRadius="2xl"
+                                h="48px"
+                                fontWeight="700"
+                                _hover={{ bg: "#e1c8b5" }}
+                            >
+                                {isEditMode ? "Update Item" : "Add Item"}
+                            </Button>
+                            {isEditMode && (
+                                <Button
+                                    variant="outline"
+                                    borderRadius="2xl"
+                                    h="48px"
+                                    borderColor="red.200"
+                                    color="red.700"
+                                    onClick={async () => {
+                                        if (!params.id) return;
+                                        const confirmDelete = window.confirm("Are you sure you want to delete this item?");
+                                        if (!confirmDelete) return;
+
+                                        try {
+                                            const response = await axios.delete(`${API_BASE_URL}/items/${params.id}`);
+                                            if (response.data.status === "success") {
+                                                await refreshClothes();
+                                                navigate('/closet');
+                                            } else {
+                                                console.error("Failed to delete item:", response.data);
+                                            }
+                                        } catch (error) {
+                                            console.error("Failed to delete item", error);
+                                        }
+                                    }}
+                                >
+                                    Delete Item
+                                </Button>
+                            )}
+                        </Flex>
+                    </form>
+                </Box>
+            </Flex>
         </AppLayout>
     );
 }

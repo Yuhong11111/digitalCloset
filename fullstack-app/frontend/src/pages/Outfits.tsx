@@ -7,37 +7,59 @@ import {
     Dialog,
     Portal,
     Text,
+    Heading,
+    SimpleGrid,
+    Icon,
 } from "@chakra-ui/react";
 import AppLayout from "./AppLayout";
+import { FiPlus, FiSearch, FiSliders, FiArrowDown } from "react-icons/fi";
+import { pageBackgroundStyles } from "../theme";
 
 export function Outfits() {
-    return <div>
+    return (
         <AppLayout>
-            <Flex direction="column" minH="100vh" overflowY="auto" px={5} bg="canvas">
-                <Flex align="center" justify="space-between" px={4} pt={6} pb={3}>
-                    <h1>Here are your outfits!</h1>
+            <Flex
+                direction="column"
+                minH="100vh"
+                overflowY="auto"
+                px={6}
+                {...pageBackgroundStyles}
+            >
+                <Flex align="center" justify="space-between" pt={8} pb={4} position="relative" zIndex={1}>
+                    <Box>
+                        <Heading
+                            size="2xl"
+                            fontWeight="800"
+                            letterSpacing="-0.02em"
+                            fontFamily="'Outfit', 'Nunito', system-ui, sans-serif"
+                        >
+                            Outfits
+                        </Heading>
+                        <Text color="gray.600" mt={2}>Build looks, save favorites, and plan your week.</Text>
+                    </Box>
                     <Dialog.Root>
                         <Dialog.Trigger asChild>
                             <Button
-                                bg="#E8DAD0"
+                                bg="#ead7c7"
                                 color="ink"
-                                borderRadius="xl"
+                                borderRadius="2xl"
                                 px={5}
-                                h="45px"
-                                fontWeight="600"
-                                _hover={{ bg: "#d4c1b3ff" }}
+                                h="48px"
+                                fontWeight="700"
+                                _hover={{ bg: "#e1c8b5" }}
                             >
-                                + Create Outfit
+                                <Icon as={FiPlus} mr={2} />
+                                Create Outfit
                             </Button>
                         </Dialog.Trigger>
                         <Portal>
                             <Dialog.Backdrop bg="blackAlpha.300" backdropFilter="blur(6px)" />
                             <Dialog.Positioner>
                                 <Dialog.Content
-                                    maxW="520px"
+                                    maxW="560px"
                                     w="full"
                                     bg="#f8f3ef"
-                                    borderRadius="2xl"
+                                    borderRadius="3xl"
                                     boxShadow="xl"
                                     p={6}
                                 >
@@ -135,54 +157,143 @@ export function Outfits() {
                         </Portal>
                     </Dialog.Root>
                 </Flex>
-                <Flex direction="row" align="center" gap={3} px={4} pb={4} justify="flex-start" flexWrap="wrap">
-                    <Box maxW="500px" w="full">
+                <Flex gap={3} pb={4} flexWrap="wrap" align="center" position="relative" zIndex={1}>
+                    <Box
+                        bg="white"
+                        borderRadius="2xl"
+                        boxShadow="sm"
+                        px={4}
+                        py={3}
+                        display="flex"
+                        alignItems="center"
+                        gap={3}
+                        flex="1"
+                        minW="260px"
+                    >
+                        <Icon as={FiSearch} color="gray.400" />
                         <Input
                             placeholder="Search outfits..."
-                            bg="#f6f2efff"
-                            borderColor="gray.300"
-                            borderRadius="lg"
-                            size="lg"
-                            h="45px"
-                            _placeholder={{ color: "gray.500" }}
+                            bg="transparent"
+                            border="none"
+                            _focusVisible={{ boxShadow: "none" }}
+                            _placeholder={{ color: "gray.400" }}
                         />
+                        <Button size="sm" borderRadius="full" bg="#f1e7de" _hover={{ bg: "#eadcd0" }}>
+                            Search
+                        </Button>
                     </Box>
-                    <NativeSelect.Root size="md" w="fit-content" minW="unset" bg="#f6eee8ff" borderRadius="xl">
-                        <NativeSelect.Field
-                            w="full"
-                            pr="7"
-                            borderRadius="xl"
-                            h="45px"
-                            fontWeight="600"
-                            fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
-                        // sx={{ "& option": { fontWeight: "600" } }}
-                        >
-                            <option>Filter</option>
-                            <option>All</option>
-                            <option>Favorites</option>
-                        </NativeSelect.Field>
-                        <NativeSelect.Indicator />
-                    </NativeSelect.Root>
-                    <NativeSelect.Root size="md" w="fit-content" minW="unset" bg="#f6eee8ff" borderRadius="xl">
-                        <NativeSelect.Field
-                            borderRadius="xl"
-                            w="full"
-                            pr="7"
-                            h="45px"
-                            fontWeight="600"
-                            fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
-                        // sx={{ "& option": { fontWeight: "600" } }}
-                        >
-                            <option>Sort: Recently Added</option>
-                            <option>Alphabetical</option>
-                            <option>Season</option>
-                        </NativeSelect.Field>
-                        <NativeSelect.Indicator />
-                    </NativeSelect.Root>
+                    <Flex gap={2} flexWrap="wrap">
+                        <Box position="relative">
+                            <Icon
+                                as={FiSliders}
+                                position="absolute"
+                                left="12px"
+                                top="50%"
+                                transform="translateY(-50%)"
+                                color="gray.400"
+                                zIndex={1}
+                            />
+                            <NativeSelect.Root size="md" w="fit-content" minW="unset" bg="white" borderRadius="xl" boxShadow="sm">
+                                <NativeSelect.Field
+                                    w="full"
+                                    pl="36px"
+                                    pr="7"
+                                    borderRadius="xl"
+                                    h="40px"
+                                    fontWeight="600"
+                                    fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
+                                >
+                                    <option>Filter</option>
+                                    <option>All</option>
+                                    <option>Favorites</option>
+                                </NativeSelect.Field>
+                                <NativeSelect.Indicator />
+                            </NativeSelect.Root>
+                        </Box>
+                        <Box position="relative">
+                            <Icon
+                                as={FiArrowDown}
+                                position="absolute"
+                                left="12px"
+                                top="50%"
+                                transform="translateY(-50%)"
+                                color="gray.400"
+                                zIndex={1}
+                            />
+                            <NativeSelect.Root size="md" w="fit-content" minW="unset" bg="white" borderRadius="xl" boxShadow="sm">
+                                <NativeSelect.Field
+                                    borderRadius="xl"
+                                    w="full"
+                                    pl="36px"
+                                    pr="7"
+                                    h="40px"
+                                    fontWeight="600"
+                                    fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
+                                >
+                                    <option>Sort: Recently Added</option>
+                                    <option>Alphabetical</option>
+                                    <option>Season</option>
+                                </NativeSelect.Field>
+                                <NativeSelect.Indicator />
+                            </NativeSelect.Root>
+                        </Box>
+                    </Flex>
                 </Flex>
+
+                <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={6} pb={10} position="relative" zIndex={1}>
+                    <Box
+                        bg="white"
+                        borderRadius="2xl"
+                        borderWidth="1px"
+                        borderColor="gray.100"
+                        boxShadow="sm"
+                        p={6}
+                    >
+                        <Heading size="md" fontWeight="700" mb={2}>Start with a mood</Heading>
+                        <Text color="gray.600" mb={4}>
+                            Curate looks by season, event, or color palette.
+                        </Text>
+                        <Button
+                            bg="#ead7c7"
+                            color="ink"
+                            borderRadius="2xl"
+                            h="44px"
+                            fontWeight="700"
+                            _hover={{ bg: "#e1c8b5" }}
+                        >
+                            Create a Moodboard
+                        </Button>
+                    </Box>
+                    <Box
+                        bg="white"
+                        borderRadius="2xl"
+                        borderWidth="1px"
+                        borderColor="gray.100"
+                        boxShadow="sm"
+                        p={6}
+                    >
+                        <Heading size="md" fontWeight="700" mb={2}>Plan the week</Heading>
+                        <Text color="gray.600">
+                            Save outfits you want ready for busy mornings.
+                        </Text>
+                    </Box>
+                    <Box
+                        bg="white"
+                        borderRadius="2xl"
+                        borderWidth="1px"
+                        borderColor="gray.100"
+                        boxShadow="sm"
+                        p={6}
+                    >
+                        <Heading size="md" fontWeight="700" mb={2}>Seasonal capsule</Heading>
+                        <Text color="gray.600">
+                            Build a capsule that keeps your favorites in rotation.
+                        </Text>
+                    </Box>
+                </SimpleGrid>
             </Flex>
         </AppLayout>
-    </div >;
+    );
 }
 
 export default Outfits;

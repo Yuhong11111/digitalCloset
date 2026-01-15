@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useContext } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import AppLayout from './AppLayout';
 import {
     Flex,
@@ -7,12 +7,16 @@ import {
     Text,
     Textarea,
     Spinner,
-    Button
+    Button,
+    Heading,
+    SimpleGrid,
+    Icon,
 } from '@chakra-ui/react';
 import type { Message } from '../components/Message';
 import axios from 'axios';
-import { UserContext } from "../components/UserContext";
+import { FiSend, FiMessageCircle } from "react-icons/fi";
 import { API_BASE_URL } from '../config';
+import { pageBackgroundStyles } from "../theme";
 
 // leave last 6 messages + new user input
 function getMessages(messages: Message[], newUserInput: string): Message[] {
@@ -85,25 +89,71 @@ export function Assistant() {
         }
     };
 
-    return <div>
+    return (
         <AppLayout>
-            <Flex direction="column" minH="100vh" overflowY="auto">
-                <Flex p={4} gap={4}>
-                    <h1>Here is your AI stylist</h1>
+            <Flex
+                direction="column"
+                minH="100vh"
+                overflowY="auto"
+                px={6}
+                {...pageBackgroundStyles}
+            >
+                <Flex align="center" justify="space-between" pt={8} pb={4} position="relative" zIndex={1}>
+                    <Box>
+                        <Heading
+                            size="2xl"
+                            fontWeight="800"
+                            letterSpacing="-0.02em"
+                            fontFamily="'Outfit', 'Nunito', system-ui, sans-serif"
+                        >
+                            AI Stylist
+                        </Heading>
+                        <Text color="gray.600" mt={2}>Ask for outfit ideas or styling tips tailored to your closet.</Text>
+                    </Box>
+                    <Button
+                        bg="#ead7c7"
+                        color="ink"
+                        borderRadius="2xl"
+                        px={5}
+                        h="48px"
+                        fontWeight="700"
+                        onClick={() => setMessages([{ role: "assistant", content: "Hi! I'm your AI stylist. Ask me about outfits or styling tips!" }])}
+                        _hover={{ bg: "#e1c8b5" }}
+                    >
+                        <Icon as={FiMessageCircle} mr={2} />
+                        New Chat
+                    </Button>
                 </Flex>
 
-                {/* two parts: left = chat (2/3), right = outfit list (1/3) */}
-                <Flex direction="row" p={4} gap={4}>
-
-                    {/* LEFT: Chat + Tips → 2/3 width */}
-                    <Flex direction="column" flex="2" gap={4}>
-                        <Box p="4" bg="#96b1dd92" color="black" borderRadius="md">
-                            Style Tip: Ask me for outfit ideas based on your closet! E.g.,
-                            "Suggest an outfit for a chilly weekend brunch" or
-                            "What goes well with my blue jeans?"
+                <SimpleGrid columns={{ base: 1, lg: 3 }} gap={6} pb={10} position="relative" zIndex={1}>
+                    <Flex direction="column" gap={4} gridColumn={{ lg: "span 2" }}>
+                        <Box
+                            bg="white"
+                            borderRadius="2xl"
+                            boxShadow="sm"
+                            borderWidth="1px"
+                            borderColor="gray.100"
+                            p={4}
+                            display="flex"
+                            alignItems="center"
+                            gap={3}
+                        >
+                            <Icon as={FiMessageCircle} color="#8b6f5a" />
+                            <Text color="gray.700">
+                                Style Tip: Ask for a weekend look, a work outfit, or how to style a specific color.
+                            </Text>
                         </Box>
-                        <Flex direction="column" bg="white" borderRadius="md" shadow="md" h="500px" flexShrink={0}>
-                            <Box p="4" flex="1" overflowY="auto">
+                        <Flex
+                            direction="column"
+                            bg="white"
+                            borderRadius="2xl"
+                            boxShadow="sm"
+                            borderWidth="1px"
+                            borderColor="gray.100"
+                            h={{ base: "520px", lg: "600px" }}
+                            overflow="hidden"
+                        >
+                            <Box p={4} flex="1" overflowY="auto">
                                 <Stack gap={4}>
                                     {messages.map((msg, idx) => (
                                         <Box
@@ -111,11 +161,11 @@ export function Assistant() {
                                             alignSelf={msg.role === "user" ? "flex-end" : "flex-start"}
                                             maxW="80%"
                                             p={3}
-                                            borderRadius="lg"
-                                            bg={msg.role === "user" ? "#D1E8FF" : "#F1F5F9"}
-                                            color="black"
+                                            borderRadius="xl"
+                                            bg={msg.role === "user" ? "#f0e3d7" : "#f7f1ec"}
+                                            color="gray.800"
                                         >
-                                            <Text fontWeight="bold" mb={1}>
+                                            <Text fontWeight="600" mb={1}>
                                                 {msg.role === "user" ? "You" : "Assistant"}
                                             </Text>
                                             <Text>{msg.content}</Text>
@@ -128,38 +178,52 @@ export function Assistant() {
                                     )}
                                 </Stack>
                             </Box>
-                            <Box h="1px" bg="gray.200" />
-                            <Box p="4" borderTop="1px solid #E2E8F0">
+                            <Box borderTop="1px solid" borderColor="gray.100" p={4} bg="#faf6f2">
                                 <Textarea
                                     placeholder="Ask about styling... e.g., 'Need an outfit for a rainy day.'"
                                     value={input}
                                     onChange={(e) => setInput(e.target.value)}
-                                    mb={2}
+                                    borderRadius="xl"
+                                    borderColor="gray.200"
+                                    bg="white"
+                                    mb={3}
                                 />
                                 <Button
-                                    colorScheme="blue"
+                                    bg="#ead7c7"
+                                    color="ink"
+                                    borderRadius="2xl"
+                                    h="44px"
+                                    fontWeight="700"
                                     loading={isLoading}
                                     disabled={isLoading || !input.trim()}
                                     onClick={sendMessage}
                                 >
+                                    <Icon as={FiSend} mr={2} />
                                     Send
                                 </Button>
                             </Box>
                         </Flex>
                     </Flex>
 
-                    {/* RIGHT: Outfit list → 1/3 width */}
-                    <Box flex="1" p="4" bg="#F3F4F6" color="grey">
-                        <Text fontWeight="bold" mb={3}>
+                    <Box
+                        bg="white"
+                        borderRadius="2xl"
+                        boxShadow="sm"
+                        borderWidth="1px"
+                        borderColor="gray.100"
+                        p={5}
+                        h="fit-content"
+                    >
+                        <Heading size="md" fontWeight="700" mb={4}>
                             Outfit Suggestions
-                        </Text>
+                        </Heading>
                         {suggestedItems.length === 0 ? (
-                            <Text color="gray.500">Ask about a specific color or item to see matching pieces.</Text>
+                            <Text color="gray.500">Ask about a color or item to see matching pieces.</Text>
                         ) : (
-                            <Stack gap={4}>
+                            <Stack gap={3}>
                                 {suggestedItems.map((item, idx) => (
-                                    <Box key={`${item.name}-${idx}`} p={3} bg="white" borderRadius="md" shadow="sm">
-                                        <Text fontWeight="semibold">{item.name || "Unnamed item"}</Text>
+                                    <Box key={`${item.name}-${idx}`} p={3} bg="#f7f1ec" borderRadius="xl">
+                                        <Text fontWeight="600">{item.name || "Unnamed item"}</Text>
                                         <Text fontSize="sm" color="gray.600">
                                             {[item.color, item.category, item.season].filter(Boolean).join(" • ")}
                                         </Text>
@@ -168,12 +232,10 @@ export function Assistant() {
                             </Stack>
                         )}
                     </Box>
-
-                </Flex>
+                </SimpleGrid>
             </Flex>
-
         </AppLayout>
-    </div >;
+    );
 }
 
 export default Assistant;
