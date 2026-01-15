@@ -16,5 +16,14 @@ if (!globalShim.TextDecoder) {
 }
 
 if (!globalShim.structuredClone) {
-  globalShim.structuredClone = <T>(value: T): T => JSON.parse(JSON.stringify(value));
+  globalShim.structuredClone = <T>(value: T): T => {
+    if (value === undefined || typeof value === "function") {
+      return value;
+    }
+    try {
+      return JSON.parse(JSON.stringify(value));
+    } catch {
+      return value;
+    }
+  };
 }
