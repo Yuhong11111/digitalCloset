@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
     Flex,
     Button,
@@ -12,10 +13,13 @@ import {
     Icon,
 } from "@chakra-ui/react";
 import AppLayout from "./AppLayout";
-import { FiPlus, FiSearch, FiSliders, FiArrowDown } from "react-icons/fi";
+import { FiPlus, FiSearch, FiSliders, FiArrowDown, FiX } from "react-icons/fi";
 import { pageBackgroundStyles } from "../theme";
 
 export function Outfits() {
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+
     return (
         <AppLayout>
             <Flex
@@ -177,7 +181,23 @@ export function Outfits() {
                             border="none"
                             _focusVisible={{ boxShadow: "none" }}
                             _placeholder={{ color: "gray.400" }}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onFocus={() => setIsSearchFocused(true)}
+                            onBlur={() => setIsSearchFocused(false)}
                         />
+                        {isSearchFocused && searchQuery.length > 0 && (
+                            <Button
+                                size="xs"
+                                variant="ghost"
+                                borderRadius="full"
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => setSearchQuery("")}
+                                aria-label="Clear search"
+                            >
+                                <Icon as={FiX} />
+                            </Button>
+                        )}
                         <Button size="sm" borderRadius="full" bg="#f1e7de" _hover={{ bg: "#eadcd0" }}>
                             Search
                         </Button>
