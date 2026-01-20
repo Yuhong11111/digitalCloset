@@ -45,4 +45,17 @@ JWT_SECRET=your_jwt_secret
 ## Features
 
 - User authentication (login/signup)
-- [Add other features here]
+- Closet inventory with photos, notes, and favorites
+- AI stylist assistant for outfit suggestions
+- Outfit planning (create and manage looks)
+
+## Screenshots
+
+### Closet
+![Closet](images/closet.png)
+
+### AI Assistant
+![AI Assistant](images/ai%20assistant.png)
+
+### Outfits
+![Outfits](images/outfir.png)
