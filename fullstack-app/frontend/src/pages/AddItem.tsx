@@ -29,7 +29,7 @@ const categories: ClothingCategory[] = ["top", "bottom", "outerwear", "footwear"
 const seasons: SeasonTag[] = ["all", "spring", "summer", "fall", "winter"];
 
 export default function AddItem() {
-    const { refreshClothes } = useClothContext();
+    const { refreshClothes, clothes } = useClothContext();
     const navigate = useNavigate();
 
     const { id: userId } = useContext(UserContext);
@@ -74,8 +74,23 @@ export default function AddItem() {
             }
         }
 
+        const existingItem = clothes.find((entry) => entry._id === params.id);
+        if (existingItem) {
+            setName(existingItem.name);
+            setCategory(existingItem.category);
+            setColor(existingItem.color);
+            setSeason(existingItem.season);
+            setNotes(existingItem.notes || "");
+            setFavorite(existingItem.favorite || false);
+            setOriginalItem(existingItem);
+            if (existingItem.imageUrl) {
+                setImagePreview(existingItem.imageUrl);
+            }
+            return;
+        }
+
         fetchItemData();
-    }, [isEditMode, params.id]);
+    }, [clothes, isEditMode, params.id]);
 
     const resetForm = () => {
         setName("");
