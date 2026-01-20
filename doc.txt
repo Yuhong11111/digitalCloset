@@ -40,3 +40,24 @@ Design:
     the ai agent has access to the database and only get the cloth for the user
     rather than all clothes whether it is in the database or search online.
     (maybe later implment more tools)
+    
+
+Possible assistant extended features:
+1. users can upload bulk of images and ai will add them to closet 
+    (user upload -> ai detect attribute -> if unsure, ask for clarify
+    -> user approval -> add item to db)
+2. help users create outfits based on users needs
+    (select items -> explanation -> approval -> add outfit)
+3. chat history
+
+Phase 1 (Strong MVP+)
+✅ Chat history
+✅ Outfit approval loop
+
+Phase 2 (Extended Assistant)
+✅ Bulk image ingestion
+✅ Clarification questions
+
+Phase 3 (Polish)
+✅ Undo / rollback
+✅ Preference learning
