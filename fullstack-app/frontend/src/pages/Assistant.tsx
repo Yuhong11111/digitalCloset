@@ -40,6 +40,8 @@ export function Assistant() {
     const [isLoading, setIsLoading] = useState(false);
     const [suggestedItems, setSuggestedItems] = useState<Array<{ name?: string; color?: string; category?: string; season?: string }>>([]);
     const isMounted = useRef(true);
+    const chatScrollRef = useRef<HTMLDivElement | null>(null);
+    const isAtBottomRef = useRef(true);
 
     // run once then the component mounts
     useEffect(() => {
@@ -51,6 +53,14 @@ export function Assistant() {
             isMounted.current = false;
         };
     }, []); //The empty array [] means it will not run again
+
+    useEffect(() => {
+        const container = chatScrollRef.current;
+        if (!container) return;
+        if (isAtBottomRef.current) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }, [messages, isLoading]);
 
     async function sendMessage() {
         // Don’t send if a request is already in progress.
@@ -153,7 +163,19 @@ export function Assistant() {
                             h={{ base: "520px", lg: "600px" }}
                             overflow="hidden"
                         >
-                            <Box p={4} flex="1" overflowY="auto">
+                            <Box
+                                p={4}
+                                flex="1"
+                                overflowY="auto"
+                                ref={chatScrollRef}
+                                onScroll={() => {
+                                    const container = chatScrollRef.current;
+                                    if (!container) return;
+                                    const threshold = 24;
+                                    const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+                                    isAtBottomRef.current = distanceFromBottom <= threshold;
+                                }}
+                            >
                                 <Stack gap={4}>
                                     {messages.map((msg, idx) => (
                                         <Box
