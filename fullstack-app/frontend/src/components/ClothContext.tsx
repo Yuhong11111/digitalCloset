@@ -3,7 +3,7 @@ import axios from "axios";
 import { UserContext } from "./UserContext";
 import { API_BASE_URL } from "../config";
 
-export type ClothingCategory = "top" | "bottom" | "outerwear" | "footwear" | "accessory" | "others";
+export type ClothingCategory = "top" | "bottom" | "outerwear" | "footwear" | "accessory" | "others" | "dress";
 export type SeasonTag = "spring" | "summer" | "fall" | "winter" | "all";
 
 export interface ClothItem {

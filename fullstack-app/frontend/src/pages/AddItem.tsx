@@ -25,7 +25,7 @@ import { FiArrowLeft, FiImage, FiStar } from "react-icons/fi";
 import { API_BASE_URL } from "../config";
 import { pageBackgroundStyles } from "../theme";
 
-const categories: ClothingCategory[] = ["top", "bottom", "outerwear", "footwear", "accessory", "others"];
+const categories: ClothingCategory[] = ["top", "bottom", "outerwear", "footwear", "accessory", "others", "dress"];
 const seasons: SeasonTag[] = ["all", "spring", "summer", "fall", "winter"];
 
 export default function AddItem() {
