@@ -22,10 +22,12 @@ import AppLayout from "./AppLayout";
 import { Flex, Input, Box, Button, ButtonGroup, Card, Image, Text, Heading, NativeSelect, SimpleGrid, Badge, Icon } from "@chakra-ui/react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
-import { FiSearch, FiSliders, FiArrowDown, FiPlus, FiGrid, FiHeart } from "react-icons/fi";
+import { FiSearch, FiSliders, FiArrowDown, FiPlus, FiGrid, FiHeart, FiX } from "react-icons/fi";
 import { useClothContext } from "../hooks/useClothContext";
 import { API_BASE_URL } from "../config";
 import { pageBackgroundStyles } from "../theme";
+import React, { useState } from "react";
+import { ClothItem } from "../components/ClothContext";
 
 
 export function Closet() {
@@ -33,9 +35,10 @@ export function Closet() {
     // const { id: userId } = useContext(UserContext);
     // const { username } = useContext(UserContext);
     // const [items, setItems] = React.useState<any[]>([]);
-    const { clothes, refreshClothes } = useClothContext();
+    const { clothes, refreshClothes, setClothes } = useClothContext();
     const totalItems = clothes.length;
     const favoriteCount = clothes.filter((item) => item.favorite).length;
+    const [searchQuery, setSearchQuery] = useState("");
 
     // if (!clothes || clothes.length === 0)xw
     //     return <Text>No clothes found.</Text>;
@@ -55,6 +58,19 @@ export function Closet() {
             console.error("Failed to update favorite", error);
         }
     };
+
+    async function handleSearch() {
+        try {
+            const response = await axios.get<ClothItem[]>(`${API_BASE_URL}/items`, {
+                params: searchQuery ? { search: searchQuery } : {}
+            });
+            setClothes(response.data ?? []);
+            // setItems(response.data ?? []);
+        } catch (error) {
+            console.error("Failed to search items", error);
+            setClothes([]);
+        }
+    }
 
 
     return (
@@ -156,8 +172,27 @@ export function Closet() {
                             border="none"
                             _focusVisible={{ boxShadow: "none" }}
                             _placeholder={{ color: "gray.400" }}
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    handleSearch();
+                                }
+                            }}
                         />
-                        <Button size="sm" borderRadius="full" bg="#f1e7de" _hover={{ bg: "#eadcd0" }}>
+                        {searchQuery && (
+                            <Button
+                                size="xs"
+                                variant="ghost"
+                                borderRadius="full"
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => { refreshClothes(); setSearchQuery(""); }}
+                                aria-label="Clear search"
+                            >
+                                <Icon as={FiX} />
+                            </Button>
+                        )}
+                        <Button size="sm" borderRadius="full" bg="#f1e7de" _hover={{ bg: "#eadcd0" }} onClick={() => handleSearch()}>
                             Search
                         </Button>
                     </Box>

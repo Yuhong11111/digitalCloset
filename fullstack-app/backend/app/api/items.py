@@ -71,6 +71,7 @@ async def create_item(
 
 @router.get("", response_model=List[ItemResponse], response_model_by_alias=True)
 async def get_items(
+    search: Optional[str] = None,
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -81,6 +82,17 @@ async def get_items(
             "FROM cloth_items WHERE owner_id = :owner_id"
         )
         results = db.execute(query, {"owner_id": owner_id}).fetchall()
+
+        if search:
+            search_lower = search.lower()
+            results = [
+                item for item in results
+                if search_lower in (item._mapping["name"] or "").lower()
+                or search_lower in (item._mapping["category"] or "").lower()
+                or search_lower in (item._mapping["color"] or "").lower()
+                or search_lower in (item._mapping["season"] or "").lower()
+                or search_lower in (item._mapping["notes"] or "").lower()
+            ]
 
         return [
             {
