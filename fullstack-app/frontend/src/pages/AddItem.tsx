@@ -45,6 +45,7 @@ export default function AddItem() {
     const [favorite, setFavorite] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [originalItem, setOriginalItem] = useState<any | null>(null);
+    const [formError, setFormError] = useState<string | null>(null);
 
     // edit mode
     const params = useParams<{ id: string }>();
@@ -106,9 +107,15 @@ export default function AddItem() {
 
     async function handleSubmit(ev: FormEvent<HTMLFormElement>) {
         ev.preventDefault();
+        setFormError(null);
         setIsSubmitting(true);
         if (!userId) {
             console.error('No user id—redirect to login or show an error');
+            setIsSubmitting(false);
+            return;
+        }
+        if (!name.trim() || !category || !color.trim() || !season) {
+            setFormError("Please fill out all required fields (Name, Category, Color, Season).");
             setIsSubmitting(false);
             return;
         }
@@ -258,10 +265,17 @@ export default function AddItem() {
                     position="relative"
                     zIndex={1}
                 >
+                    {formError && (
+                        <Box mb={4} px={4} py={3} bg="#fff1ee" borderRadius="xl" color="#b42318">
+                            {formError}
+                        </Box>
+                    )}
                     <form onSubmit={handleSubmit}>
                         <Grid templateColumns={["1fr", "repeat(2, 1fr)"]} gap={6}>
                             <Box>
-                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>Name</Text>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>
+                                    Name <Text as="span" color="#b42318">*</Text>
+                                </Text>
                                 <Input
                                     value={name}
                                     onChange={(e) => setName(e.target.value)}
@@ -273,7 +287,9 @@ export default function AddItem() {
                                 />
                             </Box>
                             <Box>
-                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>Category</Text>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>
+                                    Category <Text as="span" color="#b42318">*</Text>
+                                </Text>
                                 <NativeSelect.Root>
                                     <NativeSelect.Field
                                         value={category}
@@ -295,7 +311,9 @@ export default function AddItem() {
                                 </NativeSelect.Root>
                             </Box>
                             <Box>
-                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>Color</Text>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>
+                                    Color <Text as="span" color="#b42318">*</Text>
+                                </Text>
                                 <Input
                                     value={color}
                                     onChange={(e) => setColor(e.target.value)}
@@ -307,7 +325,9 @@ export default function AddItem() {
                                 />
                             </Box>
                             <Box>
-                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>Season</Text>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>
+                                    Season <Text as="span" color="#b42318">*</Text>
+                                </Text>
                                 <NativeSelect.Root>
                                     <NativeSelect.Field
                                         value={season}
