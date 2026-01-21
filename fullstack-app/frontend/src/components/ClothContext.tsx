@@ -23,7 +23,7 @@ export interface ClothContextType {
   clothes: ClothItem[];
   setClothes: (clothes: ClothItem[]) => void;
   isLoading: boolean;
-  refreshClothes: (options?: { page?: number; pageSize?: number; search?: string }) => Promise<void>;
+  refreshClothes: (options?: { page?: number; pageSize?: number; search?: string; filter?: string }) => Promise<void>;
   page: number;
   pageSize: number;
   total: number;
@@ -47,7 +47,7 @@ export function ClothContextProvider({ children }: PropsWithChildren) {
   const [total, setTotal] = useState(0);
   const { id: ownerId } = useContext(UserContext);
 
-  const fetchClothes = useCallback(async (options?: { page?: number; pageSize?: number; search?: string }) => {
+  const fetchClothes = useCallback(async (options?: { page?: number; pageSize?: number; search?: string; filter?: string }) => {
     if (!ownerId) {
       setClothes([]);
       setIsLoading(false);
@@ -64,6 +64,7 @@ export function ClothContextProvider({ children }: PropsWithChildren) {
             page: nextPage,
             page_size: nextPageSize,
             ...(options?.search ? { search: options.search } : {}),
+            ...(options?.filter ? { filter: options.filter } : {}),
           },
         }
       );

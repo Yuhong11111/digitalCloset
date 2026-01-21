@@ -79,6 +79,7 @@ async def create_item(
 @router.get("", response_model=ItemsPageResponse, response_model_by_alias=True)
 async def get_items(
     search: Optional[str] = None,
+    filter: Optional[str] = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(12, ge=1, le=100),
     current_user=Depends(get_current_user),
@@ -88,6 +89,21 @@ async def get_items(
         owner_id = uuid.UUID(current_user.get("userId"))
         where_clause = "owner_id = :owner_id"
         params = {"owner_id": owner_id}
+        if filter:
+            normalized = filter.lower()
+            category_map = {
+                "tops": "top",
+                "bottoms": "bottom",
+                "outerwear": "outerwear",
+                "footwear": "footwear",
+                "accessories": "accessory",
+                "dress": "dress",
+            }
+            if normalized == "favorites":
+                where_clause += " AND favorite = TRUE"
+            elif normalized in category_map:
+                where_clause += " AND category = :category"
+                params["category"] = category_map[normalized]
         if search:
             where_clause += (
                 " AND (name ILIKE :search OR category ILIKE :search OR color ILIKE :search "

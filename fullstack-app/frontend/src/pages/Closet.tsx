@@ -24,7 +24,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiSliders, FiArrowDown, FiPlus, FiGrid, FiHeart, FiX } from "react-icons/fi";
 import { useClothContext } from "../hooks/useClothContext";
 import { pageBackgroundStyles } from "../theme";
-import React, { useMemo, useState } from "react";
+import { useState } from "react";
 import axios from "axios";
 import { API_BASE_URL } from "../config";
 
@@ -40,25 +40,6 @@ export function Closet() {
     const [searchQuery, setSearchQuery] = useState("");
     const [filter, setFilter] = useState("all");
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
-    const filteredClothes = useMemo(() => { //Only recompute this filtered list when clothes or filter changes
-        const normalizedFilter = filter.toLowerCase();
-        const categoryMap: Record<string, string> = {
-            tops: "top",
-            bottoms: "bottom",
-            outerwear: "outerwear",
-            footwear: "footwear",
-            accessories: "accessory",
-            dress: "dress",
-        };
-
-        return clothes.filter((item) => {
-            if (normalizedFilter === "all") return true;
-            if (normalizedFilter === "favorites") return Boolean(item.favorite);
-            const mappedCategory = categoryMap[normalizedFilter];
-            if (!mappedCategory) return true;
-            return item.category?.toLowerCase() === mappedCategory;
-        });
-    }, [clothes, filter]);
 
     // if (!clothes || clothes.length === 0)xw
     //     return <Text>No clothes found.</Text>;
@@ -80,7 +61,11 @@ export function Closet() {
     };
 
     async function handleSearch() {
-        await refreshClothes({ page: 1, search: searchQuery || undefined });
+        await refreshClothes({
+            page: 1,
+            search: searchQuery || undefined,
+            filter: filter !== "all" ? filter : undefined,
+        });
     }
 
     return (
@@ -196,7 +181,10 @@ export function Closet() {
                                 variant="ghost"
                                 borderRadius="full"
                                 onMouseDown={(event) => event.preventDefault()}
-                                onClick={() => { refreshClothes({ page: 1 }); setSearchQuery(""); }}
+                                onClick={() => {
+                                    refreshClothes({ page: 1, filter: filter !== "all" ? filter : undefined });
+                                    setSearchQuery("");
+                                }}
                                 aria-label="Clear search"
                             >
                                 <Icon as={FiX} />
@@ -227,7 +215,15 @@ export function Closet() {
                                     fontWeight="600"
                                     fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
                                     value={filter}
-                                    onChange={(e) => setFilter(e.target.value)}
+                                    onChange={(e) => {
+                                        const nextFilter = e.target.value;
+                                        setFilter(nextFilter);
+                                        refreshClothes({
+                                            page: 1,
+                                            search: searchQuery || undefined,
+                                            filter: nextFilter !== "all" ? nextFilter : undefined,
+                                        });
+                                    }}
                                 >
                                     <option value="all">All</option>
                                     <option value="favorites">Favorites</option>
@@ -272,7 +268,7 @@ export function Closet() {
                 </Flex>
 
                 <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={6} pb={6} position="relative" zIndex={1}>
-                    {filteredClothes.map((item) => (
+                    {clothes.map((item) => (
                         <Card.Root
                             key={item._id}
                             overflow="hidden"
@@ -338,7 +334,11 @@ export function Closet() {
                     <Button
                         variant="outline"
                         borderRadius="full"
-                        onClick={() => refreshClothes({ page: Math.max(1, page - 1), search: searchQuery || undefined })}
+                        onClick={() => refreshClothes({
+                            page: Math.max(1, page - 1),
+                            search: searchQuery || undefined,
+                            filter: filter !== "all" ? filter : undefined,
+                        })}
                         disabled={page <= 1}
                     >
                         Prev
@@ -349,7 +349,11 @@ export function Closet() {
                     <Button
                         variant="outline"
                         borderRadius="full"
-                        onClick={() => refreshClothes({ page: Math.min(totalPages, page + 1), search: searchQuery || undefined })}
+                        onClick={() => refreshClothes({
+                            page: Math.min(totalPages, page + 1),
+                            search: searchQuery || undefined,
+                            filter: filter !== "all" ? filter : undefined,
+                        })}
                         disabled={page >= totalPages}
                     >
                         Next
