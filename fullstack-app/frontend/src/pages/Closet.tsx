@@ -267,7 +267,7 @@ export function Closet() {
                     </Flex>
                 </Flex>
 
-                <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={6} pb={6} position="relative" zIndex={1}>
+                <SimpleGrid columns={{ base: 1, sm: 2, md: 3, lg: 4 }} gap={5} pb={6} position="relative" zIndex={1}>
                     {clothes.map((item) => (
                         <Card.Root
                             key={item._id}
@@ -285,11 +285,11 @@ export function Closet() {
                                     src={item.imageUrl}
                                     alt={item.name}
                                     objectFit="cover"
-                                    height="220px"
+                                    height="240px"
                                 />
                             ) : (
                                 <Box
-                                    height="220px"
+                                    height="240px"
                                     bgGradient="linear(to-br, #f7efe8, #efe4db)"
                                     display="flex"
                                     alignItems="center"
