@@ -26,7 +26,7 @@ import { FiSearch, FiSliders, FiArrowDown, FiPlus, FiGrid, FiHeart, FiX } from "
 import { useClothContext } from "../hooks/useClothContext";
 import { API_BASE_URL } from "../config";
 import { pageBackgroundStyles } from "../theme";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { ClothItem } from "../components/ClothContext";
 
 
@@ -39,6 +39,26 @@ export function Closet() {
     const totalItems = clothes.length;
     const favoriteCount = clothes.filter((item) => item.favorite).length;
     const [searchQuery, setSearchQuery] = useState("");
+    const [filter, setFilter] = useState("all");
+    const filteredClothes = useMemo(() => { //Only recompute this filtered list when clothes or filter changes
+        const normalizedFilter = filter.toLowerCase();
+        const categoryMap: Record<string, string> = {
+            tops: "top",
+            bottoms: "bottom",
+            outerwear: "outerwear",
+            footwear: "footwear",
+            accessories: "accessory",
+            dress: "dress",
+        };
+
+        return clothes.filter((item) => {
+            if (normalizedFilter === "all") return true;
+            if (normalizedFilter === "favorites") return Boolean(item.favorite);
+            const mappedCategory = categoryMap[normalizedFilter];
+            if (!mappedCategory) return true;
+            return item.category?.toLowerCase() === mappedCategory;
+        });
+    }, [clothes, filter]);
 
     // if (!clothes || clothes.length === 0)xw
     //     return <Text>No clothes found.</Text>;
@@ -71,7 +91,6 @@ export function Closet() {
             setClothes([]);
         }
     }
-
 
     return (
         <AppLayout>
@@ -216,10 +235,17 @@ export function Closet() {
                                     h="40px"
                                     fontWeight="600"
                                     fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
+                                    value={filter}
+                                    onChange={(e) => setFilter(e.target.value)}
                                 >
-                                    <option>Filter</option>
-                                    <option>All</option>
-                                    <option>Favorites</option>
+                                    <option value="all">All</option>
+                                    <option value="favorites">Favorites</option>
+                                    <option value="tops">Tops</option>
+                                    <option value="bottoms">Bottoms</option>
+                                    <option value="outerwear">Outerwear</option>
+                                    <option value="footwear">Footwear</option>
+                                    <option value="accessories">Accessories</option>
+                                    <option value="dress">Dress</option>
                                 </NativeSelect.Field>
                                 <NativeSelect.Indicator />
                             </NativeSelect.Root>
@@ -255,7 +281,7 @@ export function Closet() {
                 </Flex>
 
                 <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={6} pb={10} position="relative" zIndex={1}>
-                    {clothes.map((item) => (
+                    {filteredClothes.map((item) => (
                         <Card.Root
                             key={item._id}
                             overflow="hidden"
