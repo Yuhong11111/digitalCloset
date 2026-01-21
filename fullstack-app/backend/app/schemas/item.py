@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import Form
 from pydantic import BaseModel, ConfigDict, Field
@@ -49,6 +49,13 @@ class ItemRequest(BaseModel):
 class CreateItemResponse(BaseModel):
     status: str
     item: ItemResponse
+
+
+class ItemsPageResponse(BaseModel):
+    items: List[ItemResponse]
+    page: int
+    page_size: int
+    total: int
 
 class ItemPatchRequest(BaseModel):
     name: Optional[str] = None

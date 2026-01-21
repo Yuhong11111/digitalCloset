@@ -23,7 +23,10 @@ export interface ClothContextType {
   clothes: ClothItem[];
   setClothes: (clothes: ClothItem[]) => void;
   isLoading: boolean;
-  refreshClothes: () => Promise<void>;
+  refreshClothes: (options?: { page?: number; pageSize?: number; search?: string }) => Promise<void>;
+  page: number;
+  pageSize: number;
+  total: number;
 }
 
 export const ClothContext = createContext<ClothContextType>({
@@ -31,14 +34,20 @@ export const ClothContext = createContext<ClothContextType>({
   setClothes: () => { },
   isLoading: true,
   refreshClothes: async () => { },
+  page: 1,
+  pageSize: 12,
+  total: 0,
 });
 
 export function ClothContextProvider({ children }: PropsWithChildren) {
   const [clothes, setClothes] = useState<ClothItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(12);
+  const [total, setTotal] = useState(0);
   const { id: ownerId } = useContext(UserContext);
 
-  const fetchClothes = useCallback(async () => {
+  const fetchClothes = useCallback(async (options?: { page?: number; pageSize?: number; search?: string }) => {
     if (!ownerId) {
       setClothes([]);
       setIsLoading(false);
@@ -46,24 +55,37 @@ export function ClothContextProvider({ children }: PropsWithChildren) {
     }
     setIsLoading(true);
     try {
-      const response = await axios.get<ClothItem[]>(`${API_BASE_URL}/items`, {
-        params: { owner_id: ownerId }
-      });
-      setClothes(response.data ?? []);
+      const nextPage = options?.page ?? page; //Use the left value unless it’s null or undefined
+      const nextPageSize = options?.pageSize ?? pageSize;
+      const response = await axios.get<{ items: ClothItem[]; page: number; page_size: number; total: number }>(
+        `${API_BASE_URL}/items`,
+        {
+          params: {
+            page: nextPage,
+            page_size: nextPageSize,
+            ...(options?.search ? { search: options.search } : {}),
+          },
+        }
+      );
+      setClothes(response.data.items ?? []);
+      setPage(response.data.page ?? nextPage);
+      setPageSize(response.data.page_size ?? nextPageSize);
+      setTotal(response.data.total ?? 0);
     } catch (error) {
       console.error("Failed to fetch clothes", error);
       setClothes([]);
+      setTotal(0);
     } finally {
       setIsLoading(false);
     }
-  }, [ownerId]);
+  }, [ownerId, page, pageSize]);
 
   useEffect(() => {
     fetchClothes();
   }, [fetchClothes]);//if we change to ownerId, it mean we will refetch clothes when ownerId changes
 
   return (
-    <ClothContext.Provider value={{ clothes, setClothes, isLoading, refreshClothes: fetchClothes }}>
+    <ClothContext.Provider value={{ clothes, setClothes, isLoading, refreshClothes: fetchClothes, page, pageSize, total }}>
       {children}
     </ClothContext.Provider>
   );

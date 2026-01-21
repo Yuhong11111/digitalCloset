@@ -1,14 +1,21 @@
 import base64
-from typing import Optional, List
+from typing import Optional
 import uuid
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.database import get_db
-from app.schemas.item import CreateItemResponse, ItemPatchRequest, ItemRequest, ItemResponse, PatchResponse
+from app.schemas.item import (
+    CreateItemResponse,
+    ItemPatchRequest,
+    ItemRequest,
+    ItemResponse,
+    PatchResponse,
+    ItemsPageResponse,
+)
 
 router = APIRouter(prefix="/items", tags=["items"])
 
@@ -69,32 +76,39 @@ async def create_item(
         raise HTTPException(status_code=500, detail=f"Failed to create item: {str(exc)}")
 
 
-@router.get("", response_model=List[ItemResponse], response_model_by_alias=True)
+@router.get("", response_model=ItemsPageResponse, response_model_by_alias=True)
 async def get_items(
     search: Optional[str] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(12, ge=1, le=100),
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     try:
         owner_id = uuid.UUID(current_user.get("userId"))
+        where_clause = "owner_id = :owner_id"
+        params = {"owner_id": owner_id}
+        if search:
+            where_clause += (
+                " AND (name ILIKE :search OR category ILIKE :search OR color ILIKE :search "
+                "OR season ILIKE :search OR notes ILIKE :search)"
+            )
+            params["search"] = f"%{search}%"
+
+        count_query = text(f"SELECT COUNT(*) FROM cloth_items WHERE {where_clause}")
+        total = db.execute(count_query, params).scalar() or 0
+
+        offset = (page - 1) * page_size
+        params.update({"limit": page_size, "offset": offset})
         query = text(
             "SELECT id, owner_id, name, category, color, season, image_url, favorite, notes "
-            "FROM cloth_items WHERE owner_id = :owner_id"
+            f"FROM cloth_items WHERE {where_clause} "
+            "ORDER BY created_at DESC "
+            "LIMIT :limit OFFSET :offset"
         )
-        results = db.execute(query, {"owner_id": owner_id}).fetchall()
+        results = db.execute(query, params).fetchall()
 
-        if search:
-            search_lower = search.lower()
-            results = [
-                item for item in results
-                if search_lower in (item._mapping["name"] or "").lower()
-                or search_lower in (item._mapping["category"] or "").lower()
-                or search_lower in (item._mapping["color"] or "").lower()
-                or search_lower in (item._mapping["season"] or "").lower()
-                or search_lower in (item._mapping["notes"] or "").lower()
-            ]
-
-        return [
+        items = [
             {
                 "_id": str(item._mapping["id"]),
                 "name": item._mapping["name"],
@@ -107,6 +121,12 @@ async def get_items(
             }
             for item in results
         ]
+        return {
+            "items": items,
+            "page": page,
+            "page_size": page_size,
+            "total": total,
+        }
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to fetch items: {str(exc)}")
     

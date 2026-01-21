@@ -20,14 +20,13 @@
 
 import AppLayout from "./AppLayout";
 import { Flex, Input, Box, Button, ButtonGroup, Card, Image, Text, Heading, NativeSelect, SimpleGrid, Badge, Icon } from "@chakra-ui/react";
-import axios from "axios";
 import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiSliders, FiArrowDown, FiPlus, FiGrid, FiHeart, FiX } from "react-icons/fi";
 import { useClothContext } from "../hooks/useClothContext";
-import { API_BASE_URL } from "../config";
 import { pageBackgroundStyles } from "../theme";
 import React, { useMemo, useState } from "react";
-import { ClothItem } from "../components/ClothContext";
+import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 
 export function Closet() {
@@ -35,11 +34,12 @@ export function Closet() {
     // const { id: userId } = useContext(UserContext);
     // const { username } = useContext(UserContext);
     // const [items, setItems] = React.useState<any[]>([]);
-    const { clothes, refreshClothes, setClothes } = useClothContext();
+    const { clothes, refreshClothes, page, pageSize, total } = useClothContext();
     const totalItems = clothes.length;
     const favoriteCount = clothes.filter((item) => item.favorite).length;
     const [searchQuery, setSearchQuery] = useState("");
     const [filter, setFilter] = useState("all");
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
     const filteredClothes = useMemo(() => { //Only recompute this filtered list when clothes or filter changes
         const normalizedFilter = filter.toLowerCase();
         const categoryMap: Record<string, string> = {
@@ -80,16 +80,7 @@ export function Closet() {
     };
 
     async function handleSearch() {
-        try {
-            const response = await axios.get<ClothItem[]>(`${API_BASE_URL}/items`, {
-                params: searchQuery ? { search: searchQuery } : {}
-            });
-            setClothes(response.data ?? []);
-            // setItems(response.data ?? []);
-        } catch (error) {
-            console.error("Failed to search items", error);
-            setClothes([]);
-        }
+        await refreshClothes({ page: 1, search: searchQuery || undefined });
     }
 
     return (
@@ -205,7 +196,7 @@ export function Closet() {
                                 variant="ghost"
                                 borderRadius="full"
                                 onMouseDown={(event) => event.preventDefault()}
-                                onClick={() => { refreshClothes(); setSearchQuery(""); }}
+                                onClick={() => { refreshClothes({ page: 1 }); setSearchQuery(""); }}
                                 aria-label="Clear search"
                             >
                                 <Icon as={FiX} />
@@ -280,7 +271,7 @@ export function Closet() {
                     </Flex>
                 </Flex>
 
-                <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={6} pb={10} position="relative" zIndex={1}>
+                <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={6} pb={6} position="relative" zIndex={1}>
                     {filteredClothes.map((item) => (
                         <Card.Root
                             key={item._id}
@@ -340,6 +331,30 @@ export function Closet() {
                         </Card.Root>
                     ))}
                 </SimpleGrid>
+                <Flex align="center" justify="center" gap={3} pb={10} position="relative" zIndex={1}>
+                    <Text color="gray.600">
+                        Showing {total === 0 ? 0 : (page - 1) * pageSize + 1}-{Math.min(page * pageSize, total)} of {total}
+                    </Text>
+                    <Button
+                        variant="outline"
+                        borderRadius="full"
+                        onClick={() => refreshClothes({ page: Math.max(1, page - 1), search: searchQuery || undefined })}
+                        disabled={page <= 1}
+                    >
+                        Prev
+                    </Button>
+                    <Text color="gray.600">
+                        Page {page} of {totalPages}
+                    </Text>
+                    <Button
+                        variant="outline"
+                        borderRadius="full"
+                        onClick={() => refreshClothes({ page: Math.min(totalPages, page + 1), search: searchQuery || undefined })}
+                        disabled={page >= totalPages}
+                    >
+                        Next
+                    </Button>
+                </Flex>
             </Flex>
         </AppLayout >
     );
