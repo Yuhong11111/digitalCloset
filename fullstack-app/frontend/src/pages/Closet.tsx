@@ -35,8 +35,7 @@ export function Closet() {
     // const { username } = useContext(UserContext);
     // const [items, setItems] = React.useState<any[]>([]);
     const { clothes, refreshClothes, page, pageSize, total } = useClothContext();
-    const totalItems = clothes.length;
-    const favoriteCount = clothes.filter((item) => item.favorite).length;
+    const totalItems = total;
     const [searchQuery, setSearchQuery] = useState("");
     const [filter, setFilter] = useState("all");
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -129,22 +128,6 @@ export function Closet() {
                         <Box>
                             <Text fontSize="sm" color="gray.500">Total Items</Text>
                             <Text fontWeight="700" fontSize="lg">{totalItems}</Text>
-                        </Box>
-                        <Box borderLeft="1px solid" borderColor="gray.200" h="28px" />
-                        <Box
-                            w="42px"
-                            h="42px"
-                            borderRadius="full"
-                            bg="#f4e6d9"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                        >
-                            <Icon as={FiHeart} color="#8b6f5a" />
-                        </Box>
-                        <Box>
-                            <Text fontSize="sm" color="gray.500">Favorites</Text>
-                            <Text fontWeight="700" fontSize="lg">{favoriteCount}</Text>
                         </Box>
                     </Box>
                     <Box
