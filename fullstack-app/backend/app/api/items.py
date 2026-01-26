@@ -82,6 +82,7 @@ async def create_item(
 async def get_items(
     search: Optional[str] = None,
     filter: Optional[str] = None,
+    sort: Optional[str] = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(12, ge=1, le=100),
     current_user=Depends(get_current_user),
@@ -112,17 +113,18 @@ async def get_items(
                 "OR season ILIKE :search OR notes ILIKE :search)"
             )
             params["search"] = f"%{search}%"
-
+        
         count_query = text(f"SELECT COUNT(*) FROM cloth_items WHERE {where_clause}")
         total = db.execute(count_query, params).scalar() or 0
 
         # offset is how many items to skip in the query based on the current page and page size(get next set of items for pagination)
         offset = (page - 1) * page_size
         params.update({"limit": page_size, "offset": offset})
+        order_clause = "created_at DESC"
         query = text(
             "SELECT id, owner_id, name, category, color, season, image_url, favorite, notes "
             f"FROM cloth_items WHERE {where_clause} "
-            "ORDER BY created_at DESC "
+            f"ORDER BY {order_clause} "
             "LIMIT :limit OFFSET :offset"
         )
         results = db.execute(query, params).fetchall()

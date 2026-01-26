@@ -36,6 +36,7 @@ export function Closet() {
     const [searchQuery, setSearchQuery] = useState("");
     const [filter, setFilter] = useState("all");
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const [sort, setSort] = useState("recently_added");
 
     // change favorite status
     const toggleFavorite = async (itemId: string, currentFavorite?: boolean) => {
@@ -199,6 +200,7 @@ export function Closet() {
                                             page: 1,
                                             search: searchQuery || undefined,
                                             filter: nextFilter !== "all" ? nextFilter : undefined,
+                                            sort: sort !== "recently_added" ? sort : undefined,
                                         });
                                     }}
                                 >
@@ -233,10 +235,19 @@ export function Closet() {
                                     h="40px"
                                     fontWeight="600"
                                     fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
+                                    value={sort}
+                                    onChange={(e) => {
+                                        const nextSort = e.target.value;
+                                        setSort(nextSort);
+                                        refreshClothes({
+                                            page: 1,
+                                            search: searchQuery || undefined,
+                                            filter: filter !== "all" ? filter : undefined,
+                                            sort: nextSort !== "recently_added" ? nextSort : undefined,
+                                        });
+                                    }}
                                 >
-                                    <option>Sort: Recently Added</option>
-                                    <option>Alphabetical</option>
-                                    <option>Season</option>
+                                    <option value="recently_added">Sort: Recently Added</option>
                                 </NativeSelect.Field>
                                 <NativeSelect.Indicator />
                             </NativeSelect.Root>

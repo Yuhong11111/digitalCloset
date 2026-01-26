@@ -23,7 +23,7 @@ export interface ClothContextType {
   clothes: ClothItem[];
   setClothes: (clothes: ClothItem[]) => void;
   isLoading: boolean;
-  refreshClothes: (options?: { page?: number; pageSize?: number; search?: string; filter?: string }) => Promise<void>;
+  refreshClothes: (options?: { page?: number; pageSize?: number; search?: string; filter?: string; sort?: string }) => Promise<void>;
   page: number;
   pageSize: number;
   total: number;
@@ -47,7 +47,7 @@ export function ClothContextProvider({ children }: PropsWithChildren) {
   const [total, setTotal] = useState(0);
   const { id: ownerId } = useContext(UserContext);
 
-  const fetchClothes = useCallback(async (options?: { page?: number; pageSize?: number; search?: string; filter?: string }) => {
+  const fetchClothes = useCallback(async (options?: { page?: number; pageSize?: number; search?: string; filter?: string; sort?: string }) => {
     if (!ownerId) {
       setClothes([]);
       setIsLoading(false);
@@ -57,7 +57,7 @@ export function ClothContextProvider({ children }: PropsWithChildren) {
     try {
       const nextPage = options?.page ?? page; //Use the left value unless it’s null or undefined
       const nextPageSize = options?.pageSize ?? pageSize;
-      // axios request to fetch clothes, typing the response data
+      // axios request to fetch clothes, typing the response dataå
       const response = await axios.get<{ items: ClothItem[]; page: number; page_size: number; total: number }>(
         `${API_BASE_URL}/items`,
         // query params passing in url with page, page_size, search, filter
@@ -68,6 +68,7 @@ export function ClothContextProvider({ children }: PropsWithChildren) {
             page_size: nextPageSize,
             ...(options?.search ? { search: options.search } : {}),
             ...(options?.filter ? { filter: options.filter } : {}),
+            ...(options?.sort ? { sort: options.sort } : {}),
           },
         }
       );
