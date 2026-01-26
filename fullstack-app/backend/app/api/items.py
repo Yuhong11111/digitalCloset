@@ -20,6 +20,7 @@ from app.schemas.item import (
 router = APIRouter(prefix="/items", tags=["items"])
 
 
+# Create a new clothing item
 @router.post("", response_model=CreateItemResponse, response_model_by_alias=True)
 async def create_item(
     item: ItemRequest = Depends(ItemRequest.as_form),
@@ -76,6 +77,7 @@ async def create_item(
         raise HTTPException(status_code=500, detail=f"Failed to create item: {str(exc)}")
 
 
+# Get a list of clothing items
 @router.get("", response_model=ItemsPageResponse, response_model_by_alias=True)
 async def get_items(
     search: Optional[str] = None,
@@ -114,6 +116,7 @@ async def get_items(
         count_query = text(f"SELECT COUNT(*) FROM cloth_items WHERE {where_clause}")
         total = db.execute(count_query, params).scalar() or 0
 
+        # offset is how many items to skip in the query based on the current page and page size(get next set of items for pagination)
         offset = (page - 1) * page_size
         params.update({"limit": page_size, "offset": offset})
         query = text(
@@ -146,6 +149,7 @@ async def get_items(
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to fetch items: {str(exc)}")
     
+# Get a specific clothing item by ID(from clicking on an item to view details or edit)
 @router.get("/{item_id}", response_model=ItemResponse, response_model_by_alias=True)
 async def get_item(
     item_id: str,
@@ -181,7 +185,7 @@ async def get_item(
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to fetch item: {str(exc)}")
 
-
+# for updating an existing clothing item(edit or favorite toggle)
 @router.patch("/{item_id}", response_model=PatchResponse, response_model_by_alias=True)
 async def update_item(
     item_id: str,

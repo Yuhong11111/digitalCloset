@@ -31,17 +31,11 @@ import { API_BASE_URL } from "../config";
 
 export function Closet() {
     const navigate = useNavigate();
-    // const { id: userId } = useContext(UserContext);
-    // const { username } = useContext(UserContext);
-    // const [items, setItems] = React.useState<any[]>([]);
-    const { clothes, refreshClothes, page, pageSize, total } = useClothContext();
+    const { clothes, refreshClothes, page, pageSize, total } = useClothContext(); // Re-fetches items from the backend with optional params (page/search/filter).
     const totalItems = total;
     const [searchQuery, setSearchQuery] = useState("");
     const [filter, setFilter] = useState("all");
     const totalPages = Math.max(1, Math.ceil(total / pageSize));
-
-    // if (!clothes || clothes.length === 0)xw
-    //     return <Text>No clothes found.</Text>;
 
     // change favorite status
     const toggleFavorite = async (itemId: string, currentFavorite?: boolean) => {

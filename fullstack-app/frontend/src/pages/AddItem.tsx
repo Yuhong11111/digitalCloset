@@ -48,6 +48,7 @@ export default function AddItem() {
     const [formError, setFormError] = useState<string | null>(null);
 
     // edit mode
+    // parse the :id param from the url if exists to determine edit mode
     const params = useParams<{ id: string }>();
     const isEditMode = Boolean(params.id);
 
@@ -105,6 +106,7 @@ export default function AddItem() {
         setFavorite(false);
     };
 
+    // for any edit changes or new item submission
     async function handleSubmit(ev: FormEvent<HTMLFormElement>) {
         ev.preventDefault();
         setFormError(null);
@@ -121,6 +123,7 @@ export default function AddItem() {
         }
         const formData = new FormData();
 
+        // If in edit mode, only append changed fields
         if (isEditMode) {
             if (!originalItem) {
                 console.error("Missing original item data for patch.");
@@ -166,6 +169,7 @@ export default function AddItem() {
                 return;
             }
         } else {
+            // New item - append all fields
             formData.append("name", name);
             formData.append("category", category);
             formData.append("color", color);
@@ -180,6 +184,7 @@ export default function AddItem() {
 
         try {
             const url = isEditMode ? `${API_BASE_URL}/items/${params.id}` : `${API_BASE_URL}/items`;
+            // PATCH request for edit mode, POST for new item
             const response = isEditMode
                 ? await axios.patch(url, formData, {
                     headers: {
