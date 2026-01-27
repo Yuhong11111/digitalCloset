@@ -312,7 +312,7 @@ export function Closet() {
                                     {item.color} · {item.category}
                                 </Card.Description>
                                 {item.tags && (
-                                    <Wrap spacing="2" mt={1}>
+                                    <Wrap spacing={2} mt={1}>
                                         {(Array.isArray(item.tags) ? item.tags : [item.tags]).map((tag, index) => {
                                             const palettes = ["teal", "blue", "green", "purple", "pink", "cyan"];
                                             const palette = palettes[index % palettes.length];

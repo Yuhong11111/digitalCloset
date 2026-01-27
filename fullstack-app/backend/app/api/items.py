@@ -9,12 +9,16 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_user
 from app.db.database import get_db
 from app.schemas.item import (
-    CreateItemResponse,
-    ItemPatchRequest,
+    # send item form
     ItemRequest,
-    ItemClosetResponse,
-    PatchResponse,
+    # get items list response schema with only necessary fields for closet view and pagination
     ItemsPageResponse,
+    # get detailed item response schema
+    ItemDetailResponse,
+    # patch item request and response schemas
+    ItemPatchRequest,
+    # confirm creation or patching of an item
+    CreateOrPatchItemResponse
 )
 
 router = APIRouter(prefix="/items", tags=["items"])
@@ -41,7 +45,7 @@ def parse_purchase_price(raw: Optional[str]) -> Optional[float]:
 
 
 # Create a new clothing item
-@router.post("", response_model=CreateItemResponse, response_model_by_alias=True)
+@router.post("", response_model=CreateOrPatchItemResponse, response_model_by_alias=True)
 async def create_item(
     item: ItemRequest = Depends(ItemRequest.as_form),
     image: Optional[UploadFile] = File(None),
@@ -84,27 +88,10 @@ async def create_item(
                 "tags": parsed_tags,
             },
         )
-        new_item = dict(result.first()._mapping)
+        # new_item = dict(result.first()._mapping)
         db.commit()
 
-        return {
-            "status": "success",
-            "item": {
-                "_id": str(new_item["id"]),
-                "name": new_item["name"],
-                "category": new_item["category"],
-                "color": new_item["color"],
-                "size": new_item["size"],
-                "season": new_item["season"],
-                "imageUrl": new_item["image_url"],
-                "favorite": new_item["favorite"],
-                "notes": new_item["notes"],
-                "purchase_price": new_item["purchase_price"],
-                "material": new_item["material"],
-                "brand": new_item["brand"],
-                "tags": new_item["tags"],
-            }
-        }
+        return {"status": "success"}
     except Exception as exc:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to create item: {str(exc)}")
@@ -155,7 +142,7 @@ async def get_items(
         params.update({"limit": page_size, "offset": offset})
         order_clause = "created_at DESC"
         query = text(
-            "SELECT id, owner_id, name, category, color, size, season, image_url, favorite, notes, purchase_price, material, brand, tags "
+            "SELECT id, name, category, color, season, image_url, favorite, tags "
             f"FROM cloth_items WHERE {where_clause} "
             f"ORDER BY {order_clause} "
             "LIMIT :limit OFFSET :offset"
@@ -168,14 +155,9 @@ async def get_items(
                 "name": item._mapping["name"],
                 "category": item._mapping["category"],
                 "color": item._mapping["color"],
-                "size": item._mapping["size"],
                 "season": item._mapping["season"],
                 "imageUrl": item._mapping["image_url"],
                 "favorite": item._mapping["favorite"],
-                "notes": item._mapping["notes"],
-                "purchase_price": item._mapping["purchase_price"],
-                "material": item._mapping["material"],
-                "brand": item._mapping["brand"],
                 "tags": item._mapping["tags"],
             }
             for item in results
@@ -190,7 +172,7 @@ async def get_items(
         raise HTTPException(status_code=500, detail=f"Failed to fetch items: {str(exc)}")
     
 # Get a specific clothing item by ID(from clicking on an item to view details or edit)
-@router.get("/{item_id}", response_model=ItemClosetResponse, response_model_by_alias=True)
+@router.get("/{item_id}", response_model=ItemDetailResponse, response_model_by_alias=True)
 async def get_item(
     item_id: str,
     current_user=Depends(get_current_user),
@@ -231,7 +213,7 @@ async def get_item(
         raise HTTPException(status_code=500, detail=f"Failed to fetch item: {str(exc)}")
 
 # for updating an existing clothing item(edit or favorite toggle)
-@router.patch("/{item_id}", response_model=PatchResponse, response_model_by_alias=True)
+@router.patch("/{item_id}", response_model=CreateOrPatchItemResponse, response_model_by_alias=True)
 async def update_item(
     item_id: str,
     item: ItemPatchRequest = Depends(ItemPatchRequest.as_form),
@@ -314,25 +296,7 @@ async def update_item(
             raise HTTPException(status_code=404, detail="Item not found")
 
         db.commit()
-        updated_item_dict = dict(updated_item._mapping)
-        return {
-            "status": "success",
-            "item": {
-                "_id": str(updated_item_dict["id"]),
-                "name": updated_item_dict["name"],
-                "category": updated_item_dict["category"],
-                "color": updated_item_dict["color"],
-                "size": updated_item_dict["size"],
-                "season": updated_item_dict["season"],
-                "imageUrl": updated_item_dict["image_url"],
-                "favorite": updated_item_dict["favorite"],
-                "notes": updated_item_dict["notes"],
-                "purchase_price": updated_item_dict["purchase_price"],
-                "material": updated_item_dict["material"],
-                "brand": updated_item_dict["brand"],
-                "tags": updated_item_dict["tags"],
-            }
-        }
+        return {"status": "success"}
     except Exception as exc:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to update item: {str(exc)}")

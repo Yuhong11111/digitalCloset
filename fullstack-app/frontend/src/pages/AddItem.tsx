@@ -103,7 +103,6 @@ export default function AddItem() {
             if (existingItem.imageUrl) {
                 setImagePreview(existingItem.imageUrl);
             }
-            return;
         }
 
         fetchItemData();

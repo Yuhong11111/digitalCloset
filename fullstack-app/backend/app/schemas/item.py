@@ -3,25 +3,7 @@ from typing import Optional, List
 from fastapi import Form
 from pydantic import BaseModel, ConfigDict, Field
 
-
-class ItemClosetResponse(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-
-    id: str = Field(alias="_id")
-    name: str
-    category: Optional[str] = None
-    color: Optional[str] = None
-    season: Optional[str] = None
-    size: Optional[str] = None
-    material: Optional[str] = None
-    brand: Optional[str] = None
-    tags: Optional[List[str]] = None
-    purchase_price: Optional[float] = None
-    imageUrl: Optional[str] = None
-    notes: Optional[str] = None
-    favorite: Optional[bool] = None
-
-
+# item creation request schema from form data
 class ItemRequest(BaseModel):
     name: str
     category: str
@@ -65,11 +47,44 @@ class ItemRequest(BaseModel):
         )
 
 
-class CreateItemResponse(BaseModel):
+# only necessary fields for closet view
+class ItemClosetResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str = Field(alias="_id")
+    name: str
+    category: Optional[str] = None
+    color: Optional[str] = None
+    season: Optional[str] = None
+    tags: Optional[List[str]] = None
+    imageUrl: Optional[str] = None
+    favorite: Optional[bool] = None
+
+
+# detailed item response for item detail view
+class ItemDetailResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str = Field(alias="_id")
+    name: str
+    category: Optional[str] = None
+    color: Optional[str] = None
+    season: Optional[str] = None
+    size: Optional[str] = None
+    material: Optional[str] = None
+    brand: Optional[str] = None
+    tags: Optional[List[str]] = None
+    purchase_price: Optional[float] = None
+    imageUrl: Optional[str] = None
+    notes: Optional[str] = None
+    favorite: Optional[bool] = None
+
+
+# confirmation response for creating or patching an item
+class CreateOrPatchItemResponse(BaseModel):
     status: str
-    item: ItemClosetResponse
 
-
+# paginated items response for closet view
 class ItemsPageResponse(BaseModel):
     items: List[ItemClosetResponse]
     page: int
@@ -118,7 +133,3 @@ class ItemPatchRequest(BaseModel):
             favorite=favorite,
             notes=notes,
         )
-
-class PatchResponse(BaseModel):
-    status: str
-    item: ItemPatchRequest
