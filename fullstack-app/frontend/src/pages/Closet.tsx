@@ -19,7 +19,7 @@
 */
 
 import AppLayout from "./AppLayout";
-import { Flex, Input, Box, Button, ButtonGroup, Card, Image, Text, Heading, NativeSelect, SimpleGrid, Badge, Icon } from "@chakra-ui/react";
+import { Flex, Input, Box, Button, ButtonGroup, Card, Image, Text, Heading, NativeSelect, SimpleGrid, Badge, Icon, Wrap, WrapItem } from "@chakra-ui/react";
 import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiSliders, FiArrowDown, FiPlus, FiGrid, FiHeart, FiX } from "react-icons/fi";
 import { useClothContext } from "../hooks/useClothContext";
@@ -312,9 +312,27 @@ export function Closet() {
                                     {item.color} · {item.category}
                                 </Card.Description>
                                 {item.tags && (
-                                    <Text fontSize="sm" color="gray.500">
-                                        {Array.isArray(item.tags) ? item.tags.join(", ") : item.tags}
-                                    </Text>
+                                    <Wrap spacing="2" mt={1}>
+                                        {(Array.isArray(item.tags) ? item.tags : [item.tags]).map((tag, index) => {
+                                            const palettes = ["teal", "blue", "green", "purple", "pink", "cyan"];
+                                            const palette = palettes[index % palettes.length];
+                                            return (
+                                                <WrapItem key={`${tag}-${index}`}>
+                                                    <Badge
+                                                        variant="subtle"
+                                                        colorPalette={palette}
+                                                        borderRadius="full"
+                                                        textTransform="lowercase"
+                                                        px={2}
+                                                        py={1}
+                                                        fontSize="xs"
+                                                    >
+                                                        {tag}
+                                                    </Badge>
+                                                </WrapItem>
+                                            );
+                                        })}
+                                    </Wrap>
                                 )}
                             </Card.Body>
 
