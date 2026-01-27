@@ -62,6 +62,10 @@ export function Closet() {
         });
     }
 
+    const handleCardOpen = (item: typeof clothes[number]) => {
+        navigate(`/clothesview/${item._id}`);
+    };
+
     return (
         <AppLayout>
             <Flex
@@ -267,6 +271,16 @@ export function Closet() {
                             boxShadow="sm"
                             transition="transform 0.2s ease, box-shadow 0.2s ease"
                             _hover={{ transform: "translateY(-4px)", boxShadow: "lg" }}
+                            cursor="pointer"
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => handleCardOpen(item)}
+                            onKeyDown={(event) => {
+                                if (event.key === "Enter" || event.key === " ") {
+                                    event.preventDefault();
+                                    handleCardOpen(item);
+                                }
+                            }}
                         >
                             {item.imageUrl ? (
                                 <Image
@@ -306,10 +320,29 @@ export function Closet() {
 
                             <Card.Footer px={4} pb={4}>
                                 <ButtonGroup size="sm" variant="outline">
-                                    <Button onClick={() => toggleFavorite(item._id, item.favorite)} borderRadius="md" bg="#f7f0ea" _hover={{ bg: "#eadfd6" }}>
+                                    <Button
+                                        onClick={(event) => {
+                                            // prevent card click
+                                            event.stopPropagation();
+                                            toggleFavorite(item._id, item.favorite);
+                                        }}
+                                        borderRadius="md"
+                                        bg="#f7f0ea"
+                                        _hover={{ bg: "#eadfd6" }}
+                                    >
                                         {item.favorite ? "♥ Favorite" : "♡ Favorite"}
                                     </Button>
-                                    <Button onClick={() => navigate(`/edit/${item._id}`)} borderRadius="md" bg="#f2e7de" _hover={{ bg: "#eadfd6" }}>Edit</Button>
+                                    <Button
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            navigate(`/edit/${item._id}`);
+                                        }}
+                                        borderRadius="md"
+                                        bg="#f2e7de"
+                                        _hover={{ bg: "#eadfd6" }}
+                                    >
+                                        Edit
+                                    </Button>
                                 </ButtonGroup>
                             </Card.Footer>
                         </Card.Root>

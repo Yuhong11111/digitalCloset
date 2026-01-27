@@ -37,6 +37,11 @@ export default function AddItem() {
     const [name, setName] = useState("");
     const [category, setCategory] = useState<ClothingCategory>("top");
     const [color, setColor] = useState("");
+    const [size, setSize] = useState("");
+    const [material, setMaterial] = useState("");
+    const [brand, setBrand] = useState("");
+    const [tags, setTags] = useState("");
+    const [purchasePrice, setPurchasePrice] = useState("");
     const [season, setSeason] = useState<SeasonTag>("all");
     const [imagePreview, setImagePreview] = useState("");
     const [imageFileName, setImageFileName] = useState("");
@@ -62,6 +67,11 @@ export default function AddItem() {
                 setName(item.name);
                 setCategory(item.category);
                 setColor(item.color);
+                setSize(item.size || "");
+                setMaterial(item.material || "");
+                setBrand(item.brand || "");
+                setTags(Array.isArray(item.tags) ? item.tags.join(", ") : item.tags || "");
+                setPurchasePrice(item.purchase_price ? String(item.purchase_price) : "");
                 setSeason(item.season);
                 setNotes(item.notes || "");
                 setFavorite(item.favorite || false);
@@ -81,6 +91,11 @@ export default function AddItem() {
             setName(existingItem.name);
             setCategory(existingItem.category);
             setColor(existingItem.color);
+            setSize(existingItem.size || "");
+            setMaterial(existingItem.material || "");
+            setBrand(existingItem.brand || "");
+            setTags(Array.isArray(existingItem.tags) ? existingItem.tags.join(", ") : existingItem.tags || "");
+            setPurchasePrice(existingItem.purchase_price ? String(existingItem.purchase_price) : "");
             setSeason(existingItem.season);
             setNotes(existingItem.notes || "");
             setFavorite(existingItem.favorite || false);
@@ -98,6 +113,11 @@ export default function AddItem() {
         setName("");
         setCategory("top");
         setColor("");
+        setSize("");
+        setMaterial("");
+        setBrand("");
+        setTags("");
+        setPurchasePrice("");
         setSeason("all");
         setImagePreview("");
         setImageFile(null);
@@ -148,6 +168,28 @@ export default function AddItem() {
                 formData.append("season", season);
                 hasChanges = true;
             }
+            if ((originalItem.size || "") !== size) {
+                formData.append("size", size);
+                hasChanges = true;
+            }
+            if ((originalItem.material || "") !== material) {
+                formData.append("material", material);
+                hasChanges = true;
+            }
+            if ((originalItem.brand || "") !== brand) {
+                formData.append("brand", brand);
+                hasChanges = true;
+            }
+            const originalTags = Array.isArray(originalItem.tags) ? originalItem.tags.join(", ") : originalItem.tags || "";
+            if (originalTags !== tags) {
+                formData.append("tags", tags);
+                hasChanges = true;
+            }
+            const originalPrice = originalItem.purchase_price ? String(originalItem.purchase_price) : "";
+            if (originalPrice !== purchasePrice) {
+                formData.append("purchase_price", purchasePrice);
+                hasChanges = true;
+            }
             if (Boolean(originalItem.favorite) !== favorite) {
                 formData.append("favorite", String(favorite));
                 hasChanges = true;
@@ -173,6 +215,11 @@ export default function AddItem() {
             formData.append("name", name);
             formData.append("category", category);
             formData.append("color", color);
+            if (size) formData.append("size", size);
+            if (material) formData.append("material", material);
+            if (brand) formData.append("brand", brand);
+            if (tags) formData.append("tags", tags);
+            if (purchasePrice) formData.append("purchase_price", purchasePrice);
             formData.append("season", season);
             formData.append("favorite", String(favorite));
             if (notes) formData.append("notes", notes);
@@ -327,6 +374,78 @@ export default function AddItem() {
                                     borderRadius="xl"
                                     borderColor="gray.200"
                                     bg="white"
+                                />
+                            </Box>
+                            <Box>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>
+                                    Size
+                                </Text>
+                                <Input
+                                    value={size}
+                                    onChange={(e) => setSize(e.target.value)}
+                                    placeholder="e.g., M, 32, 8.5"
+                                    h="46px"
+                                    borderRadius="xl"
+                                    borderColor="gray.200"
+                                    bg="white"
+                                />
+                            </Box>
+                            <Box>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>
+                                    Material
+                                </Text>
+                                <Input
+                                    value={material}
+                                    onChange={(e) => setMaterial(e.target.value)}
+                                    placeholder="e.g., Cotton, Wool"
+                                    h="46px"
+                                    borderRadius="xl"
+                                    borderColor="gray.200"
+                                    bg="white"
+                                />
+                            </Box>
+                            <Box>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>
+                                    Brand
+                                </Text>
+                                <Input
+                                    value={brand}
+                                    onChange={(e) => setBrand(e.target.value)}
+                                    placeholder="e.g., Uniqlo"
+                                    h="46px"
+                                    borderRadius="xl"
+                                    borderColor="gray.200"
+                                    bg="white"
+                                />
+                            </Box>
+                            <Box>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>
+                                    Tags
+                                </Text>
+                                <Input
+                                    value={tags}
+                                    onChange={(e) => setTags(e.target.value)}
+                                    placeholder="e.g., casual, work, summer"
+                                    h="46px"
+                                    borderRadius="xl"
+                                    borderColor="gray.200"
+                                    bg="white"
+                                />
+                            </Box>
+                            <Box>
+                                <Text fontSize="sm" fontWeight="600" color="gray.600" mb={2}>
+                                    Purchase Price
+                                </Text>
+                                <Input
+                                    value={purchasePrice}
+                                    onChange={(e) => setPurchasePrice(e.target.value)}
+                                    placeholder="e.g., 49.99"
+                                    h="46px"
+                                    borderRadius="xl"
+                                    borderColor="gray.200"
+                                    bg="white"
+                                    type="number"
+                                    inputMode="decimal"
                                 />
                             </Box>
                             <Box>

@@ -7,6 +7,7 @@ import Closet from './pages/Closet';
 import Outfits from './pages/Outfits';
 import Assistant from './pages/Assistant';
 import Settings from './pages/Settings';
+import ClothesView from './pages/ClothesView';
 import { UserContextProvider } from './components/UserContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import AddItem from './pages/AddItem';
@@ -68,6 +69,14 @@ function App() {
                 <ProtectedRoute>
                   <AddItem />
                 </ProtectedRoute>} />
+            <Route
+              path="/clothesview/:id"
+              element={
+                <ProtectedRoute>
+                  <ClothesView />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </Router >
       </ClothContextProvider>

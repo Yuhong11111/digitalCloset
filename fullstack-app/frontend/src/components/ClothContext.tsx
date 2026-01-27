@@ -57,7 +57,7 @@ export function ClothContextProvider({ children }: PropsWithChildren) {
     try {
       const nextPage = options?.page ?? page; //Use the left value unless it’s null or undefined
       const nextPageSize = options?.pageSize ?? pageSize;
-      // axios request to fetch clothes, typing the response dataå
+      // axios request to fetch clothes, typing the response data as an object with items array of ClothItem, page number, page_size number, total number in <{}>
       const response = await axios.get<{ items: ClothItem[]; page: number; page_size: number; total: number }>(
         `${API_BASE_URL}/items`,
         // query params passing in url with page, page_size, search, filter

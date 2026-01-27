@@ -39,8 +39,8 @@ async def create_item(
         owner_id = uuid.UUID(current_user.get("userId"))
         insert_query = text(
             "INSERT INTO cloth_items "
-            "(id, owner_id, name, category, color, season, image_url, favorite, notes, created_at, updated_at) "
-            "VALUES (gen_random_uuid(), :owner_id, :name, :category, :color, :season, :image_url, :favorite, :notes, NOW(), NOW()) "
+            "(id, owner_id, name, category, color, season, image_url, favorite, notes, created_at, wear_count, last_worn_at, purchase_price, material, brand, tags) "
+            "VALUES (gen_random_uuid(), :owner_id, :name, :category, :color, :season, :image_url, :favorite, :notes, NOW(), 0, NULL, :purchase_price, :material, :brand, :tags) "
             "RETURNING id, owner_id, name, category, color, season, image_url, favorite, notes"
         )
         result = db.execute(

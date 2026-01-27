@@ -1,7 +1,7 @@
 """
 SQLAlchemy models for PostgreSQL tables: User and ClothItem
 """
-from sqlalchemy import Column, String, DateTime, Boolean, Text, ForeignKey, Integer
+from sqlalchemy import ARRAY, Column, String, DateTime, Boolean, Text, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
@@ -43,7 +43,12 @@ class ClothItem(Base):
     notes = Column(Text, nullable=True)
     favorite = Column(Boolean, default=False)
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    wear_count = Column(Integer, default=0)
+    last_worn_at = Column(DateTime, nullable=True)
+    material = Column(String(100), nullable=True)
+    brand = Column(String(100), nullable=True)
+    tags = Column(ARRAY(String), nullable=True)  # Comma-separated tags
+    purchase_price = Column(Integer, nullable=True)
 
     # Relationships
     owner = relationship("User", back_populates="items")
