@@ -1,5 +1,5 @@
 import base64
-from typing import Optional
+from typing import Optional, List
 import uuid
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status, Query
@@ -12,12 +12,32 @@ from app.schemas.item import (
     CreateItemResponse,
     ItemPatchRequest,
     ItemRequest,
-    ItemResponse,
+    ItemClosetResponse,
     PatchResponse,
     ItemsPageResponse,
 )
 
 router = APIRouter(prefix="/items", tags=["items"])
+
+def parse_tags(raw: Optional[str]) -> Optional[List[str]]:
+    if raw is None:
+        return None
+    text = raw.strip()
+    if text == "":
+        return []
+    return [tag.strip() for tag in text.split(",") if tag.strip()]
+
+
+def parse_purchase_price(raw: Optional[str]) -> Optional[float]:
+    if raw is None:
+        return None
+    text = raw.strip()
+    if text == "":
+        return None
+    try:
+        return float(text)
+    except ValueError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid purchase price")
 
 
 # Create a new clothing item
@@ -37,11 +57,14 @@ async def create_item(
 
     try:
         owner_id = uuid.UUID(current_user.get("userId"))
+        parsed_tags = parse_tags(item.tags)
+        parsed_price = parse_purchase_price(item.purchase_price)
+
         insert_query = text(
             "INSERT INTO cloth_items "
-            "(id, owner_id, name, category, color, season, image_url, favorite, notes, created_at, wear_count, last_worn_at, purchase_price, material, brand, tags) "
-            "VALUES (gen_random_uuid(), :owner_id, :name, :category, :color, :season, :image_url, :favorite, :notes, NOW(), 0, NULL, :purchase_price, :material, :brand, :tags) "
-            "RETURNING id, owner_id, name, category, color, season, image_url, favorite, notes"
+            "(id, owner_id, name, category, color, size, season, image_url, favorite, notes, created_at, wear_count, last_worn_at, purchase_price, material, brand, tags) "
+            "VALUES (gen_random_uuid(), :owner_id, :name, :category, :color, :size, :season, :image_url, :favorite, :notes, NOW(), 0, NULL, :purchase_price, :material, :brand, :tags) "
+            "RETURNING id, owner_id, name, category, color, size, season, image_url, favorite, notes, purchase_price, material, brand, tags"
         )
         result = db.execute(
             insert_query,
@@ -50,10 +73,15 @@ async def create_item(
                 "name": item.name,
                 "category": item.category,
                 "color": item.color,
+                "size": item.size,
                 "season": item.season,
                 "image_url": image_data,
                 "favorite": item.favorite,
                 "notes": item.notes,
+                "purchase_price": parsed_price,
+                "material": item.material,
+                "brand": item.brand,
+                "tags": parsed_tags,
             },
         )
         new_item = dict(result.first()._mapping)
@@ -66,10 +94,15 @@ async def create_item(
                 "name": new_item["name"],
                 "category": new_item["category"],
                 "color": new_item["color"],
+                "size": new_item["size"],
                 "season": new_item["season"],
                 "imageUrl": new_item["image_url"],
                 "favorite": new_item["favorite"],
                 "notes": new_item["notes"],
+                "purchase_price": new_item["purchase_price"],
+                "material": new_item["material"],
+                "brand": new_item["brand"],
+                "tags": new_item["tags"],
             }
         }
     except Exception as exc:
@@ -122,7 +155,7 @@ async def get_items(
         params.update({"limit": page_size, "offset": offset})
         order_clause = "created_at DESC"
         query = text(
-            "SELECT id, owner_id, name, category, color, season, image_url, favorite, notes "
+            "SELECT id, owner_id, name, category, color, size, season, image_url, favorite, notes, purchase_price, material, brand, tags "
             f"FROM cloth_items WHERE {where_clause} "
             f"ORDER BY {order_clause} "
             "LIMIT :limit OFFSET :offset"
@@ -135,10 +168,15 @@ async def get_items(
                 "name": item._mapping["name"],
                 "category": item._mapping["category"],
                 "color": item._mapping["color"],
+                "size": item._mapping["size"],
                 "season": item._mapping["season"],
                 "imageUrl": item._mapping["image_url"],
                 "favorite": item._mapping["favorite"],
                 "notes": item._mapping["notes"],
+                "purchase_price": item._mapping["purchase_price"],
+                "material": item._mapping["material"],
+                "brand": item._mapping["brand"],
+                "tags": item._mapping["tags"],
             }
             for item in results
         ]
@@ -152,7 +190,7 @@ async def get_items(
         raise HTTPException(status_code=500, detail=f"Failed to fetch items: {str(exc)}")
     
 # Get a specific clothing item by ID(from clicking on an item to view details or edit)
-@router.get("/{item_id}", response_model=ItemResponse, response_model_by_alias=True)
+@router.get("/{item_id}", response_model=ItemClosetResponse, response_model_by_alias=True)
 async def get_item(
     item_id: str,
     current_user=Depends(get_current_user),
@@ -166,7 +204,7 @@ async def get_item(
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid item id")
 
         query = text(
-            "SELECT id, owner_id, name, category, color, season, image_url, favorite, notes "
+            "SELECT id, owner_id, name, category, color, size, season, image_url, favorite, notes, purchase_price, material, brand, tags "
             "FROM cloth_items WHERE owner_id = :owner_id AND id = :item_id"
         )
         result = db.execute(query, {"owner_id": owner_id, "item_id": item_uuid}).fetchone()
@@ -179,10 +217,15 @@ async def get_item(
             "name": result._mapping["name"],
             "category": result._mapping["category"],
             "color": result._mapping["color"],
+            "size": result._mapping["size"],
             "season": result._mapping["season"],
             "imageUrl": result._mapping["image_url"],
             "favorite": result._mapping["favorite"],
             "notes": result._mapping["notes"],
+            "purchase_price": result._mapping["purchase_price"],
+            "material": result._mapping["material"],
+            "brand": result._mapping["brand"],
+            "tags": result._mapping["tags"],
         }
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to fetch item: {str(exc)}")
@@ -214,25 +257,38 @@ async def update_item(
             item.name is None
             and item.category is None
             and item.color is None
+            and item.size is None
             and item.season is None
+            and item.material is None
+            and item.brand is None
+            and item.tags is None
+            and item.purchase_price is None
             and item.favorite is None
             and item.notes is None
             and image_data is None
         ):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update")
 
+        parsed_tags = parse_tags(item.tags) if item.tags is not None else None
+        parsed_price = parse_purchase_price(item.purchase_price) if item.purchase_price is not None else None
+
         update_query = text(
             "UPDATE cloth_items SET "
             "name = COALESCE(:name, name), "
             "category = COALESCE(:category, category), "
             "color = COALESCE(:color, color), "
+            "size = COALESCE(:size, size), "
             "season = COALESCE(:season, season), "
             "image_url = COALESCE(:image_url, image_url), "
+            "material = COALESCE(:material, material), "
+            "brand = COALESCE(:brand, brand), "
+            "tags = COALESCE(:tags, tags), "
+            "purchase_price = COALESCE(:purchase_price, purchase_price), "
             "favorite = COALESCE(:favorite, favorite), "
             "notes = COALESCE(:notes, notes), "
             "updated_at = NOW() "
             "WHERE id = :item_id AND owner_id = :owner_id "
-            "RETURNING id, owner_id, name, category, color, season, image_url, favorite, notes"
+            "RETURNING id, owner_id, name, category, color, size, season, image_url, favorite, notes, purchase_price, material, brand, tags"
         )
         result = db.execute(
             update_query,
@@ -242,8 +298,13 @@ async def update_item(
                 "name": item.name,
                 "category": item.category,
                 "color": item.color,
+                "size": item.size,
                 "season": item.season,
                 "image_url": image_data,
+                "material": item.material,
+                "brand": item.brand,
+                "tags": parsed_tags,
+                "purchase_price": parsed_price,
                 "favorite": item.favorite,
                 "notes": item.notes,
             },
@@ -261,10 +322,16 @@ async def update_item(
                 "name": updated_item_dict["name"],
                 "category": updated_item_dict["category"],
                 "color": updated_item_dict["color"],
+                "size": updated_item_dict["size"],
                 "season": updated_item_dict["season"],
                 "imageUrl": updated_item_dict["image_url"],
                 "favorite": updated_item_dict["favorite"],
-                "notes": updated_item_dict["notes"],}
+                "notes": updated_item_dict["notes"],
+                "purchase_price": updated_item_dict["purchase_price"],
+                "material": updated_item_dict["material"],
+                "brand": updated_item_dict["brand"],
+                "tags": updated_item_dict["tags"],
+            }
         }
     except Exception as exc:
         db.rollback()

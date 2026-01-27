@@ -11,7 +11,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.database import get_db
-from app.schemas.item import ItemResponse
+from app.schemas.item import ItemClosetResponse
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
 
@@ -23,7 +23,7 @@ class AIRequest(BaseModel):
 
 class AIResponse(BaseModel):
     response: str
-    referencedItems: List[ItemResponse] = []
+    referencedItems: List[ItemClosetResponse] = []
 
 SYSTEM_PROMPT = """
 You are a closet assistant.
@@ -157,7 +157,7 @@ async def get_ai_assistance(
         selected_items = [item for item in cloth_list if item["id"] in selected_ids]
         return AIResponse(
             response=answer,
-            referencedItems=[ItemResponse(**item) for item in selected_items],
+            referencedItems=[ItemClosetResponse(**item) for item in selected_items],
         )
     except Exception as e:
         # you might want to log e here

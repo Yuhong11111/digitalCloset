@@ -311,9 +311,9 @@ export function Closet() {
                                 <Card.Description>
                                     {item.color} · {item.category}
                                 </Card.Description>
-                                {item.notes && (
+                                {item.tags && (
                                     <Text fontSize="sm" color="gray.500">
-                                        {item.notes}
+                                        {Array.isArray(item.tags) ? item.tags.join(", ") : item.tags}
                                     </Text>
                                 )}
                             </Card.Body>

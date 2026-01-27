@@ -11,12 +11,15 @@ export interface ClothItem {
   name: string;
   category: ClothingCategory;
   color: string;
-  size: string;
   season: SeasonTag;
-  // brand: string;
   imageUrl?: string;
   notes?: string;
   favorite?: boolean;
+  tags?: string[];
+  size?: string;
+  material?: string;
+  brand?: string;
+  purchase_price?: number;
 }
 
 export interface ClothContextType {
