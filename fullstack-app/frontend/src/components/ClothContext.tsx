@@ -1,4 +1,4 @@
-import { createContext, useEffect, PropsWithChildren, useState, useContext, useCallback } from "react";
+import { createContext, useEffect, PropsWithChildren, useState, useContext, useCallback, useRef } from "react";
 import axios from "axios";
 import { UserContext } from "./UserContext";
 import { API_BASE_URL } from "../config";
@@ -52,6 +52,13 @@ export function ClothContextProvider({ children }: PropsWithChildren) {
   const [pageSize, setPageSize] = useState(12);
   const [total, setTotal] = useState(0);
   const { id: ownerId } = useContext(UserContext);
+  const pageRef = useRef(page);
+  const pageSizeRef = useRef(pageSize);
+
+  useEffect(() => {
+    pageRef.current = page;
+    pageSizeRef.current = pageSize;
+  }, [page, pageSize]);
 
   const fetchClothes = useCallback(async (options?: { page?: number; pageSize?: number; search?: string; filter?: string; sort?: string }) => {
     if (!ownerId) {
@@ -61,8 +68,8 @@ export function ClothContextProvider({ children }: PropsWithChildren) {
     }
     setIsLoading(true);
     try {
-      const nextPage = options?.page ?? page; //Use the left value unless it’s null or undefined
-      const nextPageSize = options?.pageSize ?? pageSize;
+      const nextPage = options?.page ?? pageRef.current; // Use latest state unless overridden
+      const nextPageSize = options?.pageSize ?? pageSizeRef.current;
       // axios request to fetch clothes, typing the response data as an object with items array of ClothItem, page number, page_size number, total number in <{}>
       const response = await axios.get<{ items: ClothItem[]; page: number; page_size: number; total: number }>(
         `${API_BASE_URL}/items`,
@@ -89,11 +96,11 @@ export function ClothContextProvider({ children }: PropsWithChildren) {
     } finally {
       setIsLoading(false);
     }
-  }, [ownerId, page, pageSize]);
+  }, [ownerId]);
 
   useEffect(() => {
     fetchClothes();
-  }, [fetchClothes]);//if we change to ownerId, it mean we will refetch clothes when ownerId changes
+  }, [ownerId, fetchClothes]);//refetch clothes when ownerId changes
 
   return (
     <ClothContext.Provider value={{ clothes, setClothes, isLoading, refreshClothes: fetchClothes, page, pageSize, total }}>

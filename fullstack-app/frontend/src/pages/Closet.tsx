@@ -252,6 +252,9 @@ export function Closet() {
                                     }}
                                 >
                                     <option value="recently_added">Sort: Recently Added</option>
+                                    <option value="favorites_first">Sort: Favorites First</option>
+                                    <option value="most_worn">Sort: Most Worn</option>
+                                    <option value="last_worn">Sort: Last Worn</option>
                                 </NativeSelect.Field>
                                 <NativeSelect.Indicator />
                             </NativeSelect.Root>
@@ -377,6 +380,7 @@ export function Closet() {
                             page: Math.max(1, page - 1),
                             search: searchQuery || undefined,
                             filter: filter !== "all" ? filter : undefined,
+                            sort: sort !== "recently_added" ? sort : undefined,
                         })}
                         disabled={page <= 1}
                     >
@@ -392,6 +396,7 @@ export function Closet() {
                             page: Math.min(totalPages, page + 1),
                             search: searchQuery || undefined,
                             filter: filter !== "all" ? filter : undefined,
+                            sort: sort !== "recently_added" ? sort : undefined,
                         })}
                         disabled={page >= totalPages}
                     >

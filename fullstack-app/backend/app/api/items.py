@@ -133,14 +133,23 @@ async def get_items(
                 "OR season ILIKE :search OR notes ILIKE :search)"
             )
             params["search"] = f"%{search}%"
-        
+
+        if sort == "most_worn":
+            order_clause = "wear_count DESC, created_at DESC"
+        elif sort == "favorites_first":
+            order_clause = "favorite DESC, created_at DESC"
+        elif sort == "last_worn":
+            order_clause = "last_worn_at DESC NULLS LAST, created_at DESC"
+        else:
+            order_clause = "created_at DESC"
+
         count_query = text(f"SELECT COUNT(*) FROM cloth_items WHERE {where_clause}")
         total = db.execute(count_query, params).scalar() or 0
 
         # offset is how many items to skip in the query based on the current page and page size(get next set of items for pagination)
         offset = (page - 1) * page_size
         params.update({"limit": page_size, "offset": offset})
-        order_clause = "created_at DESC"
+        # order_clause = "created_at DESC"
         query = text(
             "SELECT id, name, category, color, season, image_url, favorite, tags "
             f"FROM cloth_items WHERE {where_clause} "
