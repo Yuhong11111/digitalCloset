@@ -146,6 +146,38 @@ export default function ClothesView() {
                                 </Button>
                                 <Button
                                     borderRadius="full"
+                                    bg="#ead7c7"
+                                    color="ink"
+                                    _hover={{ bg: "#e1c8b5" }}
+                                    onClick={async () => {
+                                        setIsWorking(true);
+                                        try {
+                                            const formData = new FormData();
+                                            const nextWearCount = (item.wear_count ?? 0) + 1;
+                                            const nowIso = new Date().toISOString();
+                                            formData.append("wear_count", String(nextWearCount));
+                                            formData.append("last_worn_at", nowIso);
+                                            await axios.patch(`${API_BASE_URL}/items/${item._id}`, formData, {
+                                                headers: {
+                                                    "Content-Type": "multipart/form-data",
+                                                },
+                                            });
+                                            setItem({
+                                                ...item,
+                                                wear_count: nextWearCount,
+                                                last_worn_at: nowIso,
+                                            });
+                                        } catch (error) {
+                                            console.error("Failed to update wear stats", error);
+                                        } finally {
+                                            setIsWorking(false);
+                                        }
+                                    }}
+                                >
+                                    I wore today
+                                </Button>
+                                <Button
+                                    borderRadius="full"
                                     color="gray.700"
                                     bg="#f2e7de"
                                     _hover={{ bg: "#eadfd6" }}

@@ -107,6 +107,8 @@ class ItemPatchRequest(BaseModel):
     purchase_price: Optional[str] = None
     favorite: Optional[bool] = None
     notes: Optional[str] = None
+    wear_count: Optional[int] = None
+    last_worn_at: Optional[str] = None
 
 
     @classmethod
@@ -123,6 +125,8 @@ class ItemPatchRequest(BaseModel):
         purchase_price: Optional[str] = Form(None),
         favorite: Optional[bool] = Form(None),
         notes: Optional[str] = Form(None),
+        wear_count: Optional[int] = Form(None),
+        last_worn_at: Optional[str] = Form(None),
     ) -> "ItemPatchRequest":
         return cls(
             name=name,
@@ -136,4 +140,6 @@ class ItemPatchRequest(BaseModel):
             purchase_price=purchase_price,
             favorite=favorite,
             notes=notes,
+            wear_count=wear_count,
+            last_worn_at=last_worn_at,
         )

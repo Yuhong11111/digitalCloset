@@ -250,6 +250,8 @@ async def update_item(
             and item.purchase_price is None
             and item.favorite is None
             and item.notes is None
+            and item.wear_count is None
+            and item.last_worn_at is None
             and image_data is None
         ):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No fields to update")
@@ -271,6 +273,8 @@ async def update_item(
             "purchase_price = COALESCE(:purchase_price, purchase_price), "
             "favorite = COALESCE(:favorite, favorite), "
             "notes = COALESCE(:notes, notes), "
+            "wear_count = COALESCE(:wear_count, wear_count), "
+            "last_worn_at = COALESCE(:last_worn_at, last_worn_at), "
             "updated_at = NOW() "
             "WHERE id = :item_id AND owner_id = :owner_id "
             "RETURNING id, owner_id, name, category, color, size, season, image_url, favorite, notes, purchase_price, material, brand, tags"
@@ -292,6 +296,8 @@ async def update_item(
                 "purchase_price": parsed_price,
                 "favorite": item.favorite,
                 "notes": item.notes,
+                "wear_count": item.wear_count,
+                "last_worn_at": item.last_worn_at,
             },
         )
         updated_item = result.first()
