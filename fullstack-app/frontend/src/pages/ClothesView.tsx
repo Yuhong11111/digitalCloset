@@ -224,6 +224,24 @@ export default function ClothesView() {
                                         {typeof item.purchase_price === "number" ? `$${item.purchase_price.toFixed(2)}` : "—"}
                                     </Text>
                                 </Flex>
+                                <Flex justify="space-between">
+                                    <Text color="gray.500">Wear count</Text>
+                                    <Text fontWeight="600">
+                                        {typeof item.wear_count === "number" ? item.wear_count : "—"}
+                                    </Text>
+                                </Flex>
+                                <Flex justify="space-between">
+                                    <Text color="gray.500">Last worn</Text>
+                                    <Text fontWeight="600">
+                                        {item.last_worn_at ? new Date(item.last_worn_at).toLocaleDateString() : "—"}
+                                    </Text>
+                                </Flex>
+                                <Flex justify="space-between">
+                                    <Text color="gray.500">Added</Text>
+                                    <Text fontWeight="600">
+                                        {item.created_at ? new Date(item.created_at).toLocaleDateString() : "—"}
+                                    </Text>
+                                </Flex>
                             </SimpleGrid>
 
                             <Box borderTop="1px solid" borderColor="gray.100" my={6} />

@@ -20,6 +20,9 @@ export interface ClothItem {
   material?: string;
   brand?: string;
   purchase_price?: number;
+  wear_count?: number;
+  last_worn_at?: string;
+  created_at?: string;
 }
 
 export interface ClothContextType {

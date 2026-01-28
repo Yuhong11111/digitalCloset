@@ -186,7 +186,7 @@ async def get_item(
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid item id")
 
         query = text(
-            "SELECT id, owner_id, name, category, color, size, season, image_url, favorite, notes, purchase_price, material, brand, tags "
+            "SELECT id, owner_id, name, category, color, size, season, image_url, favorite, notes, purchase_price, material, brand, tags, wear_count, last_worn_at, created_at "
             "FROM cloth_items WHERE owner_id = :owner_id AND id = :item_id"
         )
         result = db.execute(query, {"owner_id": owner_id, "item_id": item_uuid}).fetchone()
@@ -208,6 +208,9 @@ async def get_item(
             "material": result._mapping["material"],
             "brand": result._mapping["brand"],
             "tags": result._mapping["tags"],
+            "wear_count": result._mapping["wear_count"],
+            "last_worn_at": result._mapping["last_worn_at"],
+            "created_at": result._mapping["created_at"],
         }
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to fetch item: {str(exc)}")

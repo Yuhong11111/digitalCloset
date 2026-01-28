@@ -1,4 +1,5 @@
 from typing import Optional, List
+from datetime import datetime
 
 from fastapi import Form
 from pydantic import BaseModel, ConfigDict, Field
@@ -78,6 +79,9 @@ class ItemDetailResponse(BaseModel):
     imageUrl: Optional[str] = None
     notes: Optional[str] = None
     favorite: Optional[bool] = None
+    wear_count: Optional[int] = None
+    last_worn_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
 
 
 # confirmation response for creating or patching an item
