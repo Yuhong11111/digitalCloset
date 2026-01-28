@@ -1,28 +1,20 @@
 from typing import Optional, List
+from datetime import datetime
 
 from fastapi import Form
 from pydantic import BaseModel, ConfigDict, Field
 
-
-class ItemResponse(BaseModel):
-    model_config = ConfigDict(populate_by_name=True)
-
-    id: str = Field(alias="_id")
-    name: str
-    category: Optional[str] = None
-    color: Optional[str] = None
-    season: Optional[str] = None
-    size: Optional[str] = None
-    imageUrl: Optional[str] = None
-    notes: Optional[str] = None
-    favorite: Optional[bool] = None
-
-
+# item creation request schema from form data
 class ItemRequest(BaseModel):
     name: str
     category: str
     color: str
     season: str
+    size: Optional[str] = None
+    material: Optional[str] = None
+    brand: Optional[str] = None
+    tags: Optional[str] = None
+    purchase_price: Optional[str] = None
     favorite: bool = False
     notes: Optional[str] = None
 
@@ -33,6 +25,11 @@ class ItemRequest(BaseModel):
         category: str = Form(...),
         color: str = Form(...),
         season: str = Form(...),
+        size: Optional[str] = Form(None),
+        material: Optional[str] = Form(None),
+        brand: Optional[str] = Form(None),
+        tags: Optional[str] = Form(None),
+        purchase_price: Optional[str] = Form(None),
         favorite: bool = Form(False),
         notes: Optional[str] = Form(None),
     ) -> "ItemRequest":
@@ -41,18 +38,59 @@ class ItemRequest(BaseModel):
             category=category,
             color=color,
             season=season,
+            size=size,
+            material=material,
+            brand=brand,
+            tags=tags,
+            purchase_price=purchase_price,
             favorite=favorite,
             notes=notes,
         )
 
 
-class CreateItemResponse(BaseModel):
+# only necessary fields for closet view
+class ItemClosetResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str = Field(alias="_id")
+    name: str
+    category: Optional[str] = None
+    color: Optional[str] = None
+    season: Optional[str] = None
+    tags: Optional[List[str]] = None
+    imageUrl: Optional[str] = None
+    favorite: Optional[bool] = None
+
+
+# detailed item response for item detail view
+class ItemDetailResponse(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    id: str = Field(alias="_id")
+    name: str
+    category: Optional[str] = None
+    color: Optional[str] = None
+    season: Optional[str] = None
+    size: Optional[str] = None
+    material: Optional[str] = None
+    brand: Optional[str] = None
+    tags: Optional[List[str]] = None
+    purchase_price: Optional[float] = None
+    imageUrl: Optional[str] = None
+    notes: Optional[str] = None
+    favorite: Optional[bool] = None
+    wear_count: Optional[int] = None
+    last_worn_at: Optional[datetime] = None
+    created_at: Optional[datetime] = None
+
+
+# confirmation response for creating or patching an item
+class CreateOrPatchItemResponse(BaseModel):
     status: str
-    item: ItemResponse
 
-
+# paginated items response for closet view
 class ItemsPageResponse(BaseModel):
-    items: List[ItemResponse]
+    items: List[ItemClosetResponse]
     page: int
     page_size: int
     total: int
@@ -62,8 +100,16 @@ class ItemPatchRequest(BaseModel):
     category: Optional[str] = None
     color: Optional[str] = None
     season: Optional[str] = None
+    size: Optional[str] = None
+    material: Optional[str] = None
+    brand: Optional[str] = None
+    tags: Optional[str] = None
+    purchase_price: Optional[str] = None
     favorite: Optional[bool] = None
     notes: Optional[str] = None
+    wear_count: Optional[int] = None
+    last_worn_at: Optional[str] = None
+
 
     @classmethod
     def as_form(
@@ -72,18 +118,28 @@ class ItemPatchRequest(BaseModel):
         category: Optional[str] = Form(None),
         color: Optional[str] = Form(None),
         season: Optional[str] = Form(None),
+        size: Optional[str] = Form(None),
+        material: Optional[str] = Form(None),
+        brand: Optional[str] = Form(None),
+        tags: Optional[str] = Form(None),
+        purchase_price: Optional[str] = Form(None),
         favorite: Optional[bool] = Form(None),
         notes: Optional[str] = Form(None),
+        wear_count: Optional[int] = Form(None),
+        last_worn_at: Optional[str] = Form(None),
     ) -> "ItemPatchRequest":
         return cls(
             name=name,
             category=category,
             color=color,
             season=season,
+            size=size,
+            material=material,
+            brand=brand,
+            tags=tags,
+            purchase_price=purchase_price,
             favorite=favorite,
             notes=notes,
+            wear_count=wear_count,
+            last_worn_at=last_worn_at,
         )
-
-class PatchResponse(BaseModel):
-    status: str
-    item: ItemPatchRequest

@@ -19,7 +19,7 @@
 */
 
 import AppLayout from "./AppLayout";
-import { Flex, Input, Box, Button, ButtonGroup, Card, Image, Text, Heading, NativeSelect, SimpleGrid, Badge, Icon } from "@chakra-ui/react";
+import { Flex, Input, Box, Button, ButtonGroup, Card, Image, Text, Heading, NativeSelect, SimpleGrid, Badge, Icon, Wrap, WrapItem } from "@chakra-ui/react";
 import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiSliders, FiArrowDown, FiPlus, FiGrid, FiHeart, FiX } from "react-icons/fi";
 import { useClothContext } from "../hooks/useClothContext";
@@ -61,6 +61,10 @@ export function Closet() {
             filter: filter !== "all" ? filter : undefined,
         });
     }
+
+    const handleCardOpen = (item: typeof clothes[number]) => {
+        navigate(`/clothesview/${item._id}`);
+    };
 
     return (
         <AppLayout>
@@ -267,6 +271,16 @@ export function Closet() {
                             boxShadow="sm"
                             transition="transform 0.2s ease, box-shadow 0.2s ease"
                             _hover={{ transform: "translateY(-4px)", boxShadow: "lg" }}
+                            cursor="pointer"
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => handleCardOpen(item)}
+                            onKeyDown={(event) => {
+                                if (event.key === "Enter" || event.key === " ") {
+                                    event.preventDefault();
+                                    handleCardOpen(item);
+                                }
+                            }}
                         >
                             {item.imageUrl ? (
                                 <Image
@@ -297,19 +311,56 @@ export function Closet() {
                                 <Card.Description>
                                     {item.color} · {item.category}
                                 </Card.Description>
-                                {item.notes && (
-                                    <Text fontSize="sm" color="gray.500">
-                                        {item.notes}
-                                    </Text>
+                                {item.tags && (
+                                    <Wrap gap={2} mt={1}>
+                                        {(Array.isArray(item.tags) ? item.tags : [item.tags]).map((tag, index) => {
+                                            const palettes = ["teal", "blue", "green", "purple", "pink", "cyan"];
+                                            const palette = palettes[index % palettes.length];
+                                            return (
+                                                <WrapItem key={`${tag}-${index}`}>
+                                                    <Badge
+                                                        variant="subtle"
+                                                        colorPalette={palette}
+                                                        borderRadius="full"
+                                                        textTransform="lowercase"
+                                                        px={2}
+                                                        py={1}
+                                                        fontSize="xs"
+                                                    >
+                                                        {tag}
+                                                    </Badge>
+                                                </WrapItem>
+                                            );
+                                        })}
+                                    </Wrap>
                                 )}
                             </Card.Body>
 
                             <Card.Footer px={4} pb={4}>
                                 <ButtonGroup size="sm" variant="outline">
-                                    <Button onClick={() => toggleFavorite(item._id, item.favorite)} borderRadius="md" bg="#f7f0ea" _hover={{ bg: "#eadfd6" }}>
+                                    <Button
+                                        onClick={(event) => {
+                                            // prevent card click
+                                            event.stopPropagation();
+                                            toggleFavorite(item._id, item.favorite);
+                                        }}
+                                        borderRadius="md"
+                                        bg="#f7f0ea"
+                                        _hover={{ bg: "#eadfd6" }}
+                                    >
                                         {item.favorite ? "♥ Favorite" : "♡ Favorite"}
                                     </Button>
-                                    <Button onClick={() => navigate(`/edit/${item._id}`)} borderRadius="md" bg="#f2e7de" _hover={{ bg: "#eadfd6" }}>Edit</Button>
+                                    <Button
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            navigate(`/edit/${item._id}`);
+                                        }}
+                                        borderRadius="md"
+                                        bg="#f2e7de"
+                                        _hover={{ bg: "#eadfd6" }}
+                                    >
+                                        Edit
+                                    </Button>
                                 </ButtonGroup>
                             </Card.Footer>
                         </Card.Root>
