@@ -11,6 +11,7 @@ import {
     Heading,
     SimpleGrid,
     Icon,
+    Input
 } from '@chakra-ui/react';
 import type { Message } from '../components/Message';
 import axios from 'axios';
@@ -34,9 +35,10 @@ function messagesToPrompt(messages: Message[]): string {
 
 export function Assistant() {
     const [messages, setMessages] = useState<Message[]>([
-        { role: "assistant", content: "Hi! I'm your AI stylist. Ask me about outfits or styling tips!" }
+        { role: "assistant", content: "Hi! I'm your AI stylist. Ask me about outfits or styling tips!", mode: "chat" }
     ]);
     const [input, setInput] = useState("");
+    const [mode, setMode] = useState<"chat" | "command">("chat");
     const [isLoading, setIsLoading] = useState(false);
     const [suggestedItems, setSuggestedItems] = useState<Array<{ name?: string; color?: string; category?: string; season?: string }>>([]);
     const isMounted = useRef(true);
@@ -44,6 +46,7 @@ export function Assistant() {
     const isAtBottomRef = useRef(true);
     const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
     const addMenuRef = useRef<HTMLDivElement | null>(null);
+    const addFileInputRef = useRef<HTMLInputElement | null>(null);
 
     // run once then the component mounts
     useEffect(() => {
@@ -80,7 +83,7 @@ export function Assistant() {
         // Don’t send if a request is already in progress.
         if (!input.trim() || isLoading) return;
         const userInput = input;
-        const updatedMessages = [...messages, { role: "user" as const, content: userInput }];
+        const updatedMessages = [...messages, { role: "user" as const, content: userInput, mode }];
         setMessages(updatedMessages);
         setInput("");
         setIsLoading(true);
@@ -260,12 +263,22 @@ export function Assistant() {
                                                 size="sm"
                                                 w="100%"
                                                 justifyContent="flex-start"
-                                                onClick={() => setIsAddMenuOpen(false)}
+                                                onClick={() => {
+                                                    setIsAddMenuOpen(false);
+                                                    addFileInputRef.current?.click();
+                                                }}
                                             >
                                                 Add a clothes
                                             </Button>
                                         </Box>
                                     )}
+                                    <Input
+                                        type="file"
+                                        accept="image/*"
+                                        ref={addFileInputRef}
+                                        display="none"
+                                        onChange={() => { setMode("command"); setIsAddMenuOpen(false); setInput("Added a new clothing item to my closet."); }}
+                                    />
                                 </Box>
                                 <Button
                                     bg="#ead7c7"
@@ -312,8 +325,8 @@ export function Assistant() {
                         )}
                     </Box>
                 </SimpleGrid>
-            </Flex>
-        </AppLayout>
+            </Flex >
+        </AppLayout >
     );
 }
 
