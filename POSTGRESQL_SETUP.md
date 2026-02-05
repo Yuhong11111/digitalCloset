@@ -115,7 +115,3 @@ psql closet_db
 DROP TABLE cloth_items;
 DROP TABLE users;
 ```
-
----
-
-Ready to migrate the API endpoints? 🚀

@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react';
 import type { Message } from '../components/Message';
 import axios from 'axios';
-import { FiSend, FiMessageCircle } from "react-icons/fi";
+import { FiSend, FiMessageCircle, FiPlus } from "react-icons/fi";
 import { API_BASE_URL } from '../config';
 import { pageBackgroundStyles } from "../theme";
 
@@ -42,6 +42,8 @@ export function Assistant() {
     const isMounted = useRef(true);
     const chatScrollRef = useRef<HTMLDivElement | null>(null);
     const isAtBottomRef = useRef(true);
+    const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
+    const addMenuRef = useRef<HTMLDivElement | null>(null);
 
     // run once then the component mounts
     useEffect(() => {
@@ -61,6 +63,18 @@ export function Assistant() {
             container.scrollTop = container.scrollHeight;
         }
     }, [messages, isLoading]);
+
+    useEffect(() => {
+        function handleOutsideClick(event: MouseEvent) {
+            if (!isAddMenuOpen) return;
+            const target = event.target as Node;
+            if (addMenuRef.current && !addMenuRef.current.contains(target)) {
+                setIsAddMenuOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleOutsideClick);
+        return () => document.removeEventListener("mousedown", handleOutsideClick);
+    }, [isAddMenuOpen]);
 
     async function sendMessage() {
         // Don’t send if a request is already in progress.
@@ -201,15 +215,58 @@ export function Assistant() {
                                 </Stack>
                             </Box>
                             <Box borderTop="1px solid" borderColor="gray.100" p={4} bg="#faf6f2">
-                                <Textarea
-                                    placeholder="Ask about styling... e.g., 'Need an outfit for a rainy day.'"
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    borderRadius="xl"
-                                    borderColor="gray.200"
-                                    bg="white"
-                                    mb={3}
-                                />
+                                <Box position="relative" mb={3} ref={addMenuRef}>
+                                    <Textarea
+                                        placeholder="Ask about styling... e.g., 'Need an outfit for a rainy day.'"
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        borderRadius="xl"
+                                        borderColor="gray.200"
+                                        bg="white"
+                                        pr="56px"
+                                    />
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        borderRadius="lg"
+                                        bg="white"
+                                        borderColor="gray.200"
+                                        _hover={{ bg: "gray.50" }}
+                                        px={2}
+                                        minW="36px"
+                                        position="absolute"
+                                        top="8px"
+                                        right="8px"
+                                        onClick={() => setIsAddMenuOpen(prev => !prev)}
+                                    >
+                                        <Icon as={FiPlus} />
+                                    </Button>
+                                    {isAddMenuOpen && (
+                                        <Box
+                                            position="absolute"
+                                            top="44px"
+                                            right="8px"
+                                            bg="white"
+                                            borderWidth="1px"
+                                            borderColor="gray.200"
+                                            borderRadius="lg"
+                                            boxShadow="sm"
+                                            minW="160px"
+                                            zIndex={2}
+                                            overflow="hidden"
+                                        >
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                w="100%"
+                                                justifyContent="flex-start"
+                                                onClick={() => setIsAddMenuOpen(false)}
+                                            >
+                                                Add a clothes
+                                            </Button>
+                                        </Box>
+                                    )}
+                                </Box>
                                 <Button
                                     bg="#ead7c7"
                                     color="ink"
