@@ -20,8 +20,11 @@ cd fullstack-app/backend
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-cd /Users/yuhong/Desktop/sl/digitalCloset
-python init_db.py
+
+# Create .env in fullstack-app/backend before running init_db.py
+# First-time DB init (run from the backend folder)
+python ../../init_db.py
+
 uvicorn app.main:app --reload
 ```
 
@@ -50,6 +53,9 @@ JWT_SECRET=your_jwt_secret
 - Outfit planning (create and manage looks)
 
 ## Screenshots
+
+### Login/Signup
+![login](images/login.png)
 
 ### Closet
 ![Closet](images/closet.png)
