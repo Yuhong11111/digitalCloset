@@ -87,7 +87,7 @@ export function Assistant() {
         // Don’t send if a request is already in progress.
         if (!input.trim() || isLoading) return;
         const userInput = input;
-        const updatedMessages = [...messages, { role: "user" as const, content: userInput, mode }];
+        const updatedMessages = [...messages, { role: "user" as const, content: userInput, mode: mode ?? "chat" }];
         setMessages(updatedMessages);
         setInput("");
         setSelectedImage(null);
@@ -115,11 +115,11 @@ export function Assistant() {
             // console.log(isMounted.current);
             if (isMounted.current) {
                 // console.log("Updating messages with assistant response");
-                setMessages([...updatedMessages, { role: "assistant", content: answer || "No response" }]);
+                setMessages([...updatedMessages, { role: "assistant", content: answer || "No response", mode: mode ?? "chat" }]);
             }
         } catch (error) {
             if (isMounted.current) {
-                setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong." }]);
+                setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong.", mode: mode ?? "chat" }]);
             }
         } finally {
             if (isMounted.current) {
@@ -156,7 +156,7 @@ export function Assistant() {
                         px={5}
                         h="48px"
                         fontWeight="700"
-                        onClick={() => setMessages([{ role: "assistant", content: "Hi! I'm your AI stylist. Ask me about outfits or styling tips!" }])}
+                        onClick={() => setMessages([{ role: "assistant", content: "Hi! I'm your AI stylist. Ask me about outfits or styling tips!", mode: "chat" }])}
                         _hover={{ bg: "#e1c8b5" }}
                     >
                         <Icon as={FiMessageCircle} mr={2} />
