@@ -38,7 +38,11 @@ export function Assistant() {
         { role: "assistant", content: "Hi! I'm your AI stylist. Ask me about outfits or styling tips!", mode: "chat" }
     ]);
     const [input, setInput] = useState("");
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [mode, setMode] = useState<"chat" | "command">("chat");
+    useEffect(() => {
+        console.log("Assistant mode:", mode);
+    }, [mode]);
     const [isLoading, setIsLoading] = useState(false);
     const [suggestedItems, setSuggestedItems] = useState<Array<{ name?: string; color?: string; category?: string; season?: string }>>([]);
     const isMounted = useRef(true);
@@ -86,15 +90,23 @@ export function Assistant() {
         const updatedMessages = [...messages, { role: "user" as const, content: userInput, mode }];
         setMessages(updatedMessages);
         setInput("");
+        setSelectedImage(null);
+        if (addFileInputRef.current) {
+            addFileInputRef.current.value = "";
+        }
         setIsLoading(true);
         // console.log("Sending message:", userInput);
         try {
             const url = `${API_BASE_URL}/assistant`;
-            const payload = {
-                message: messagesToPrompt(getMessages(messages, userInput)),
-                max_tokens: 200,
-            };
-            const response = await axios.post(url, payload);
+            const formData = new FormData();
+            formData.append("message", messagesToPrompt(getMessages(messages, userInput)));
+            formData.append("max_tokens", "200");
+            if (selectedImage) {
+                formData.append("image", selectedImage);
+            }
+            const response = await axios.post(url, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
             const data = response.data;
             const answer = data.response;
             const referencedItems = data.referencedItems ?? [];
@@ -222,7 +234,10 @@ export function Assistant() {
                                     <Textarea
                                         placeholder="Ask about styling... e.g., 'Need an outfit for a rainy day.'"
                                         value={input}
-                                        onChange={(e) => setInput(e.target.value)}
+                                        onChange={(e) => {
+                                            setMode("chat");
+                                            setInput(e.target.value);
+                                        }}
                                         borderRadius="xl"
                                         borderColor="gray.200"
                                         bg="white"
@@ -265,6 +280,10 @@ export function Assistant() {
                                                 justifyContent="flex-start"
                                                 onClick={() => {
                                                     setIsAddMenuOpen(false);
+                                                    setMode("command");
+                                                    if (!input.trim()) {
+                                                        setInput("add clothes");
+                                                    }
                                                     addFileInputRef.current?.click();
                                                 }}
                                             >
@@ -277,9 +296,17 @@ export function Assistant() {
                                         accept="image/*"
                                         ref={addFileInputRef}
                                         display="none"
-                                        onChange={() => { setMode("command"); setIsAddMenuOpen(false); setInput("Added a new clothing item to my closet."); }}
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0] ?? null;
+                                            setSelectedImage(file);
+                                        }}
                                     />
                                 </Box>
+                                {selectedImage && (
+                                    <Text fontSize="sm" color="gray.600" mb={3}>
+                                        Attached: {selectedImage.name}
+                                    </Text>
+                                )}
                                 <Button
                                     bg="#ead7c7"
                                     color="ink"
