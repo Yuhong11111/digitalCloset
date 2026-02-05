@@ -40,9 +40,9 @@ export function Assistant() {
     const [input, setInput] = useState("");
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [mode, setMode] = useState<"chat" | "command">("chat");
-    useEffect(() => {
-        console.log("Assistant mode:", mode);
-    }, [mode]);
+    // useEffect(() => {
+    //     console.log("Assistant mode:", mode);
+    // }, [mode]);
     const [isLoading, setIsLoading] = useState(false);
     const [suggestedItems, setSuggestedItems] = useState<Array<{ name?: string; color?: string; category?: string; season?: string }>>([]);
     const isMounted = useRef(true);
@@ -303,9 +303,22 @@ export function Assistant() {
                                     />
                                 </Box>
                                 {selectedImage && (
-                                    <Text fontSize="sm" color="gray.600" mb={3}>
-                                        Attached: {selectedImage.name}
-                                    </Text>
+                                    <Flex align="center" gap={2} mb={3}>
+                                        <Text fontSize="sm" color="gray.600">
+                                            Attached: {selectedImage.name}
+                                        </Text>
+                                        <Button
+                                            size="xs"
+                                            variant="ghost"
+                                            onClick={() => {
+                                                setSelectedImage(null);
+                                                setMode("chat");
+                                                setInput("");
+                                            }}
+                                        >
+                                            Remove
+                                        </Button>
+                                    </Flex>
                                 )}
                                 <Button
                                     bg="#ead7c7"
