@@ -4,4 +4,5 @@ export interface Message {
     role: MessageRole;
     content: string;
     mode?: "chat" | "command";
+    imageUrl?: string;
 }

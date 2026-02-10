@@ -89,7 +89,6 @@ async def get_ai_assistance(
     db: Session = Depends(get_db),
 ):
     try:
-        print(f"image filename: {image.filename if image else None}")
         user_id = current_user.get("userId")
         cloth_list = get_cloth(db, user_id)
         payload = {
@@ -98,7 +97,6 @@ async def get_ai_assistance(
         }
         # get mode to decide which system prompt to use
         mode = request.mode
-        print(f"assistant mode: {mode}")
         # if mode == "command" and image is not None: def command mode system
         # if mode == "chat": def chat mode system (more casual, less strict on response format)
         if mode == "command":

@@ -88,7 +88,11 @@ export function Assistant() {
         if (!input.trim() || isLoading) return;
         const userInput = input;
         const lastMode = messages[messages.length - 1]?.mode ?? "chat";
-        const updatedMessages = [...messages, { role: "user" as const, content: userInput, mode: mode ?? "chat" }];
+        const imageUrl = selectedImage ? URL.createObjectURL(selectedImage) : undefined;
+        const updatedMessages = [
+            ...messages,
+            { role: "user" as const, content: userInput, mode: mode ?? "chat", imageUrl }
+        ];
         setMessages(updatedMessages);
         setInput("");
         setSelectedImage(null);
@@ -222,6 +226,18 @@ export function Assistant() {
                                                 {msg.role === "user" ? "You" : "Assistant"}
                                             </Text>
                                             <Text>{msg.content}</Text>
+                                            {msg.imageUrl && (
+                                                <img
+                                                    src={msg.imageUrl}
+                                                    alt="attached"
+                                                    style={{
+                                                        marginTop: '8px',
+                                                        maxHeight: '200px',
+                                                        borderRadius: '8px',
+                                                        objectFit: 'cover'
+                                                    }}
+                                                />
+                                            )}
                                         </Box>
                                     ))}
                                     {isLoading && (
