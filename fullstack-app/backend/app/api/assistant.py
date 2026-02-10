@@ -3,27 +3,20 @@ from typing import Any, Dict, List, Optional, Set
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
 from openai import OpenAI
-from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.database import get_db
+from app.schemas.message import AIResponse, AIRequest
 from app.schemas.item import ItemClosetResponse
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
 
 client = OpenAI()
 
-class AIRequest(BaseModel):
-    message: str
-    max_tokens: int = 150
-
-class AIResponse(BaseModel):
-    response: str
-    referencedItems: List[ItemClosetResponse] = []
 
 SYSTEM_PROMPT = """
 You are a closet assistant.
@@ -84,7 +77,8 @@ def get_cloth(db: Session, owner_id: Optional[str]) -> List[Dict[str, Any]]:
 
 @router.post("", response_model=AIResponse)
 async def get_ai_assistance(
-    request: AIRequest,
+    request: AIRequest = Depends(AIRequest.as_form),
+    image: UploadFile | None = File(None),
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
