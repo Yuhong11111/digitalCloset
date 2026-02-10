@@ -87,6 +87,7 @@ export function Assistant() {
         // Don’t send if a request is already in progress.
         if (!input.trim() || isLoading) return;
         const userInput = input;
+        const lastMode = messages[messages.length - 1]?.mode ?? "chat";
         const updatedMessages = [...messages, { role: "user" as const, content: userInput, mode: mode ?? "chat" }];
         setMessages(updatedMessages);
         setInput("");
@@ -101,6 +102,7 @@ export function Assistant() {
             const formData = new FormData();
             formData.append("message", messagesToPrompt(getMessages(messages, userInput)));
             formData.append("max_tokens", "200");
+            formData.append("mode", mode ?? "chat");
             if (selectedImage) {
                 formData.append("image", selectedImage);
             }
@@ -115,11 +117,11 @@ export function Assistant() {
             // console.log(isMounted.current);
             if (isMounted.current) {
                 // console.log("Updating messages with assistant response");
-                setMessages([...updatedMessages, { role: "assistant", content: answer || "No response", mode: mode ?? "chat" }]);
+                setMessages([...updatedMessages, { role: "assistant", content: answer || "No response", mode: lastMode }]);
             }
         } catch (error) {
             if (isMounted.current) {
-                setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong.", mode: mode ?? "chat" }]);
+                setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong.", mode: lastMode }]);
             }
         } finally {
             if (isMounted.current) {
