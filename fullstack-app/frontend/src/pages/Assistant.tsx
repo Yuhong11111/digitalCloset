@@ -87,7 +87,6 @@ export function Assistant() {
         // Don’t send if a request is already in progress.
         if (!input.trim() || isLoading) return;
         const userInput = input;
-        const lastMode = messages[messages.length - 1]?.mode ?? "chat";
         const imageUrl = selectedImage ? URL.createObjectURL(selectedImage) : undefined;
         const updatedMessages = [
             ...messages,
@@ -121,11 +120,11 @@ export function Assistant() {
             // console.log(isMounted.current);
             if (isMounted.current) {
                 // console.log("Updating messages with assistant response");
-                setMessages([...updatedMessages, { role: "assistant", content: answer || "No response", mode: lastMode }]);
+                setMessages([...updatedMessages, { role: "assistant", content: answer || "No response", mode: mode ?? "chat" }]);
             }
         } catch (error) {
             if (isMounted.current) {
-                setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong.", mode: lastMode }]);
+                setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong.", mode: mode ?? "chat" }]);
             }
         } finally {
             if (isMounted.current) {
