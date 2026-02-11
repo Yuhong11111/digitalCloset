@@ -15,7 +15,7 @@ import {
     Icon,
 } from "@chakra-ui/react";
 import { FormEvent, useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import AppLayout from "./AppLayout";
 import { ClothingCategory, SeasonTag } from "../components/ClothContext";
 import { useClothContext } from "../hooks/useClothContext";
@@ -31,6 +31,7 @@ const seasons: SeasonTag[] = ["all", "spring", "summer", "fall", "winter"];
 export default function AddItem() {
     const { refreshClothes, clothes } = useClothContext();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     const { id: userId } = useContext(UserContext);
 
@@ -107,6 +108,22 @@ export default function AddItem() {
 
         fetchItemData();
     }, [clothes, isEditMode, params.id]);
+
+    useEffect(() => {
+        if (isEditMode) return;
+        const qName = searchParams.get("name") || "";
+        const qCategory = searchParams.get("category") as ClothingCategory | null;
+        const qColor = searchParams.get("color") || "";
+        const qSeason = searchParams.get("season") || "";
+        const qMaterial = searchParams.get("material") || "";
+        const qBrand = searchParams.get("brand") || "";
+        if (qName) setName(qName);
+        if (qCategory) setCategory(qCategory);
+        if (qColor) setColor(qColor);
+        if (qSeason) setSeason(qSeason as SeasonTag);
+        if (qMaterial) setMaterial(qMaterial);
+        if (qBrand) setBrand(qBrand);
+    }, [isEditMode, searchParams]);
 
     const resetForm = () => {
         setName("");

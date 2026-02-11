@@ -18,6 +18,7 @@ import axios from 'axios';
 import { FiSend, FiMessageCircle, FiPlus } from "react-icons/fi";
 import { API_BASE_URL } from '../config';
 import { pageBackgroundStyles } from "../theme";
+import { useNavigate } from 'react-router-dom';
 
 // leave last 6 messages + new user input
 function getMessages(messages: Message[], newUserInput: string): Message[] {
@@ -34,6 +35,7 @@ function messagesToPrompt(messages: Message[]): string {
 
 
 export function Assistant() {
+    const navigate = useNavigate();
     const [messages, setMessages] = useState<Message[]>([
         { role: "assistant", content: "Hi! I'm your AI stylist. Ask me about outfits or styling tips!", mode: "chat" }
     ]);
@@ -253,6 +255,16 @@ export function Assistant() {
                                             const missingRequiredList = ["name", "category", "color", "season"]
                                                 .filter(field => missing.has(field))
                                                 .join(", ");
+                                            const handleConfirm = () => {
+                                                const params = new URLSearchParams();
+                                                if (item.name) params.set("name", item.name);
+                                                if (item.category) params.set("category", item.category);
+                                                if (item.color && item.color.length > 0) params.set("color", item.color[0]);
+                                                if (item.season && item.season.length > 0) params.set("season", item.season[0]);
+                                                if (item.material) params.set("material", item.material);
+                                                if (item.brand) params.set("brand", item.brand);
+                                                navigate(`/add?${params.toString()}`);
+                                            };
                                             return (
                                                 <Box
                                                     key={idx}
@@ -296,7 +308,7 @@ export function Assistant() {
                                                         />
                                                     )}
                                                     <Flex gap={3} mt={4}>
-                                                        <Button size="sm" variant="outline">
+                                                        <Button size="sm" variant="outline" onClick={() => { }}>
                                                             Edit
                                                         </Button>
                                                         <Button
@@ -305,6 +317,7 @@ export function Assistant() {
                                                             bg={isMissingRequired ? "transparent" : "#ead7c7"}
                                                             color="ink"
                                                             disabled={isMissingRequired}
+                                                            onClick={handleConfirm}
                                                         >
                                                             Confirm
                                                         </Button>
