@@ -1,7 +1,7 @@
 from app.schemas.item import ItemClosetResponse
 from fastapi import Form
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional, Dict, Any
 
 class AIRequest(BaseModel):
     message: str
@@ -23,5 +23,10 @@ class AIRequest(BaseModel):
         )
 
 class AIResponse(BaseModel):
-    response: str
+    type: str
+    message: str
+    mode: str = "chat"
+    draftItem: Optional[Dict[str, Any]] = None
+    missingFields: List[str] = []
     referencedItems: List[ItemClosetResponse] = []
+    mode : str = "chat"

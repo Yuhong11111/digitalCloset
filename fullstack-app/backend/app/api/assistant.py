@@ -26,13 +26,20 @@ You receive:
 - question: the user's message
 - mode: "chat" or "command"
 
-Your job:
-1. If mode == "chat": answer naturally and optionally reference relevant items.
-2. If mode == "command": interpret the user’s intent as an action about adding/confirming clothes, then respond with what should happen next.
-3. Always return ONLY valid JSON in this schema:
-
+Return ONLY valid JSON with this structure:
 {
-  "answer": "string",
+  "type": "add_clothing_draft" | "chat_response",
+  "mode": "chat" | "command",
+  "message": "string",
+  "draftItem": {
+    "name": "string|null",
+    "category": "string|null",
+    "color": ["string"],
+    "season": ["string"],
+    "material": "string|null",
+    "brand": "string|null"
+  } | null,
+  "missingFields": ["field1", "field2"],
   "selected_item_ids": ["id1", "id2"]
 }
 
@@ -106,7 +113,7 @@ async def get_ai_assistance(
             If an image is provided, you MUST extract as many details as possible directly from the image (name, category, color, season, material, patterns, and any visible notes like logos/brands).
             Provide a best-effort guess even if uncertain. Then ask a short follow-up only for missing or ambiguous fields.
             If no image is provided, ask the user to upload one and include any details they already know.
-            Your response should confirm the details of the new item to be added and request only the missing info.
+            Fill draftItem with your best guesses, set missingFields for anything you couldn't determine, and set type="add_clothing_draft".
             Always respond in valid JSON.
             """
 
@@ -117,9 +124,7 @@ async def get_ai_assistance(
             You are given the payload with the user's closet items and their question.{payload}
 
             you are having a friendly conversation with the user about their closet and fashion choices.
-            You can be more flexible and conversational in your response, but you must still provide a valid JSON object with the answer and selected item IDs. 
-            Feel free to include a natural language answer that addresses the user's question, and select any items that you think are relevant, but you can be a bit more lenient in how you choose them. 
-            The user is looking for friendly advice and suggestions based on their closet items.
+            Provide a natural language message, set type="chat_response", and include any relevant selected_item_ids.
             """
         else:
             instructions = SYSTEM_PROMPT
@@ -154,12 +159,20 @@ async def get_ai_assistance(
         raw_json = response.output[0].content[0].text
         data = json.loads(raw_json)
 
-        answer: str = data["answer"]
-        selected_ids = set(data["selected_item_ids"])
+        response_type = data.get("type", "chat_response")
+        response_mode = data.get("mode", mode)
+        message = data.get("message", "")
+        draft_item = data.get("draftItem")
+        missing_fields = data.get("missingFields", [])
+        selected_ids = set(data.get("selected_item_ids", []))
         # reply_text = response.output_text
         selected_items = [item for item in cloth_list if item["id"] in selected_ids]
         return AIResponse(
-            response=answer,
+            type=response_type,
+            mode=response_mode,
+            message=message,
+            draftItem=draft_item,
+            missingFields=missing_fields,
             referencedItems=[ItemClosetResponse(**item) for item in selected_items],
         )
     except Exception as e:

@@ -113,18 +113,36 @@ export function Assistant() {
                 headers: { "Content-Type": "multipart/form-data" },
             });
             const data = response.data;
-            const answer = data.response;
+            const answer = data.message;
+            const responseType = data.type;
+            const responseMode = data.mode ?? (mode ?? "chat");
+            const draftItem = data.draftItem ?? null;
+            const missingFields = data.missingFields ?? [];
             const referencedItems = data.referencedItems ?? [];
             setSuggestedItems(referencedItems);
             // console.log("Received response:", data);
             // console.log(isMounted.current);
             if (isMounted.current) {
                 // console.log("Updating messages with assistant response");
-                setMessages([...updatedMessages, { role: "assistant", content: answer || "No response", mode: mode ?? "chat" }]);
+                setMessages([
+                    ...updatedMessages,
+                    {
+                        role: "assistant",
+                        content: answer || "No response",
+                        mode: responseMode,
+                        type: responseType,
+                        draftItem,
+                        missingFields,
+                        imageUrl,
+                    }
+                ]);
             }
         } catch (error) {
             if (isMounted.current) {
-                setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong.", mode: mode ?? "chat" }]);
+                setMessages(prev => [
+                    ...prev,
+                    { role: "assistant", content: "Sorry, something went wrong.", mode: mode ?? "chat" }
+                ]);
             }
         } finally {
             if (isMounted.current) {
@@ -211,34 +229,118 @@ export function Assistant() {
                                 }}
                             >
                                 <Stack gap={4}>
-                                    {messages.map((msg, idx) => (
-                                        <Box
-                                            key={idx}
-                                            alignSelf={msg.role === "user" ? "flex-end" : "flex-start"}
-                                            maxW="80%"
-                                            p={3}
-                                            borderRadius="xl"
-                                            bg={msg.role === "user" ? "#f0e3d7" : "#f7f1ec"}
-                                            color="gray.800"
-                                        >
-                                            <Text fontWeight="600" mb={1}>
-                                                {msg.role === "user" ? "You" : "Assistant"}
-                                            </Text>
-                                            <Text>{msg.content}</Text>
-                                            {msg.imageUrl && (
-                                                <img
-                                                    src={msg.imageUrl}
-                                                    alt="attached"
-                                                    style={{
-                                                        marginTop: '8px',
-                                                        maxHeight: '200px',
-                                                        borderRadius: '8px',
-                                                        objectFit: 'cover'
-                                                    }}
-                                                />
-                                            )}
-                                        </Box>
-                                    ))}
+                                    {messages.map((msg, idx) => {
+                                        const isAssistantCommand = msg.role === "assistant" && msg.mode === "command" && msg.draftItem;
+                                        if (isAssistantCommand) {
+                                            const item = msg.draftItem || {};
+                                            const missing = new Set(msg.missingFields || []);
+                                            const valueOrMissing = (key: "category" | "material" | "brand") => {
+                                                const value = item[key];
+                                                if (value) return value;
+                                                return missing.has(key) ? "— missing —" : "— optional —";
+                                            };
+                                            const colorText = (item.color && item.color.length > 0)
+                                                ? item.color.join(", ")
+                                                : (missing.has("color") ? "— missing —" : "— optional —");
+                                            const seasonText = (item.season && item.season.length > 0)
+                                                ? item.season.join(" / ")
+                                                : (missing.has("season") ? "— missing —" : "— optional —");
+                                            const isMissingRequired =
+                                                missing.has("name") ||
+                                                missing.has("category") ||
+                                                missing.has("color") ||
+                                                missing.has("season");
+                                            const missingRequiredList = ["name", "category", "color", "season"]
+                                                .filter(field => missing.has(field))
+                                                .join(", ");
+                                            return (
+                                                <Box
+                                                    key={idx}
+                                                    alignSelf="flex-start"
+                                                    maxW="80%"
+                                                    p={4}
+                                                    borderRadius="xl"
+                                                    bg="#f7f1ec"
+                                                    color="gray.800"
+                                                    borderWidth="1px"
+                                                    borderColor="gray.200"
+                                                >
+                                                    <Text fontWeight="700" mb={1}>
+                                                        Assistant
+                                                    </Text>
+                                                    <Text fontWeight="500" mb={2}>
+                                                        {item.name || "New clothing item"}
+                                                    </Text>
+                                                    <Stack gap={1}>
+                                                        <Text>Category: {valueOrMissing("category")}</Text>
+                                                        <Text>Color: {colorText}</Text>
+                                                        <Text>Season: {seasonText}</Text>
+                                                        <Text>Material: {valueOrMissing("material")}</Text>
+                                                        <Text>Brand: {valueOrMissing("brand")}</Text>
+                                                    </Stack>
+                                                    {isMissingRequired && (
+                                                        <Text mt={2} fontSize="sm" color="red.600">
+                                                            Missing required: {missingRequiredList}
+                                                        </Text>
+                                                    )}
+                                                    {msg.imageUrl && (
+                                                        <img
+                                                            src={msg.imageUrl}
+                                                            alt="attached"
+                                                            style={{
+                                                                marginTop: '12px',
+                                                                maxHeight: '220px',
+                                                                borderRadius: '8px',
+                                                                objectFit: 'cover'
+                                                            }}
+                                                        />
+                                                    )}
+                                                    <Flex gap={3} mt={4}>
+                                                        <Button size="sm" variant="outline">
+                                                            Edit
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant={isMissingRequired ? "ghost" : undefined}
+                                                            bg={isMissingRequired ? "transparent" : "#ead7c7"}
+                                                            color="ink"
+                                                            disabled={isMissingRequired}
+                                                        >
+                                                            Confirm
+                                                        </Button>
+                                                    </Flex>
+                                                </Box>
+                                            );
+                                        }
+                                        return (
+                                            <Box
+                                                key={idx}
+                                                alignSelf={msg.role === "user" ? "flex-end" : "flex-start"}
+                                                maxW="80%"
+                                                p={3}
+                                                borderRadius="xl"
+                                                bg={msg.role === "user" ? "#f0e3d7" : "#f7f1ec"}
+                                                color="gray.800"
+                                            >
+                                                <Text fontWeight="600" mb={1}>
+                                                    {msg.role === "user" ? "You" : "Assistant"}
+                                                </Text>
+                                                <Text>{msg.content}</Text>
+                                                {msg.imageUrl && (
+                                                    <img
+                                                        src={msg.imageUrl}
+                                                        alt="attached"
+                                                        style={{
+                                                            marginTop: '8px',
+                                                            maxHeight: '200px',
+                                                            borderRadius: '8px',
+                                                            objectFit: 'cover'
+                                                        }}
+                                                    />
+                                                )}
+                                            </Box>
+                                        );
+                                    })}
                                     {isLoading && (
                                         <Box textAlign="center">
                                             <Spinner size="sm" /> Thinking...

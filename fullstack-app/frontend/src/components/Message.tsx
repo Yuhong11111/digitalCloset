@@ -5,4 +5,14 @@ export interface Message {
     content: string;
     mode?: "chat" | "command";
     imageUrl?: string;
+    type?: string;
+    draftItem?: {
+        name?: string | null;
+        category?: string | null;
+        color?: string[] | null;
+        season?: string[] | null;
+        material?: string | null;
+        brand?: string | null;
+    } | null;
+    missingFields?: string[];
 }
