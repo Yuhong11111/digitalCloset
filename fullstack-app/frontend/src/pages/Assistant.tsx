@@ -41,6 +41,7 @@ export function Assistant() {
     ]);
     const [input, setInput] = useState("");
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [selectedImageDataUrl, setSelectedImageDataUrl] = useState<string | null>(null);
     const [mode, setMode] = useState<"chat" | "command">("chat");
     // useEffect(() => {
     //     console.log("Assistant mode:", mode);
@@ -92,11 +93,12 @@ export function Assistant() {
         const imageUrl = selectedImage ? URL.createObjectURL(selectedImage) : undefined;
         const updatedMessages = [
             ...messages,
-            { role: "user" as const, content: userInput, mode: mode ?? "chat", imageUrl }
+            { role: "user" as const, content: userInput, mode: mode ?? "chat", imageUrl, imageDataUrl: selectedImageDataUrl ?? undefined }
         ];
         setMessages(updatedMessages);
         setInput("");
         setSelectedImage(null);
+        setSelectedImageDataUrl(null);
         if (addFileInputRef.current) {
             addFileInputRef.current.value = "";
         }
@@ -136,6 +138,7 @@ export function Assistant() {
                         draftItem,
                         missingFields,
                         imageUrl,
+                        imageDataUrl: selectedImageDataUrl ?? undefined,
                     }
                 ]);
             }
@@ -255,16 +258,40 @@ export function Assistant() {
                                             const missingRequiredList = ["name", "category", "color", "season"]
                                                 .filter(field => missing.has(field))
                                                 .join(", ");
-                                            const handleConfirm = () => {
-                                                const params = new URLSearchParams();
-                                                if (item.name) params.set("name", item.name);
-                                                if (item.category) params.set("category", item.category);
-                                                if (item.color && item.color.length > 0) params.set("color", item.color[0]);
-                                                if (item.season && item.season.length > 0) params.set("season", item.season[0]);
-                                                if (item.material) params.set("material", item.material);
-                                                if (item.brand) params.set("brand", item.brand);
-                                                navigate(`/add?${params.toString()}`);
-                                            };
+                                                const persistDraft = () => {
+                                                    const draftPayload = {
+                                                        name: item.name ?? "",
+                                                        category: item.category ?? "",
+                                                        color: item.color ?? [],
+                                                        season: item.season ?? [],
+                                                        material: item.material ?? "",
+                                                        brand: item.brand ?? "",
+                                                        imageDataUrl: msg.imageDataUrl ?? null,
+                                                    };
+                                                    sessionStorage.setItem("assistantDraftItem", JSON.stringify(draftPayload));
+                                                };
+                                                const handleConfirm = () => {
+                                                    persistDraft();
+                                                    const params = new URLSearchParams();
+                                                    if (item.name) params.set("name", item.name);
+                                                    if (item.category) params.set("category", item.category);
+                                                    if (item.color && item.color.length > 0) params.set("color", item.color[0]);
+                                                    if (item.season && item.season.length > 0) params.set("season", item.season[0]);
+                                                    if (item.material) params.set("material", item.material);
+                                                    if (item.brand) params.set("brand", item.brand);
+                                                    navigate(`/add?${params.toString()}`);
+                                                };
+                                                const handleEdit = () => {
+                                                    persistDraft();
+                                                    const params = new URLSearchParams();
+                                                    if (item.name) params.set("name", item.name);
+                                                    if (item.category) params.set("category", item.category);
+                                                    if (item.color && item.color.length > 0) params.set("color", item.color[0]);
+                                                    if (item.season && item.season.length > 0) params.set("season", item.season[0]);
+                                                    if (item.material) params.set("material", item.material);
+                                                    if (item.brand) params.set("brand", item.brand);
+                                                    navigate(`/add?${params.toString()}`);
+                                                };
                                             return (
                                                 <Box
                                                     key={idx}
@@ -308,7 +335,7 @@ export function Assistant() {
                                                         />
                                                     )}
                                                     <Flex gap={3} mt={4}>
-                                                        <Button size="sm" variant="outline" onClick={() => { }}>
+                                                        <Button size="sm" variant="outline" onClick={handleEdit}>
                                                             Edit
                                                         </Button>
                                                         <Button
@@ -431,6 +458,16 @@ export function Assistant() {
                                         onChange={(e) => {
                                             const file = e.target.files?.[0] ?? null;
                                             setSelectedImage(file);
+                                            if (!file) {
+                                                setSelectedImageDataUrl(null);
+                                                return;
+                                            }
+                                            const reader = new FileReader();
+                                            reader.onload = () => {
+                                                const result = typeof reader.result === "string" ? reader.result : null;
+                                                setSelectedImageDataUrl(result);
+                                            };
+                                            reader.readAsDataURL(file);
                                         }}
                                     />
                                 </Box>

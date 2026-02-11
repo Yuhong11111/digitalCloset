@@ -117,12 +117,28 @@ export default function AddItem() {
         const qSeason = searchParams.get("season") || "";
         const qMaterial = searchParams.get("material") || "";
         const qBrand = searchParams.get("brand") || "";
+        const draftRaw = sessionStorage.getItem("assistantDraftItem");
+        const draft = draftRaw ? JSON.parse(draftRaw) : null;
         if (qName) setName(qName);
         if (qCategory) setCategory(qCategory);
         if (qColor) setColor(qColor);
         if (qSeason) setSeason(qSeason as SeasonTag);
         if (qMaterial) setMaterial(qMaterial);
         if (qBrand) setBrand(qBrand);
+        if (draft?.imageDataUrl) {
+            setImagePreview(draft.imageDataUrl);
+            setImageFileName("assistant-upload");
+            fetch(draft.imageDataUrl)
+                .then(res => res.blob())
+                .then(blob => {
+                    const file = new File([blob], "assistant-upload.png", { type: blob.type || "image/png" });
+                    setImageFile(file);
+                })
+                .catch(() => {});
+        }
+        if (draftRaw) {
+            sessionStorage.removeItem("assistantDraftItem");
+        }
     }, [isEditMode, searchParams]);
 
     const resetForm = () => {
