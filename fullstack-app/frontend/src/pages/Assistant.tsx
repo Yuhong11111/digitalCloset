@@ -258,40 +258,58 @@ export function Assistant() {
                                             const missingRequiredList = ["name", "category", "color", "season"]
                                                 .filter(field => missing.has(field))
                                                 .join(", ");
-                                                const persistDraft = () => {
-                                                    const draftPayload = {
-                                                        name: item.name ?? "",
-                                                        category: item.category ?? "",
-                                                        color: item.color ?? [],
-                                                        season: item.season ?? [],
-                                                        material: item.material ?? "",
-                                                        brand: item.brand ?? "",
-                                                        imageDataUrl: msg.imageDataUrl ?? null,
-                                                    };
-                                                    sessionStorage.setItem("assistantDraftItem", JSON.stringify(draftPayload));
+                                            const persistDraft = () => {
+                                                const draftPayload = {
+                                                    name: item.name ?? "",
+                                                    category: item.category ?? "",
+                                                    color: item.color ?? [],
+                                                    season: item.season ?? [],
+                                                    material: item.material ?? "",
+                                                    brand: item.brand ?? "",
+                                                    imageDataUrl: msg.imageDataUrl ?? null,
                                                 };
-                                                const handleConfirm = () => {
-                                                    persistDraft();
-                                                    const params = new URLSearchParams();
-                                                    if (item.name) params.set("name", item.name);
-                                                    if (item.category) params.set("category", item.category);
-                                                    if (item.color && item.color.length > 0) params.set("color", item.color[0]);
-                                                    if (item.season && item.season.length > 0) params.set("season", item.season[0]);
-                                                    if (item.material) params.set("material", item.material);
-                                                    if (item.brand) params.set("brand", item.brand);
-                                                    navigate(`/add?${params.toString()}`);
-                                                };
-                                                const handleEdit = () => {
-                                                    persistDraft();
-                                                    const params = new URLSearchParams();
-                                                    if (item.name) params.set("name", item.name);
-                                                    if (item.category) params.set("category", item.category);
-                                                    if (item.color && item.color.length > 0) params.set("color", item.color[0]);
-                                                    if (item.season && item.season.length > 0) params.set("season", item.season[0]);
-                                                    if (item.material) params.set("material", item.material);
-                                                    if (item.brand) params.set("brand", item.brand);
-                                                    navigate(`/add?${params.toString()}`);
-                                                };
+                                                sessionStorage.setItem("assistantDraftItem", JSON.stringify(draftPayload));
+                                            };
+                                            const handleConfirm = async () => {
+                                                if (isMissingRequired) return;
+                                                try {
+                                                    const formData = new FormData();
+                                                    formData.append("name", item.name || "");
+                                                    formData.append("category", item.category || "");
+                                                    formData.append("color", (item.color && item.color[0]) || "");
+                                                    formData.append("season", (item.season && item.season[0]) || "");
+                                                    if (item.material) formData.append("material", item.material);
+                                                    if (item.brand) formData.append("brand", item.brand);
+                                                    if (msg.imageDataUrl) {
+                                                        const blob = await fetch(msg.imageDataUrl).then(res => res.blob());
+                                                        const file = new File([blob], "assistant-upload.png", { type: blob.type || "image/png" });
+                                                        formData.append("image", file);
+                                                    }
+                                                    await axios.post(`${API_BASE_URL}/items`, formData, {
+                                                        headers: { "Content-Type": "multipart/form-data" },
+                                                    });
+                                                    setMessages(prev => [
+                                                        ...prev,
+                                                        { role: "assistant", content: "Item added to your closet.", mode: "chat" }
+                                                    ]);
+                                                } catch (error) {
+                                                    setMessages(prev => [
+                                                        ...prev,
+                                                        { role: "assistant", content: "Failed to add item. Please try again.", mode: "chat" }
+                                                    ]);
+                                                }
+                                            };
+                                            const handleEdit = () => {
+                                                persistDraft();
+                                                const params = new URLSearchParams();
+                                                if (item.name) params.set("name", item.name);
+                                                if (item.category) params.set("category", item.category);
+                                                if (item.color && item.color.length > 0) params.set("color", item.color[0]);
+                                                if (item.season && item.season.length > 0) params.set("season", item.season[0]);
+                                                if (item.material) params.set("material", item.material);
+                                                if (item.brand) params.set("brand", item.brand);
+                                                navigate(`/add?${params.toString()}`);
+                                            };
                                             return (
                                                 <Box
                                                     key={idx}
