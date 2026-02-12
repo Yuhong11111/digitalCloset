@@ -18,6 +18,42 @@ router = APIRouter(prefix="/assistant", tags=["assistant"])
 client = OpenAI()
 
 
+def repair_json(raw: str) -> str:
+    start = raw.find("{")
+    end = raw.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        raw = raw[start:end + 1]
+    out = []
+    in_str = False
+    escape = False
+    for ch in raw:
+        if in_str:
+            if escape:
+                out.append(ch)
+                escape = False
+                continue
+            if ch == "\\":
+                out.append(ch)
+                escape = True
+                continue
+            if ch == "\n":
+                out.append("\\n")
+                continue
+            if ch == "\r":
+                out.append("\\r")
+                continue
+            if ch == "\"":
+                in_str = False
+                out.append(ch)
+                continue
+            out.append(ch)
+        else:
+            if ch == "\"":
+                in_str = True
+            out.append(ch)
+    return "".join(out)
+
+
 SYSTEM_PROMPT = """
 You are a digital closet assistant.
 
@@ -46,6 +82,7 @@ Return ONLY valid JSON with this structure:
 Rules:
 - Use only item ids from closet_items.
 - If no item matches, use an empty array.
+- The JSON must be valid and must not contain unescaped newlines inside strings.
 """
 
 
@@ -97,11 +134,6 @@ async def get_ai_assistance(
 ):
     try:
         user_id = current_user.get("userId")
-        cloth_list = get_cloth(db, user_id)
-        payload = {
-            "closet_items": cloth_list,
-            "question": request.message
-        }
         # get mode to decide which system prompt to use
         mode = request.mode
         # if mode == "command" and image is not None: def command mode system
@@ -118,6 +150,11 @@ async def get_ai_assistance(
             """
 
         elif mode == "chat":
+            cloth_list = get_cloth(db, user_id)
+            payload = {
+                "closet_items": cloth_list,
+                "question": request.message
+            }
             instructions = f"""{SYSTEM_PROMPT}
             You are in CHAT MODE.
             
@@ -151,13 +188,18 @@ async def get_ai_assistance(
             model="gpt-4o-mini",
             # system message that sets the permanent behavior/personality of the assistant
             instructions=instructions,
+            # since we include image data in the input, we need to use the structured input format and include the text and image as separate parts of the input array
             input=[{"role": "user", "content": input_content}],
             temperature=0.7,
             max_output_tokens=request.max_tokens,
         )
-         # 4. Parse JSON from the model response
+         # Parse JSON from the model response
         raw_json = response.output[0].content[0].text
-        data = json.loads(raw_json)
+        try:
+            data = json.loads(raw_json)
+        except json.JSONDecodeError:
+            repaired = repair_json(raw_json)
+            data = json.loads(repaired)
 
         response_type = data.get("type", "chat_response")
         response_mode = data.get("mode", mode)
