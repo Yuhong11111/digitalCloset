@@ -19,6 +19,7 @@ import { FiSend, FiMessageCircle, FiPlus } from "react-icons/fi";
 import { API_BASE_URL } from '../config';
 import { pageBackgroundStyles } from "../theme";
 import { useNavigate } from 'react-router-dom';
+import { useClothContext } from "../hooks/useClothContext";
 
 // leave last 6 messages + new user input
 function getMessages(messages: Message[], newUserInput: string): Message[] {
@@ -36,6 +37,7 @@ function messagesToPrompt(messages: Message[]): string {
 
 export function Assistant() {
     const navigate = useNavigate();
+    const { refreshClothes } = useClothContext();
     const [messages, setMessages] = useState<Message[]>([
         { role: "assistant", content: "Hi! I'm your AI stylist. Ask me about outfits or styling tips!", mode: "chat" }
     ]);
@@ -288,6 +290,7 @@ export function Assistant() {
                                                     await axios.post(`${API_BASE_URL}/items`, formData, {
                                                         headers: { "Content-Type": "multipart/form-data" },
                                                     });
+                                                    await refreshClothes();
                                                     setMessages(prev => [
                                                         ...prev,
                                                         { role: "assistant", content: "Item added to your closet.", mode: "chat" }
