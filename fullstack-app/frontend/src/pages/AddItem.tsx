@@ -83,6 +83,11 @@ export default function AddItem() {
                     setImageFileName(urlParts[urlParts.length - 1]);
                 }
             } catch (error) {
+                const status = (error as any)?.response?.status;
+                if (status === 404) {
+                    navigate('/closet');
+                    return;
+                }
                 console.error("Failed to fetch item data", error);
             }
         }
@@ -134,7 +139,7 @@ export default function AddItem() {
                     const file = new File([blob], "assistant-upload.png", { type: blob.type || "image/png" });
                     setImageFile(file);
                 })
-                .catch(() => {});
+                .catch(() => { });
         }
         if (draftRaw) {
             sessionStorage.removeItem("assistantDraftItem");
@@ -599,6 +604,7 @@ export default function AddItem() {
                                             if (response.data.status === "success") {
                                                 await refreshClothes();
                                                 navigate('/closet');
+                                                return;
                                             } else {
                                                 console.error("Failed to delete item:", response.data);
                                             }

@@ -107,7 +107,7 @@ async def get_items(
     page_size: int = Query(12, ge=1, le=100),
     current_user=Depends(get_current_user),
     db: Session = Depends(get_db),
-):
+    ):
     try:
         owner_id = uuid.UUID(current_user.get("userId"))
         where_clause = "owner_id = :owner_id"
@@ -221,6 +221,8 @@ async def get_item(
             "last_worn_at": result._mapping["last_worn_at"],
             "created_at": result._mapping["created_at"],
         }
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Failed to fetch item: {str(exc)}")
 
@@ -344,6 +346,9 @@ async def delete_item(
             "status": "success",
             "message": "Item deleted successfully"
         }
+    except HTTPException:
+        db.rollback()
+        raise
     except Exception as exc:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed to delete item: {str(exc)}")
