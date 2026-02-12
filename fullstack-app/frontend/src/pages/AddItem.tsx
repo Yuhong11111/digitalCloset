@@ -116,6 +116,7 @@ export default function AddItem() {
 
     useEffect(() => {
         if (isEditMode) return;
+        // when coming from assistant command "edit draft" action, the assistant will save the draft data in session storage and we can read it here to pre-fill the form, and then clear the draft from storage so it doesn't interfere with future edits
         const qName = searchParams.get("name") || "";
         const qCategory = searchParams.get("category") as ClothingCategory | null;
         const qColor = searchParams.get("color") || "";

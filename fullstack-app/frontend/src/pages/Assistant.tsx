@@ -42,7 +42,9 @@ export function Assistant() {
         { role: "assistant", content: "Hi! I'm your AI stylist. Ask me about outfits or styling tips!", mode: "chat" }
     ]);
     const [input, setInput] = useState("");
+    // the actual File object selected by the user, which will be sent to the backend
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    // a data URL version of the selected image, used for previewing the image in the chat
     const [selectedImageDataUrl, setSelectedImageDataUrl] = useState<string | null>(null);
     const [mode, setMode] = useState<"chat" | "command">("chat");
     // useEffect(() => {
@@ -207,7 +209,7 @@ export function Assistant() {
                         >
                             <Icon as={FiMessageCircle} color="#8b6f5a" />
                             <Text color="gray.700">
-                                Style Tip: Ask for a weekend look, a work outfit, or how to style a specific color.
+                                Style Tip: Ask for a weekend look, a work outfit, or how to style a specific color. You can also attach an image of a clothing item to add it!
                             </Text>
                         </Box>
                         <Flex
@@ -236,6 +238,7 @@ export function Assistant() {
                                 <Stack gap={4}>
                                     {messages.map((msg, idx) => {
                                         const isAssistantCommand = msg.role === "assistant" && msg.mode === "command" && msg.draftItem;
+                                        // display assistant command messages differently with draft item details and confirm/edit buttons
                                         if (isAssistantCommand) {
                                             const item = msg.draftItem || {};
                                             const missing = new Set(msg.missingFields || []);
@@ -302,6 +305,7 @@ export function Assistant() {
                                             };
                                             const handleEdit = () => {
                                                 persistDraft();
+                                                // we are navigating to the AddItem page with query params for pre-filling the form, because we want the data to persist even if the user refreshes the page while editing
                                                 const params = new URLSearchParams();
                                                 if (item.name) params.set("name", item.name);
                                                 if (item.category) params.set("category", item.category);
