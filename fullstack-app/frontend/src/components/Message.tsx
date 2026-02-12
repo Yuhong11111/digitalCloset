@@ -6,7 +6,6 @@ export interface Message {
     mode?: "chat" | "command";
     imageUrl?: string;
     imageDataUrl?: string;
-    type?: string;
     draftItem?: {
         name?: string | null;
         category?: string | null;

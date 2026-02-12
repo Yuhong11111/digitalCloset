@@ -23,7 +23,6 @@ class AIRequest(BaseModel):
         )
 
 class AIResponse(BaseModel):
-    type: str
     message: str
     mode: str = "chat"
     draftItem: Optional[Dict[str, Any]] = None

@@ -64,7 +64,6 @@ You receive:
 
 Return ONLY valid JSON with this structure:
 {
-  "type": "add_clothing_draft" | "chat_response",
   "mode": "chat" | "command",
   "message": "string",
   "draftItem": {
@@ -201,7 +200,6 @@ async def get_ai_assistance(
             repaired = repair_json(raw_json)
             data = json.loads(repaired)
 
-        response_type = data.get("type", "chat_response")
         response_mode = data.get("mode", mode)
         message = data.get("message", "")
         draft_item = data.get("draftItem")
@@ -210,7 +208,6 @@ async def get_ai_assistance(
         # reply_text = response.output_text
         selected_items = [item for item in cloth_list if item["id"] in selected_ids]
         return AIResponse(
-            type=response_type,
             mode=response_mode,
             message=message,
             draftItem=draft_item,

@@ -120,7 +120,6 @@ export function Assistant() {
             });
             const data = response.data;
             const answer = data.message;
-            const responseType = data.type;
             const responseMode = data.mode ?? (mode ?? "chat");
             const draftItem = data.draftItem ?? null;
             const missingFields = data.missingFields ?? [];
@@ -136,7 +135,6 @@ export function Assistant() {
                         role: "assistant",
                         content: answer || "No response",
                         mode: responseMode,
-                        type: responseType,
                         draftItem,
                         missingFields,
                         imageUrl,
