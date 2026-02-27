@@ -11,8 +11,8 @@ export function HomePage() {
             justify="center"
             gap={6}
             direction="row">
-            <h1>Welcome to the Digital Closet</h1>
-            <Button onClick={() => navigate('/login')}>
+            <h1 data-testid="home-title">Welcome to the Digital Closet</h1>
+            <Button onClick={() => navigate('/login')} data-testid="start-button">
                 Log in/Sign in
             </Button>
             {/* <button onClick={testBackendConnection}>Test Backend Connection</button> */}

@@ -60,6 +60,47 @@ DATABASE_URL=postgresql+psycopg2://user:password@localhost:5432/closet_db
 JWT_SECRET=your_jwt_secret
 ```
 
+## Selenium E2E Test (Signup Smoke)
+
+This project includes a Selenium smoke test that validates:
+- Open login page
+- Switch to signup mode
+- Register a unique user
+- Redirect to `/closet`
+
+### Prerequisites
+
+- Backend running at `http://localhost:8000`
+- Frontend running at `http://localhost:3000`
+- Google Chrome installed
+
+### Install E2E dependencies
+
+```bash
+cd fullstack-app/frontend
+npm run test:e2e:install
+```
+
+### Run
+
+```bash
+cd fullstack-app/frontend
+npm run test:e2e
+# or run with visible browser
+E2E_HEADLESS=false npm run test:e2e
+```
+
+Run a single test file:
+
+```bash
+cd fullstack-app/frontend
+python3 -m pytest tests/e2e/tests/test_home_page_selenium.py -q
+```
+
+Optional env vars:
+- `E2E_FRONTEND_URL` (default: `http://localhost:3000`)
+- `E2E_HEADLESS` (`true` or `false`, default: `true`)
+
 ## Features
 
 - User authentication (login/signup)

@@ -15,7 +15,7 @@ import {
     Icon,
 } from "@chakra-ui/react";
 import { FormEvent, useContext, useEffect, useState } from "react";
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import AppLayout from "./AppLayout";
 import { ClothingCategory, SeasonTag } from "../components/ClothContext";
 import { useClothContext } from "../hooks/useClothContext";
@@ -31,6 +31,7 @@ const seasons: SeasonTag[] = ["all", "spring", "summer", "fall", "winter"];
 export default function AddItem() {
     const { refreshClothes, clothes } = useClothContext();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     const { id: userId } = useContext(UserContext);
 
@@ -82,6 +83,11 @@ export default function AddItem() {
                     setImageFileName(urlParts[urlParts.length - 1]);
                 }
             } catch (error) {
+                const status = (error as any)?.response?.status;
+                if (status === 404) {
+                    navigate('/closet');
+                    return;
+                }
                 console.error("Failed to fetch item data", error);
             }
         }
@@ -107,6 +113,39 @@ export default function AddItem() {
 
         fetchItemData();
     }, [clothes, isEditMode, params.id]);
+
+    useEffect(() => {
+        if (isEditMode) return;
+        // when coming from assistant command "edit draft" action, the assistant will save the draft data in session storage and we can read it here to pre-fill the form, and then clear the draft from storage so it doesn't interfere with future edits
+        const qName = searchParams.get("name") || "";
+        const qCategory = searchParams.get("category") as ClothingCategory | null;
+        const qColor = searchParams.get("color") || "";
+        const qSeason = searchParams.get("season") || "";
+        const qMaterial = searchParams.get("material") || "";
+        const qBrand = searchParams.get("brand") || "";
+        const draftRaw = sessionStorage.getItem("assistantDraftItem");
+        const draft = draftRaw ? JSON.parse(draftRaw) : null;
+        if (qName) setName(qName);
+        if (qCategory) setCategory(qCategory);
+        if (qColor) setColor(qColor);
+        if (qSeason) setSeason(qSeason as SeasonTag);
+        if (qMaterial) setMaterial(qMaterial);
+        if (qBrand) setBrand(qBrand);
+        if (draft?.imageDataUrl) {
+            setImagePreview(draft.imageDataUrl);
+            setImageFileName("assistant-upload");
+            fetch(draft.imageDataUrl)
+                .then(res => res.blob())
+                .then(blob => {
+                    const file = new File([blob], "assistant-upload.png", { type: blob.type || "image/png" });
+                    setImageFile(file);
+                })
+                .catch(() => { });
+        }
+        if (draftRaw) {
+            sessionStorage.removeItem("assistantDraftItem");
+        }
+    }, [isEditMode, searchParams]);
 
     const resetForm = () => {
         setName("");
@@ -566,6 +605,7 @@ export default function AddItem() {
                                             if (response.data.status === "success") {
                                                 await refreshClothes();
                                                 navigate('/closet');
+                                                return;
                                             } else {
                                                 console.error("Failed to delete item:", response.data);
                                             }

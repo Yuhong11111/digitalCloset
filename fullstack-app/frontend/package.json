@@ -31,6 +31,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --watchAll=false",
+    "test:e2e": "python3 -m pytest tests/e2e -q",
+    "test:e2e:install": "python3 -m pip install -r tests/e2e/requirements.txt",
     "eject": "react-scripts eject"
   },
   "jest": {

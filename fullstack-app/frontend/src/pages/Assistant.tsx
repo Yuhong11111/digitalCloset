@@ -11,12 +11,15 @@ import {
     Heading,
     SimpleGrid,
     Icon,
+    Input
 } from '@chakra-ui/react';
 import type { Message } from '../components/Message';
 import axios from 'axios';
 import { FiSend, FiMessageCircle, FiPlus } from "react-icons/fi";
 import { API_BASE_URL } from '../config';
 import { pageBackgroundStyles } from "../theme";
+import { useNavigate } from 'react-router-dom';
+import { useClothContext } from "../hooks/useClothContext";
 
 // leave last 6 messages + new user input
 function getMessages(messages: Message[], newUserInput: string): Message[] {
@@ -33,10 +36,20 @@ function messagesToPrompt(messages: Message[]): string {
 
 
 export function Assistant() {
+    const navigate = useNavigate();
+    const { refreshClothes } = useClothContext();
     const [messages, setMessages] = useState<Message[]>([
-        { role: "assistant", content: "Hi! I'm your AI stylist. Ask me about outfits or styling tips!" }
+        { role: "assistant", content: "Hi! I'm your AI stylist. Ask me about outfits or styling tips!", mode: "chat" }
     ]);
     const [input, setInput] = useState("");
+    // the actual File object selected by the user, which will be sent to the backend
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    // a data URL version of the selected image, used for previewing the image in the chat
+    const [selectedImageDataUrl, setSelectedImageDataUrl] = useState<string | null>(null);
+    const [mode, setMode] = useState<"chat" | "command">("chat");
+    // useEffect(() => {
+    //     console.log("Assistant mode:", mode);
+    // }, [mode]);
     const [isLoading, setIsLoading] = useState(false);
     const [suggestedItems, setSuggestedItems] = useState<Array<{ name?: string; color?: string; category?: string; season?: string }>>([]);
     const isMounted = useRef(true);
@@ -44,6 +57,7 @@ export function Assistant() {
     const isAtBottomRef = useRef(true);
     const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
     const addMenuRef = useRef<HTMLDivElement | null>(null);
+    const addFileInputRef = useRef<HTMLInputElement | null>(null);
 
     // run once then the component mounts
     useEffect(() => {
@@ -80,31 +94,62 @@ export function Assistant() {
         // Don’t send if a request is already in progress.
         if (!input.trim() || isLoading) return;
         const userInput = input;
-        const updatedMessages = [...messages, { role: "user" as const, content: userInput }];
+        const imageUrl = selectedImage ? URL.createObjectURL(selectedImage) : undefined;
+        const updatedMessages = [
+            ...messages,
+            { role: "user" as const, content: userInput, mode: mode ?? "chat", imageUrl, imageDataUrl: selectedImageDataUrl ?? undefined }
+        ];
         setMessages(updatedMessages);
         setInput("");
+        setSelectedImage(null);
+        setSelectedImageDataUrl(null);
+        if (addFileInputRef.current) {
+            addFileInputRef.current.value = "";
+        }
         setIsLoading(true);
         // console.log("Sending message:", userInput);
         try {
             const url = `${API_BASE_URL}/assistant`;
-            const payload = {
-                message: messagesToPrompt(getMessages(messages, userInput)),
-                max_tokens: 200,
-            };
-            const response = await axios.post(url, payload);
+            const formData = new FormData();
+            formData.append("message", messagesToPrompt(getMessages(messages, userInput)));
+            formData.append("max_tokens", "200");
+            formData.append("mode", mode ?? "chat");
+            if (selectedImage) {
+                formData.append("image", selectedImage);
+            }
+            const response = await axios.post(url, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
             const data = response.data;
-            const answer = data.response;
+            const answer = data.message;
+            const responseMode = data.mode ?? (mode ?? "chat");
+            const draftItem = data.draftItem ?? null;
+            const missingFields = data.missingFields ?? [];
             const referencedItems = data.referencedItems ?? [];
             setSuggestedItems(referencedItems);
             // console.log("Received response:", data);
             // console.log(isMounted.current);
             if (isMounted.current) {
                 // console.log("Updating messages with assistant response");
-                setMessages([...updatedMessages, { role: "assistant", content: answer || "No response" }]);
+                setMessages([
+                    ...updatedMessages,
+                    {
+                        role: "assistant",
+                        content: answer || "No response",
+                        mode: responseMode,
+                        draftItem,
+                        missingFields,
+                        imageUrl,
+                        imageDataUrl: selectedImageDataUrl ?? undefined,
+                    }
+                ]);
             }
         } catch (error) {
             if (isMounted.current) {
-                setMessages(prev => [...prev, { role: "assistant", content: "Sorry, something went wrong." }]);
+                setMessages(prev => [
+                    ...prev,
+                    { role: "assistant", content: "Sorry, something went wrong.", mode: mode ?? "chat" }
+                ]);
             }
         } finally {
             if (isMounted.current) {
@@ -141,7 +186,7 @@ export function Assistant() {
                         px={5}
                         h="48px"
                         fontWeight="700"
-                        onClick={() => setMessages([{ role: "assistant", content: "Hi! I'm your AI stylist. Ask me about outfits or styling tips!" }])}
+                        onClick={() => setMessages([{ role: "assistant", content: "Hi! I'm your AI stylist. Ask me about outfits or styling tips!", mode: "chat" }])}
                         _hover={{ bg: "#e1c8b5" }}
                     >
                         <Icon as={FiMessageCircle} mr={2} />
@@ -164,7 +209,7 @@ export function Assistant() {
                         >
                             <Icon as={FiMessageCircle} color="#8b6f5a" />
                             <Text color="gray.700">
-                                Style Tip: Ask for a weekend look, a work outfit, or how to style a specific color.
+                                Style Tip: Ask for a weekend look, a work outfit, or how to style a specific color. You can also attach an image of a clothing item to add it!
                             </Text>
                         </Box>
                         <Flex
@@ -191,22 +236,174 @@ export function Assistant() {
                                 }}
                             >
                                 <Stack gap={4}>
-                                    {messages.map((msg, idx) => (
-                                        <Box
-                                            key={idx}
-                                            alignSelf={msg.role === "user" ? "flex-end" : "flex-start"}
-                                            maxW="80%"
-                                            p={3}
-                                            borderRadius="xl"
-                                            bg={msg.role === "user" ? "#f0e3d7" : "#f7f1ec"}
-                                            color="gray.800"
-                                        >
-                                            <Text fontWeight="600" mb={1}>
-                                                {msg.role === "user" ? "You" : "Assistant"}
-                                            </Text>
-                                            <Text>{msg.content}</Text>
-                                        </Box>
-                                    ))}
+                                    {messages.map((msg, idx) => {
+                                        const isAssistantCommand = msg.role === "assistant" && msg.mode === "command" && msg.draftItem;
+                                        // display assistant command messages differently with draft item details and confirm/edit buttons
+                                        if (isAssistantCommand) {
+                                            const item = msg.draftItem || {};
+                                            const missing = new Set(msg.missingFields || []);
+                                            const valueOrMissing = (key: "category" | "material" | "brand") => {
+                                                const value = item[key];
+                                                if (value) return value;
+                                                return missing.has(key) ? "— missing —" : "— optional —";
+                                            };
+                                            const colorText = (item.color && item.color.length > 0)
+                                                ? item.color.join(", ")
+                                                : (missing.has("color") ? "— missing —" : "— optional —");
+                                            const seasonText = (item.season && item.season.length > 0)
+                                                ? item.season.join(" / ")
+                                                : (missing.has("season") ? "— missing —" : "— optional —");
+                                            const isMissingRequired =
+                                                missing.has("name") ||
+                                                missing.has("category") ||
+                                                missing.has("color") ||
+                                                missing.has("season");
+                                            const missingRequiredList = ["name", "category", "color", "season"]
+                                                .filter(field => missing.has(field))
+                                                .join(", ");
+                                            const persistDraft = () => {
+                                                const draftPayload = {
+                                                    name: item.name ?? "",
+                                                    category: item.category ?? "",
+                                                    color: item.color ?? [],
+                                                    season: item.season ?? [],
+                                                    material: item.material ?? "",
+                                                    brand: item.brand ?? "",
+                                                    imageDataUrl: msg.imageDataUrl ?? null,
+                                                };
+                                                sessionStorage.setItem("assistantDraftItem", JSON.stringify(draftPayload));
+                                            };
+                                            const handleConfirm = async () => {
+                                                if (isMissingRequired) return;
+                                                try {
+                                                    const formData = new FormData();
+                                                    formData.append("name", item.name || "");
+                                                    formData.append("category", item.category || "");
+                                                    formData.append("color", (item.color && item.color[0]) || "");
+                                                    formData.append("season", (item.season && item.season[0]) || "");
+                                                    if (item.material) formData.append("material", item.material);
+                                                    if (item.brand) formData.append("brand", item.brand);
+                                                    if (msg.imageDataUrl) {
+                                                        const blob = await fetch(msg.imageDataUrl).then(res => res.blob());
+                                                        const file = new File([blob], "assistant-upload.png", { type: blob.type || "image/png" });
+                                                        formData.append("image", file);
+                                                    }
+                                                    await axios.post(`${API_BASE_URL}/items`, formData, {
+                                                        headers: { "Content-Type": "multipart/form-data" },
+                                                    });
+                                                    await refreshClothes();
+                                                    setMessages(prev => [
+                                                        ...prev,
+                                                        { role: "assistant", content: "Item added to your closet.", mode: "chat" }
+                                                    ]);
+                                                } catch (error) {
+                                                    setMessages(prev => [
+                                                        ...prev,
+                                                        { role: "assistant", content: "Failed to add item. Please try again.", mode: "chat" }
+                                                    ]);
+                                                }
+                                            };
+                                            const handleEdit = () => {
+                                                persistDraft();
+                                                // we are navigating to the AddItem page with query params for pre-filling the form, because we want the data to persist even if the user refreshes the page while editing
+                                                const params = new URLSearchParams();
+                                                if (item.name) params.set("name", item.name);
+                                                if (item.category) params.set("category", item.category);
+                                                if (item.color && item.color.length > 0) params.set("color", item.color[0]);
+                                                if (item.season && item.season.length > 0) params.set("season", item.season[0]);
+                                                if (item.material) params.set("material", item.material);
+                                                if (item.brand) params.set("brand", item.brand);
+                                                navigate(`/add?${params.toString()}`);
+                                            };
+                                            return (
+                                                <Box
+                                                    key={idx}
+                                                    alignSelf="flex-start"
+                                                    maxW="80%"
+                                                    p={4}
+                                                    borderRadius="xl"
+                                                    bg="#f7f1ec"
+                                                    color="gray.800"
+                                                    borderWidth="1px"
+                                                    borderColor="gray.200"
+                                                >
+                                                    <Text fontWeight="700" mb={1}>
+                                                        Assistant
+                                                    </Text>
+                                                    <Text fontWeight="500" mb={2}>
+                                                        {item.name || "New clothing item"}
+                                                    </Text>
+                                                    <Stack gap={1}>
+                                                        <Text>Category: {valueOrMissing("category")}</Text>
+                                                        <Text>Color: {colorText}</Text>
+                                                        <Text>Season: {seasonText}</Text>
+                                                        <Text>Material: {valueOrMissing("material")}</Text>
+                                                        <Text>Brand: {valueOrMissing("brand")}</Text>
+                                                    </Stack>
+                                                    {isMissingRequired && (
+                                                        <Text mt={2} fontSize="sm" color="red.600">
+                                                            Missing required: {missingRequiredList}
+                                                        </Text>
+                                                    )}
+                                                    {msg.imageUrl && (
+                                                        <img
+                                                            src={msg.imageUrl}
+                                                            alt="attached"
+                                                            style={{
+                                                                marginTop: '12px',
+                                                                maxHeight: '220px',
+                                                                borderRadius: '8px',
+                                                                objectFit: 'cover'
+                                                            }}
+                                                        />
+                                                    )}
+                                                    <Flex gap={3} mt={4}>
+                                                        <Button size="sm" variant="outline" onClick={handleEdit}>
+                                                            Edit
+                                                        </Button>
+                                                        <Button
+                                                            size="sm"
+                                                            variant={isMissingRequired ? "ghost" : undefined}
+                                                            bg={isMissingRequired ? "transparent" : "#ead7c7"}
+                                                            color="ink"
+                                                            disabled={isMissingRequired}
+                                                            onClick={handleConfirm}
+                                                        >
+                                                            Confirm
+                                                        </Button>
+                                                    </Flex>
+                                                </Box>
+                                            );
+                                        }
+                                        return (
+                                            <Box
+                                                key={idx}
+                                                alignSelf={msg.role === "user" ? "flex-end" : "flex-start"}
+                                                maxW="80%"
+                                                p={3}
+                                                borderRadius="xl"
+                                                bg={msg.role === "user" ? "#f0e3d7" : "#f7f1ec"}
+                                                color="gray.800"
+                                            >
+                                                <Text fontWeight="600" mb={1}>
+                                                    {msg.role === "user" ? "You" : "Assistant"}
+                                                </Text>
+                                                <Text>{msg.content}</Text>
+                                                {msg.imageUrl && (
+                                                    <img
+                                                        src={msg.imageUrl}
+                                                        alt="attached"
+                                                        style={{
+                                                            marginTop: '8px',
+                                                            maxHeight: '200px',
+                                                            borderRadius: '8px',
+                                                            objectFit: 'cover'
+                                                        }}
+                                                    />
+                                                )}
+                                            </Box>
+                                        );
+                                    })}
                                     {isLoading && (
                                         <Box textAlign="center">
                                             <Spinner size="sm" /> Thinking...
@@ -219,7 +416,10 @@ export function Assistant() {
                                     <Textarea
                                         placeholder="Ask about styling... e.g., 'Need an outfit for a rainy day.'"
                                         value={input}
-                                        onChange={(e) => setInput(e.target.value)}
+                                        onChange={(e) => {
+                                            setMode("chat");
+                                            setInput(e.target.value);
+                                        }}
                                         borderRadius="xl"
                                         borderColor="gray.200"
                                         bg="white"
@@ -260,13 +460,58 @@ export function Assistant() {
                                                 size="sm"
                                                 w="100%"
                                                 justifyContent="flex-start"
-                                                onClick={() => setIsAddMenuOpen(false)}
+                                                onClick={() => {
+                                                    setIsAddMenuOpen(false);
+                                                    setMode("command");
+                                                    if (!input.trim()) {
+                                                        setInput("add clothes");
+                                                    }
+                                                    addFileInputRef.current?.click();
+                                                }}
                                             >
                                                 Add a clothes
                                             </Button>
                                         </Box>
                                     )}
+                                    <Input
+                                        type="file"
+                                        accept="image/*"
+                                        ref={addFileInputRef}
+                                        display="none"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0] ?? null;
+                                            setSelectedImage(file);
+                                            if (!file) {
+                                                setSelectedImageDataUrl(null);
+                                                return;
+                                            }
+                                            const reader = new FileReader();
+                                            reader.onload = () => {
+                                                const result = typeof reader.result === "string" ? reader.result : null;
+                                                setSelectedImageDataUrl(result);
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }}
+                                    />
                                 </Box>
+                                {selectedImage && (
+                                    <Flex align="center" gap={2} mb={3}>
+                                        <Text fontSize="sm" color="gray.600">
+                                            Attached: {selectedImage.name}
+                                        </Text>
+                                        <Button
+                                            size="xs"
+                                            variant="ghost"
+                                            onClick={() => {
+                                                setSelectedImage(null);
+                                                setMode("chat");
+                                                setInput("");
+                                            }}
+                                        >
+                                            Remove
+                                        </Button>
+                                    </Flex>
+                                )}
                                 <Button
                                     bg="#ead7c7"
                                     color="ink"
@@ -312,8 +557,8 @@ export function Assistant() {
                         )}
                     </Box>
                 </SimpleGrid>
-            </Flex>
-        </AppLayout>
+            </Flex >
+        </AppLayout >
     );
 }
 
