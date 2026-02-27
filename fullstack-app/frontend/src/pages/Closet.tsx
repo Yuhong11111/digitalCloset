@@ -78,6 +78,7 @@ export function Closet() {
                 <Flex align="center" justify="space-between" pt={8} pb={4} position="relative" zIndex={1}>
                     <Box>
                         <Heading
+                            data-testid="closet-title"
                             size="3xl"
                             fontWeight="1000"
                             letterSpacing="-0.02em"

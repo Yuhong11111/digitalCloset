@@ -62,6 +62,7 @@ export function Login() {
                     p={{ base: 6, md: 8 }}
                 >
                     <Heading
+                        data-testid="auth-title"
                         size="xl"
                         fontWeight="800"
                         fontFamily="'Outfit', 'Nunito', system-ui, sans-serif"
@@ -90,6 +91,7 @@ export function Login() {
                                 <Box position="relative">
                                     <Icon as={FiUser} position="absolute" left="12px" top="50%" transform="translateY(-50%)" color="gray.400" />
                                     <Input
+                                        data-testid="auth-username"
                                         pl="38px"
                                         value={username}
                                         onChange={ev => setUsername(ev.target.value)}
@@ -107,6 +109,7 @@ export function Login() {
                                 <Box position="relative">
                                     <Icon as={FiKey} position="absolute" left="12px" top="50%" transform="translateY(-50%)" color="gray.400" />
                                     <Input
+                                        data-testid="auth-password"
                                         pl="38px"
                                         value={password}
                                         onChange={ev => setPassword(ev.target.value)}
@@ -124,6 +127,7 @@ export function Login() {
                                 <Box position="relative">
                                     <Icon as={FiMail} position="absolute" left="12px" top="50%" transform="translateY(-50%)" color="gray.400" />
                                     <Input
+                                        data-testid="auth-email"
                                         pl="38px"
                                         value={email}
                                         onChange={ev => setEmail(ev.target.value)}
@@ -136,6 +140,7 @@ export function Login() {
                                 </Box>
                             </Field.Root>
                             <Button
+                                data-testid="auth-submit"
                                 type="submit"
                                 bg="#ead7c7"
                                 color="ink"
@@ -147,6 +152,7 @@ export function Login() {
                                 {status === 'login' ? 'Login' : 'Sign Up'}
                             </Button>
                             <Button
+                                data-testid="auth-toggle-mode"
                                 variant="ghost"
                                 onClick={() => setStatus(status === 'login' ? 'signup' : 'login')}
                             >
