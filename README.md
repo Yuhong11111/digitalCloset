@@ -60,7 +60,35 @@ DATABASE_URL=postgresql+psycopg2://user:password@localhost:5432/closet_db
 JWT_SECRET=your_jwt_secret
 ```
 
-## Selenium E2E Test (Signup Smoke)
+## Testing
+
+Run tests from the frontend folder:
+
+```bash
+cd fullstack-app/frontend
+```
+
+### 1) Unit/Component tests (Jest)
+
+Run once (CI-friendly):
+
+```bash
+npm test
+```
+
+Watch mode during development:
+
+```bash
+npm run test:watch
+```
+
+Generate coverage report:
+
+```bash
+npm run test:coverage
+```
+
+### 2) Selenium E2E tests (Pytest)
 
 This project includes a Selenium smoke test that validates:
 - Open login page
@@ -74,17 +102,15 @@ This project includes a Selenium smoke test that validates:
 - Frontend running at `http://localhost:3000`
 - Google Chrome installed
 
-### Install E2E dependencies
+Install E2E dependencies:
 
 ```bash
-cd fullstack-app/frontend
 npm run test:e2e:install
 ```
 
-### Run
+Run E2E tests:
 
 ```bash
-cd fullstack-app/frontend
 npm run test:e2e
 # or run with visible browser
 E2E_HEADLESS=false npm run test:e2e
@@ -93,13 +119,18 @@ E2E_HEADLESS=false npm run test:e2e
 Run a single test file:
 
 ```bash
-cd fullstack-app/frontend
 python3 -m pytest tests/e2e/tests/test_home_page_selenium.py -q
 ```
 
 Optional env vars:
 - `E2E_FRONTEND_URL` (default: `http://localhost:3000`)
 - `E2E_HEADLESS` (`true` or `false`, default: `true`)
+
+### Recommended workflow
+
+- Use `npm run test:watch` while building frontend features.
+- Run `npm test` on every PR for fast verification.
+- Run `npm run test:e2e` separately for browser flow validation.
 
 ## Features
 

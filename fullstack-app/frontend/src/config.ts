@@ -20,5 +20,6 @@ const getBackendURL = (): string => {
 
 export const API_BASE_URL = getBackendURL();
 
-console.log('API_BASE_URL:', API_BASE_URL);
-
+if (process.env.NODE_ENV !== 'test') {
+  console.log('API_BASE_URL:', API_BASE_URL);
+}

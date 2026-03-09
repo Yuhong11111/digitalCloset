@@ -27,3 +27,20 @@ if (!globalShim.structuredClone) {
     }
   };
 }
+
+const originalConsoleError = console.error;
+const reactActDeprecation = /ReactDOMTestUtils\.act is deprecated in favor of React\.act/;
+
+beforeAll(() => {
+  jest.spyOn(console, 'error').mockImplementation((...args: unknown[]) => {
+    const [firstArg] = args;
+    if (typeof firstArg === 'string' && reactActDeprecation.test(firstArg)) {
+      return;
+    }
+    originalConsoleError(...args);
+  });
+});
+
+afterAll(() => {
+  (console.error as jest.Mock).mockRestore();
+});
