@@ -374,6 +374,7 @@ export default function AddItem() {
                                     borderRadius="xl"
                                     borderColor="gray.200"
                                     bg="white"
+                                    data-testid="name-input"
                                 />
                             </Box>
                             <Box>
@@ -388,6 +389,7 @@ export default function AddItem() {
                                         h="46px"
                                         fontWeight="600"
                                         fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
+                                        data-testid="category-select"
                                     >
                                         <For each={categories}>
                                             {(option) => (
@@ -412,6 +414,7 @@ export default function AddItem() {
                                     borderRadius="xl"
                                     borderColor="gray.200"
                                     bg="white"
+                                    data-testid="color-input"
                                 />
                             </Box>
                             <Box>
@@ -426,6 +429,7 @@ export default function AddItem() {
                                     borderRadius="xl"
                                     borderColor="gray.200"
                                     bg="white"
+                                    data-testid="size-input"
                                 />
                             </Box>
                             <Box>
@@ -440,6 +444,7 @@ export default function AddItem() {
                                     borderRadius="xl"
                                     borderColor="gray.200"
                                     bg="white"
+                                    data-testid="material-input"
                                 />
                             </Box>
                             <Box>
@@ -454,6 +459,7 @@ export default function AddItem() {
                                     borderRadius="xl"
                                     borderColor="gray.200"
                                     bg="white"
+                                    data-testid="brand-input"
                                 />
                             </Box>
                             <Box>
@@ -468,6 +474,7 @@ export default function AddItem() {
                                     borderRadius="xl"
                                     borderColor="gray.200"
                                     bg="white"
+                                    data-testid="tags-input"
                                 />
                             </Box>
                             <Box>
@@ -484,6 +491,7 @@ export default function AddItem() {
                                     bg="white"
                                     type="number"
                                     inputMode="decimal"
+                                    data-testid="purchase-price-input"
                                 />
                             </Box>
                             <Box>
@@ -498,6 +506,7 @@ export default function AddItem() {
                                         h="46px"
                                         fontWeight="600"
                                         fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
+                                        data-testid="season-select"
                                     >
                                         <For each={seasons}>
                                             {(option) => (
@@ -519,10 +528,11 @@ export default function AddItem() {
                                     borderRadius="xl"
                                     p={4}
                                     bg="#fbf7f3"
+                                    data-testid="image-upload"
                                 >
                                     <Flex align="center" gap={3}>
                                         <Icon as={FiImage} color="gray.500" />
-                                        <Input type="file" accept="image/*" onChange={handleFileChange} bg="white" borderRadius="lg" />
+                                        <Input type="file" accept="image/*" onChange={handleFileChange} bg="white" borderRadius="lg" data-testid="image-file-input" />
                                     </Flex>
                                 </Box>
                                 {imagePreview && (
@@ -537,11 +547,11 @@ export default function AddItem() {
                                             borderColor="gray.100"
                                         />
                                         <ButtonGroup mt={2} size="xs">
-                                            <Button variant="ghost" onClick={clearImage}>
+                                            <Button variant="ghost" onClick={clearImage} data-testid="remove-image-button">
                                                 Remove
                                             </Button>
                                             {imageFileName && (
-                                                <Button variant="ghost">
+                                                <Button variant="ghost" data-testid="image-filename-button">
                                                     {imageFileName}
                                                 </Button>
                                             )}
@@ -559,6 +569,7 @@ export default function AddItem() {
                                     borderRadius="xl"
                                     borderColor="gray.200"
                                     bg="white"
+                                    data-testid="notes-input"
                                 />
                             </Box>
                             <Box display="flex" alignItems="center" gap="3">
@@ -585,6 +596,7 @@ export default function AddItem() {
                                 h="48px"
                                 fontWeight="700"
                                 _hover={{ bg: "#e1c8b5" }}
+                                data-testid="submit-button"
                             >
                                 {isEditMode ? "Update Item" : "Add Item"}
                             </Button>
@@ -595,6 +607,7 @@ export default function AddItem() {
                                     h="48px"
                                     borderColor="red.200"
                                     color="red.700"
+                                    data-testid="delete-button"
                                     onClick={async () => {
                                         if (!params.id) return;
                                         const confirmDelete = window.confirm("Are you sure you want to delete this item?");
