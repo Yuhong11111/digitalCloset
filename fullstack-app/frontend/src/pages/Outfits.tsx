@@ -1,25 +1,259 @@
-import { useState } from "react";
 import {
-    Flex,
-    Button,
     Box,
-    NativeSelect,
-    Input,
+    Button,
     Dialog,
-    Portal,
-    Text,
+    Flex,
     Heading,
-    SimpleGrid,
     Icon,
+    Input,
+    NativeSelect,
+    Portal,
+    SimpleGrid,
+    Text,
 } from "@chakra-ui/react";
+import { FiCloud, FiMapPin, FiPlus, FiRefreshCw, FiSun } from "react-icons/fi";
 import AppLayout from "./AppLayout";
-import { FiPlus, FiSearch, FiSliders, FiArrowDown, FiX } from "react-icons/fi";
 import { pageBackgroundStyles } from "../theme";
 
-export function Outfits() {
-    const [searchQuery, setSearchQuery] = useState("");
-    const [isSearchFocused, setIsSearchFocused] = useState(false);
+const outfitItems = [
+    { icon: "🧥", label: "Light Jacket" },
+    { icon: "👕", label: "White T-Shirt" },
+    { icon: "👖", label: "Jeans" },
+];
 
+const insightCards = [
+    {
+        title: "Start with a mood",
+        description: "Curate looks by season, event, or color palette.",
+    },
+    {
+        title: "Plan the week",
+        description: "Save outfits you want ready for busy mornings.",
+    },
+    {
+        title: "Seasonal capsule",
+        description: "Build a capsule that keeps your favorites in rotation.",
+    },
+];
+
+function CreateOutfitDialog() {
+    return (
+        <Dialog.Root>
+            <Dialog.Trigger asChild>
+                <Button
+                    px={6}
+                    boxShadow="0 12px 30px rgba(131, 102, 81, 0.12)"
+                    bg="#ead7c7"
+                    color="ink"
+                    borderRadius="2xl"
+                    h="48px"
+                    fontWeight="700"
+                    _hover={{ bg: "#e1c8b5" }}
+                >
+                    <Icon as={FiPlus} mr={2.5} boxSize={5} />
+                    Create Outfit
+                </Button>
+            </Dialog.Trigger>
+            <Portal>
+                <Dialog.Backdrop bg="blackAlpha.300" backdropFilter="blur(6px)" />
+                <Dialog.Positioner>
+                    <Dialog.Content
+                        maxW="560px"
+                        w="full"
+                        bg="#fbf6f1"
+                        borderRadius="30px"
+                        boxShadow="0 32px 90px rgba(64, 43, 28, 0.18)"
+                        p={6}
+                    >
+                        <Flex align="center" justify="space-between" pb={3} borderBottom="1px solid" borderColor="blackAlpha.100">
+                            <Dialog.Title fontSize="2xl" fontWeight="700">Create Outfit</Dialog.Title>
+                            <Dialog.CloseTrigger asChild>
+                                <Button variant="ghost" size="sm" fontSize="lg">×</Button>
+                            </Dialog.CloseTrigger>
+                        </Flex>
+                        <Dialog.Body pt={5}>
+                            <Flex direction="column" gap={5}>
+                                <Box>
+                                    <Text fontWeight="600" color="gray.600" mb={2}>Outfit Name</Text>
+                                    <Input placeholder="Weekend layers" bg="white" borderRadius="xl" h="45px" />
+                                </Box>
+                                <Flex gap={4} wrap="wrap">
+                                    <Box flex="1" minW="200px">
+                                        <Text fontWeight="600" color="gray.600" mb={2}>Season</Text>
+                                        <NativeSelect.Root size="md" w="full">
+                                            <NativeSelect.Field
+                                                borderRadius="xl"
+                                                w="full"
+                                                pr="7"
+                                                h="45px"
+                                                bg="white"
+                                                fontWeight="600"
+                                                fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
+                                            >
+                                                <option>Spring</option>
+                                                <option>Summer</option>
+                                                <option>Fall</option>
+                                                <option>Winter</option>
+                                            </NativeSelect.Field>
+                                            <NativeSelect.Indicator />
+                                        </NativeSelect.Root>
+                                    </Box>
+                                    <Box flex="1" minW="200px">
+                                        <Text fontWeight="600" color="gray.600" mb={2}>Occasion</Text>
+                                        <NativeSelect.Root size="md" w="full">
+                                            <NativeSelect.Field
+                                                borderRadius="xl"
+                                                w="full"
+                                                pr="7"
+                                                h="45px"
+                                                bg="white"
+                                                fontWeight="600"
+                                                fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
+                                            >
+                                                <option>Casual</option>
+                                                <option>Work</option>
+                                                <option>Weekend</option>
+                                                <option>Travel</option>
+                                            </NativeSelect.Field>
+                                            <NativeSelect.Indicator />
+                                        </NativeSelect.Root>
+                                    </Box>
+                                </Flex>
+                                <Button
+                                    bg="#d9b899"
+                                    color="white"
+                                    borderRadius="xl"
+                                    h="48px"
+                                    fontWeight="700"
+                                    _hover={{ bg: "#cea785" }}
+                                >
+                                    Start Creating
+                                </Button>
+                            </Flex>
+                        </Dialog.Body>
+                    </Dialog.Content>
+                </Dialog.Positioner>
+            </Portal>
+        </Dialog.Root>
+    );
+}
+
+function OutfitVisual() {
+    return (
+        <Box
+            flex="1"
+            minH={{ base: "340px", lg: "400px" }}
+            borderRadius="28px"
+            position="relative"
+            overflow="hidden"
+            bg="linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(247,240,232,0.95) 100%)"
+        >
+            <Box
+                position="absolute"
+                inset={0}
+                bg="radial-gradient(circle at 20% 20%, rgba(255,255,255,0.95), transparent 35%), radial-gradient(circle at 70% 30%, rgba(204, 231, 230, 0.45), transparent 34%), radial-gradient(circle at 50% 85%, rgba(232, 219, 207, 0.75), transparent 36%)"
+            />
+            <Box
+                position="absolute"
+                left={{ base: "16%", md: "22%" }}
+                top={{ base: "8%", md: "6%" }}
+                w={{ base: "26%", md: "22%" }}
+                h={{ base: "60%", md: "68%" }}
+                borderRadius="100px 100px 28px 28px"
+                bg="linear-gradient(180deg, #6db8b6 0%, #5ea5a3 100%)"
+                boxShadow="0 24px 36px rgba(80, 140, 138, 0.22)"
+            >
+                <Box position="absolute" insetX="39%" top="-18px" w="22%" h="24px" border="3px solid #ccb4a2" borderBottom="0" borderRadius="full" />
+                <Box position="absolute" top="18%" left="-10%" w="18%" h="52%" borderRadius="full" bg="#69b1ae" transform="rotate(10deg)" />
+                <Box position="absolute" top="18%" right="-10%" w="18%" h="52%" borderRadius="full" bg="#69b1ae" transform="rotate(-10deg)" />
+                <Box position="absolute" top="9%" left="33%" w="34%" h="18%" borderRadius="0 0 24px 24px" borderTop="3px solid rgba(255,255,255,0.55)" />
+                <Box position="absolute" top="26%" left="49%" w="3px" h="44%" bg="rgba(255,255,255,0.38)" />
+                {[0, 1, 2, 3, 4].map((index) => (
+                    <Box
+                        key={index}
+                        position="absolute"
+                        left="calc(49% - 4px)"
+                        top={`calc(31% + ${index * 8}%)`}
+                        w="8px"
+                        h="8px"
+                        borderRadius="full"
+                        bg="#ead7cb"
+                    />
+                ))}
+            </Box>
+            <Box
+                position="absolute"
+                left={{ base: "48%", md: "49%" }}
+                top={{ base: "9%", md: "10%" }}
+                w={{ base: "24%", md: "21%" }}
+                h={{ base: "42%", md: "46%" }}
+                borderRadius="36px 36px 22px 22px"
+                bg="linear-gradient(180deg, #63b7b7 0%, #57a8a9 100%)"
+                boxShadow="0 24px 36px rgba(80, 140, 138, 0.18)"
+            >
+                <Box position="absolute" top="5%" left="30%" w="40%" h="14%" borderRadius="0 0 24px 24px" borderTop="3px solid rgba(255,255,255,0.48)" />
+                <Box position="absolute" top="18%" left="-12%" w="22%" h="35%" borderRadius="full" bg="#63b7b7" transform="rotate(14deg)" />
+                <Box position="absolute" top="18%" right="-12%" w="22%" h="35%" borderRadius="full" bg="#63b7b7" transform="rotate(-14deg)" />
+            </Box>
+            <Box
+                position="absolute"
+                right={{ base: "10%", md: "13%" }}
+                top={{ base: "43%", md: "44%" }}
+                w={{ base: "16%", md: "15%" }}
+                h={{ base: "33%", md: "36%" }}
+                borderRadius="18px 18px 12px 12px"
+                bg="linear-gradient(180deg, #8ccccc 0%, #78b7b8 100%)"
+                transform="rotate(4deg)"
+                boxShadow="0 20px 32px rgba(80, 140, 138, 0.16)"
+            >
+                <Box position="absolute" top="8%" left="14%" w="72%" h="10%" borderTop="2px solid rgba(110, 140, 140, 0.55)" />
+                <Box position="absolute" top="18%" left="18%" w="18%" h="10%" borderRadius="full" border="2px solid rgba(110, 140, 140, 0.45)" />
+                <Box position="absolute" top="18%" right="18%" w="18%" h="10%" borderRadius="full" border="2px solid rgba(110, 140, 140, 0.45)" />
+            </Box>
+            <Box
+                position="absolute"
+                left={{ base: "9%", md: "12%" }}
+                bottom={{ base: "7%", md: "6%" }}
+                w={{ base: "20%", md: "18%" }}
+                h={{ base: "19%", md: "21%" }}
+                borderRadius="28px 28px 16px 16px"
+                bg="linear-gradient(180deg, #5f9ea0 0%, #538a8d 100%)"
+                boxShadow="0 18px 28px rgba(80, 140, 138, 0.2)"
+            >
+                <Box position="absolute" left="12%" right="12%" top="18%" h="14%" borderTop="3px solid rgba(255,255,255,0.35)" borderRadius="full" />
+                <Box position="absolute" left="20%" right="20%" top="-28%" h="48%" border="4px solid #4d8285" borderBottom="0" borderRadius="full" />
+                <Box position="absolute" right="-8%" bottom="5%" w="14%" h="50%" borderRadius="full" border="4px solid #4d8285" borderLeft="0" />
+                <Box position="absolute" left="44%" top="40%" w="18%" h="16%" borderRadius="6px" bg="#dec2a8" />
+            </Box>
+            <Flex
+                position="absolute"
+                right={{ base: "16%", md: "20%" }}
+                bottom={{ base: "6%", md: "7%" }}
+                gap={3}
+                align="flex-end"
+            >
+                <Box
+                    w={{ base: "48px", md: "56px" }}
+                    h={{ base: "74px", md: "82px" }}
+                    borderRadius="18px 18px 10px 10px"
+                    bg="linear-gradient(180deg, #78c6c6 0%, #69b1b0 100%)"
+                    transform="rotate(8deg)"
+                    boxShadow="0 12px 24px rgba(80, 140, 138, 0.18)"
+                />
+                <Box
+                    w={{ base: "48px", md: "56px" }}
+                    h={{ base: "74px", md: "82px" }}
+                    borderRadius="18px 18px 10px 10px"
+                    bg="linear-gradient(180deg, #85d0d0 0%, #74bbbc 100%)"
+                    transform="rotate(-8deg)"
+                    boxShadow="0 12px 24px rgba(80, 140, 138, 0.18)"
+                />
+            </Flex>
+        </Box>
+    );
+}
+
+export function Outfits() {
     return (
         <AppLayout>
             <Flex
@@ -30,289 +264,175 @@ export function Outfits() {
                 {...pageBackgroundStyles}
             >
                 <Flex align="center" justify="space-between" pt={8} pb={4} position="relative" zIndex={1}>
+
                     <Box>
                         <Heading
+                            data-testid="closet-title"
                             size="3xl"
                             fontWeight="1000"
                             letterSpacing="-0.02em"
                             fontFamily="'Outfit', 'Nunito', system-ui, sans-serif"
                         >
-                            Outfits
+                            Dress For Today
                         </Heading>
-                        <Text color="gray.600" mt={2}>Build looks, save favorites, and plan your week.</Text>
+                        <Text
+                            color="gray.600" mt={2}
+                        >
+                            Get a smart outfit suggestion based on your weather
+                        </Text>
                     </Box>
-                    <Dialog.Root>
-                        <Dialog.Trigger asChild>
-                            <Button
-                                bg="#ead7c7"
-                                color="ink"
-                                borderRadius="2xl"
-                                px={5}
-                                h="48px"
-                                fontWeight="700"
-                                _hover={{ bg: "#e1c8b5" }}
-                            >
-                                <Icon as={FiPlus} mr={2} />
-                                Create Outfit
-                            </Button>
-                        </Dialog.Trigger>
-                        <Portal>
-                            <Dialog.Backdrop bg="blackAlpha.300" backdropFilter="blur(6px)" />
-                            <Dialog.Positioner>
-                                <Dialog.Content
-                                    maxW="560px"
-                                    w="full"
-                                    bg="#f8f3ef"
-                                    borderRadius="3xl"
-                                    boxShadow="xl"
-                                    p={6}
-                                >
-                                    <Flex align="center" justify="space-between" pb={3} borderBottom="1px solid" borderColor="gray.200">
-                                        <Dialog.Title fontSize="2xl" fontWeight="700">Create Outfit</Dialog.Title>
-                                        <Dialog.CloseTrigger asChild>
-                                            <Button variant="ghost" size="sm" fontSize="lg">×</Button>
-                                        </Dialog.CloseTrigger>
-                                    </Flex>
-                                    <Dialog.Body pt={5}>
-                                        <Flex direction="column" gap={5}>
-                                            <Box>
-                                                <Text fontWeight="600" color="gray.600" mb={2}>Outfit Name</Text>
-                                                <Input
-                                                    placeholder="Create Outfit"
-                                                    bg="whiteAlpha.600"
-                                                    borderRadius="xl"
-                                                    h="45px"
-                                                />
-                                            </Box>
-                                            <Box>
-                                                <Text fontWeight="600" color="gray.600" mb={2}>Tags</Text>
-                                                <Flex gap={2} wrap="wrap" bg="whiteAlpha.600" borderRadius="xl" p={2}>
-                                                    {["Casual", "Neutral", "Comfy"].map((tag) => (
-                                                        <Box
-                                                            key={tag}
-                                                            px={3}
-                                                            py={1}
-                                                            bg="white"
-                                                            borderRadius="full"
-                                                            borderWidth="1px"
-                                                            borderColor="gray.200"
-                                                            fontWeight="600"
-                                                        >
-                                                            {tag} <Box as="span" ml={2} color="gray.400">×</Box>
-                                                        </Box>
-                                                    ))}
-                                                </Flex>
-                                            </Box>
-                                            <Flex gap={4} wrap="wrap">
-                                                <Box flex="1" minW="200px">
-                                                    <Text fontWeight="600" color="gray.600" mb={2}>Season</Text>
-                                                    <NativeSelect.Root size="md" w="full">
-                                                        <NativeSelect.Field
-                                                            borderRadius="xl"
-                                                            w="full"
-                                                            pr="7"
-                                                            h="45px"
-                                                            fontWeight="600"
-                                                            fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
-                                                        >
-                                                            <option>All</option>
-                                                            <option>Spring</option>
-                                                            <option>Summer</option>
-                                                            <option>Fall</option>
-                                                            <option>Winter</option>
-                                                        </NativeSelect.Field>
-                                                        <NativeSelect.Indicator />
-                                                    </NativeSelect.Root>
-                                                </Box>
-                                                <Box flex="1" minW="200px">
-                                                    <Text fontWeight="600" color="gray.600" mb={2}>Occasion</Text>
-                                                    <NativeSelect.Root size="md" w="full">
-                                                        <NativeSelect.Field
-                                                            borderRadius="xl"
-                                                            w="full"
-                                                            pr="7"
-                                                            h="45px"
-                                                            fontWeight="600"
-                                                            fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
-                                                        >
-                                                            <option>Casual</option>
-                                                            <option>Work</option>
-                                                            <option>Formal</option>
-                                                            <option>Weekend</option>
-                                                        </NativeSelect.Field>
-                                                        <NativeSelect.Indicator />
-                                                    </NativeSelect.Root>
-                                                </Box>
-                                            </Flex>
-                                            <Button
-                                                bg="#e1cfc2"
-                                                color="ink"
-                                                borderRadius="xl"
-                                                h="48px"
-                                                fontWeight="700"
-                                                _hover={{ bg: "#d4c1b3ff" }}
-                                            >
-                                                Start Creating
-                                            </Button>
-                                        </Flex>
-                                    </Dialog.Body>
-                                </Dialog.Content>
-                            </Dialog.Positioner>
-                        </Portal>
-                    </Dialog.Root>
-                </Flex>
-                <Flex gap={3} pb={4} flexWrap="wrap" align="center" position="relative" zIndex={1}>
-                    <Box
-                        bg="white"
-                        borderRadius="2xl"
-                        boxShadow="sm"
-                        px={4}
-                        py={3}
-                        display="flex"
-                        alignItems="center"
-                        gap={3}
-                        flex="1"
-                        minW="260px"
-                    >
-                        <Icon as={FiSearch} color="gray.400" />
-                        <Input
-                            placeholder="Search outfits..."
-                            bg="transparent"
-                            border="none"
-                            _focusVisible={{ boxShadow: "none" }}
-                            _placeholder={{ color: "gray.400" }}
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onFocus={() => setIsSearchFocused(true)}
-                            onBlur={() => setIsSearchFocused(false)}
-                        />
-                        {isSearchFocused && searchQuery.length > 0 && (
-                            <Button
-                                size="xs"
-                                variant="ghost"
-                                borderRadius="full"
-                                onMouseDown={(event) => event.preventDefault()}
-                                onClick={() => setSearchQuery("")}
-                                aria-label="Clear search"
-                            >
-                                <Icon as={FiX} />
-                            </Button>
-                        )}
-                        <Button size="sm" borderRadius="full" bg="#f1e7de" _hover={{ bg: "#eadcd0" }}>
-                            Search
-                        </Button>
+                    <Box alignSelf={{ base: "flex-start", md: "center" }}>
+                        <CreateOutfitDialog />
                     </Box>
-                    <Flex gap={2} flexWrap="wrap">
-                        <Box position="relative">
-                            <Icon
-                                as={FiSliders}
-                                position="absolute"
-                                left="12px"
-                                top="50%"
-                                transform="translateY(-50%)"
-                                color="gray.400"
-                                zIndex={1}
-                            />
-                            <NativeSelect.Root size="md" w="fit-content" minW="unset" bg="white" borderRadius="xl" boxShadow="sm">
-                                <NativeSelect.Field
-                                    w="full"
-                                    pl="36px"
-                                    pr="7"
-                                    borderRadius="xl"
-                                    h="40px"
-                                    fontWeight="600"
-                                    fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
-                                >
-                                    <option>Filter</option>
-                                    <option>All</option>
-                                    <option>Favorites</option>
-                                </NativeSelect.Field>
-                                <NativeSelect.Indicator />
-                            </NativeSelect.Root>
-                        </Box>
-                        <Box position="relative">
-                            <Icon
-                                as={FiArrowDown}
-                                position="absolute"
-                                left="12px"
-                                top="50%"
-                                transform="translateY(-50%)"
-                                color="gray.400"
-                                zIndex={1}
-                            />
-                            <NativeSelect.Root size="md" w="fit-content" minW="unset" bg="white" borderRadius="xl" boxShadow="sm">
-                                <NativeSelect.Field
-                                    borderRadius="xl"
-                                    w="full"
-                                    pl="36px"
-                                    pr="7"
-                                    h="40px"
-                                    fontWeight="600"
-                                    fontFamily="'Nunito', ui-rounded, system-ui, sans-serif"
-                                >
-                                    <option>Sort: Recently Added</option>
-                                    <option>Alphabetical</option>
-                                    <option>Season</option>
-                                </NativeSelect.Field>
-                                <NativeSelect.Indicator />
-                            </NativeSelect.Root>
-                        </Box>
-                    </Flex>
                 </Flex>
 
-                <SimpleGrid columns={{ base: 1, sm: 2, lg: 3 }} gap={6} pb={10} position="relative" zIndex={1}>
-                    <Box
-                        bg="white"
-                        borderRadius="2xl"
-                        borderWidth="1px"
-                        borderColor="gray.100"
-                        boxShadow="sm"
-                        p={6}
+
+                <Box
+                    position="relative"
+                    zIndex={1}
+                    maxW="1400px"
+                    mx="auto"
+                    w="full"
+                    borderRadius={{ base: "28px", md: "34px" }}
+                    bg="rgba(255,255,255,0.72)"
+                    border="1px solid rgba(182, 157, 138, 0.18)"
+                    boxShadow="0 24px 70px rgba(146, 118, 91, 0.15)"
+                    backdropFilter="blur(18px)"
+                    px={{ base: 6, md: 9 }}
+                    py={{ base: 6, md: 8 }}
+                >
+                    <Flex
+                        align={{ base: "flex-start", md: "center" }}
+                        direction={{ base: "column", md: "row" }}
+                        gap={3}
+                        color="#3a3531"
+                        mb={5}
                     >
-                        <Heading size="md" fontWeight="700" mb={2}>Start with a mood</Heading>
-                        <Text color="gray.600" mb={4}>
-                            Curate looks by season, event, or color palette.
-                        </Text>
-                        <Button
-                            bg="#ead7c7"
-                            color="ink"
-                            borderRadius="2xl"
-                            h="44px"
-                            fontWeight="700"
-                            _hover={{ bg: "#e1c8b5" }}
+                        <Flex align="center" gap={2.5}>
+                            <Box position="relative" w="34px" h="34px">
+                                <Icon as={FiSun} color="#f2b53d" boxSize={7} position="absolute" left="0" top="0" />
+                                <Icon as={FiCloud} color="#b5b8c6" boxSize={6} position="absolute" right="-2px" bottom="0" />
+                            </Box>
+                            <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="800" letterSpacing="-0.03em">
+                                San Francisco
+                            </Text>
+                        </Flex>
+                        <Text fontSize={{ base: "lg", md: "xl" }} color="#6a625b">68°F</Text>
+                        <Text fontSize={{ base: "lg", md: "xl" }} color="#6a625b">· Partly Cloudy</Text>
+                        <Flex align="center" gap={1.5} color="#84786e" ml={{ md: "auto" }}>
+                            <Icon as={FiMapPin} />
+                            <Text fontSize="s" fontWeight="600">Weather-based pick</Text>
+                        </Flex>
+                    </Flex>
+
+                    <Flex
+                        direction={{ base: "column", xl: "row" }}
+                        gap={6}
+                        borderRadius={{ base: "24px", md: "30px" }}
+                        bg="rgba(255,255,255,0.6)"
+                        border="1px solid rgba(243, 242, 241, 0.14)"
+                        // boxShadow="inset 0 1px 0 rgba(255,255,255,0.55), 0 14px 30px rgba(125, 99, 77, 0.09)"
+                        p={{ base: 5, md: 6 }}
+                    >
+                        <Flex direction="column" justify="space-between" gap={5} maxW={{ xl: "430px" }}>
+                            <Box>
+                                <Heading
+                                    size={{ base: "xl", md: "xl" }}
+                                    fontWeight="700"
+                                    letterSpacing="-0.03em"
+                                    color="#3a3531"
+                                    fontFamily="'Outfit', 'Nunito', system-ui, sans-serif"
+                                >
+                                    Suggested Outfit for Today
+                                </Heading>
+                                <Box
+                                    mt={6}
+                                    bg="rgba(255,255,255,0.8)"
+                                    borderRadius="24px"
+                                    p={5}
+                                    boxShadow="0 16px 30px rgba(122, 95, 74, 0.08)"
+                                >
+                                    {outfitItems.map((item) => (
+                                        <Flex key={item.label} align="center" gap={4} py={3}>
+                                            <Text fontSize="xl" lineHeight="1">{item.icon}</Text>
+                                            <Text
+                                                fontSize={{ base: "l", md: "l" }}
+                                                lineHeight="1.1"
+                                                color="#6b625b"
+                                                fontFamily="'Outfit', 'Nunito', system-ui, sans-serif"
+                                            >
+                                                {item.label}
+                                            </Text>
+                                        </Flex>
+                                    ))}
+                                </Box>
+                            </Box>
+
+                            <Flex gap={4} wrap="wrap">
+                                <Button
+                                    bg="#efe3d9"
+                                    color="#241f1a"
+                                    borderRadius="22px"
+                                    h="48px"
+                                    px={6}
+                                    fontWeight="800"
+                                    boxShadow="0 12px 30px rgba(131, 102, 81, 0.12)"
+                                    _hover={{ bg: "#e8d8cb" }}
+                                >
+                                    <Icon as={FiPlus} mr={2.5} boxSize={5} />
+                                    Generate Outfit
+                                </Button>
+                                <Button
+                                    bg="#f0f0f0ff"
+                                    color="#241f1a"
+                                    borderRadius="22px"
+                                    h="48px"
+                                    px={6}
+                                    fontWeight="800"
+                                    boxShadow="0 12px 30px rgba(131, 102, 81, 0.12)"
+                                    _hover={{ bg: "#e8d8cb" }}
+                                >
+                                    <Icon as={FiRefreshCw} mr={2.5} boxSize={5} />
+                                    Customize
+                                </Button>
+                            </Flex>
+                        </Flex>
+
+                        <OutfitVisual />
+                    </Flex>
+                </Box>
+
+                <SimpleGrid columns={{ base: 1, md: 3 }} gap={5} mt={9} pb={{ base: 10, md: 16 }} position="relative" zIndex={1}>
+                    {insightCards.map((card) => (
+                        <Box
+                            key={card.title}
+                            borderRadius="28px"
+                            bg="rgba(255,255,255,0.74)"
+                            border="1px solid rgba(182, 157, 138, 0.16)"
+                            boxShadow="0 18px 38px rgba(129, 103, 81, 0.09)"
+                            minH={{ base: "220px", md: "250px" }}
+                            px={{ base: 5, md: 6 }}
+                            pt={{ base: 6, md: 7 }}
+                            pb={{ base: 9, md: 11 }}
                         >
-                            Create a Moodboard
-                        </Button>
-                    </Box>
-                    <Box
-                        bg="white"
-                        borderRadius="2xl"
-                        borderWidth="1px"
-                        borderColor="gray.100"
-                        boxShadow="sm"
-                        p={6}
-                    >
-                        <Heading size="md" fontWeight="700" mb={2}>Plan the week</Heading>
-                        <Text color="gray.600">
-                            Save outfits you want ready for busy mornings.
-                        </Text>
-                    </Box>
-                    <Box
-                        bg="white"
-                        borderRadius="2xl"
-                        borderWidth="1px"
-                        borderColor="gray.100"
-                        boxShadow="sm"
-                        p={6}
-                    >
-                        <Heading size="md" fontWeight="700" mb={2}>Seasonal capsule</Heading>
-                        <Text color="gray.600">
-                            Build a capsule that keeps your favorites in rotation.
-                        </Text>
-                    </Box>
+                            <Heading
+                                size="lg"
+                                fontWeight="800"
+                                letterSpacing="-0.03em"
+                                mb={3}
+                                color="#3a3531"
+                                fontFamily="'Outfit', 'Nunito', system-ui, sans-serif"
+                            >
+                                {card.title}
+                            </Heading>
+                            <Text fontSize="lg" color="#6d645d" maxW="28ch">
+                                {card.description}
+                            </Text>
+                        </Box>
+                    ))}
                 </SimpleGrid>
             </Flex>
-        </AppLayout>
+        </AppLayout >
     );
 }
 
