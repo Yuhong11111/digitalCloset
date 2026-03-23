@@ -135,6 +135,7 @@ async def get_ai_assistance(
         user_id = current_user.get("userId")
         # get mode to decide which system prompt to use
         mode = request.mode
+        cloth_list: List[Dict[str, Any]] = []
         # if mode == "command" and image is not None: def command mode system
         # if mode == "chat": def chat mode system (more casual, less strict on response format)
         if mode == "command":
