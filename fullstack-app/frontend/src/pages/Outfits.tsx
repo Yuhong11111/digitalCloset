@@ -14,6 +14,22 @@ import {
 import { FiCloud, FiMapPin, FiPlus, FiRefreshCw, FiSun } from "react-icons/fi";
 import AppLayout from "./AppLayout";
 import { pageBackgroundStyles } from "../theme";
+import { useEffect, useState } from "react";
+import { API_BASE_URL } from "../config";
+
+type GeoPermissionState = "idle" | "prompt" | "granted" | "denied" | "unsupported";
+
+type WeatherDisplay = {
+    location: string;
+    temp: string;
+    condition: string;
+};
+
+const fallbackWeather: WeatherDisplay = {
+    location: "San Francisco",
+    temp: "68°F",
+    condition: "Partly Cloudy",
+};
 
 const outfitItems = [
     { icon: "🧥", label: "Light Jacket" },
@@ -35,6 +51,25 @@ const insightCards = [
         description: "Build a capsule that keeps your favorites in rotation.",
     },
 ];
+
+async function fetchWeatherForCoords(latitude: number, longitude: number): Promise<WeatherDisplay> {
+    const response = await fetch(
+        `${API_BASE_URL}/weather/current?lat=${latitude}&lon=${longitude}`,
+        { credentials: "include" }
+    );
+
+    if (!response.ok) {
+        throw new Error("Unable to fetch weather");
+    }
+
+    const data = await response.json();
+
+    return {
+        location: typeof data?.location === "string" && data.location.trim() ? data.location : fallbackWeather.location,
+        temp: typeof data?.temp_c === "number" ? `${Math.round(data.temp_c)}°C` : fallbackWeather.temp,
+        condition: typeof data?.condition === "string" && data.condition.trim() ? data.condition : fallbackWeather.condition,
+    };
+}
 
 function CreateOutfitDialog() {
     return (
@@ -254,6 +289,110 @@ function OutfitVisual() {
 }
 
 export function Outfits() {
+    const [weather, setWeather] = useState<WeatherDisplay>(fallbackWeather);
+    const [geoPermission, setGeoPermission] = useState<GeoPermissionState>("idle");
+    const [locationLoading, setLocationLoading] = useState(false);
+    const [locationMessage, setLocationMessage] = useState("Using default weather");
+
+    //The basic workflow is:
+    //1. On component mount, we check if geolocation is supported and what the current permission status is. We also set up a listener for changes to the permission status, so if the user grants or denies permission after the initial check, we can update our UI accordingly.
+    //2. When the user clicks the "Use my location" button, we request their current position. If they grant permission and we successfully get their location, we fetch the weather for those coordinates and update our display. If they deny permission or if there's an error getting their location, we show an appropriate message.
+    //On page load -> check if geolocation is supported -> check permission status -> store it in state -> listen for changes -> update UI accordingly -> clean up listeners on unmount
+    useEffect(() => {
+        if (!("geolocation" in navigator)) {
+            setGeoPermission("unsupported");
+            setLocationMessage("Location is not supported in this browser");
+            return;
+        }
+
+        // check user permission status for geolocation
+        if (!("permissions" in navigator) || !navigator.permissions?.query) {
+            setGeoPermission("prompt"); //prompt means we can still ask for permission, but we can't track changes to it
+            return;
+        }
+
+        let cancelled = false;
+        // granted -> denied or unsupported, or denied -> granted, etc
+        let permissionStatus: PermissionStatus | null = null;
+
+        const syncPermission = () => {
+            if (cancelled || !permissionStatus) return;
+            // granted, denied, prompt
+            setGeoPermission(permissionStatus.state as GeoPermissionState);
+        };
+
+        navigator.permissions
+            .query({ name: "geolocation" as PermissionName }) //check the current permission status for geolocation
+            .then((status) => {
+                if (cancelled) return;
+                permissionStatus = status; // store the PermissionStatus object so we can remove the event listener later if needed
+                syncPermission(); // set initial state based on current permission
+                permissionStatus.addEventListener("change", syncPermission);// listen for changes to the permission status, so we can update our UI if the user changes their decision after initially denying or granting permission
+            })
+            .catch(() => {
+                if (!cancelled) {
+                    setGeoPermission("prompt");
+                }
+            });
+
+        return () => {
+            cancelled = true;
+            permissionStatus?.removeEventListener("change", syncPermission);
+        };
+    }, []);
+
+    const requestLocation = () => {
+        if (!("geolocation" in navigator)) {
+            setGeoPermission("unsupported");
+            setLocationMessage("Location is not supported in this browser");
+            return;
+        }
+
+        setLocationLoading(true);
+        setLocationMessage("Requesting location permission...");
+
+        navigator.geolocation.getCurrentPosition(
+            async (position) => {
+                const { latitude, longitude } = position.coords;
+                setGeoPermission("granted");
+
+                try {
+                    const nextWeather = await fetchWeatherForCoords(latitude, longitude);
+
+                    setWeather(nextWeather);
+                    setLocationMessage("Weather updated from your current location");
+                } catch (error) {
+                    console.error("Failed to fetch location-based weather", error);
+                    setLocationMessage("Location granted, but live weather could not be loaded");
+                } finally {
+                    setLocationLoading(false);
+                }
+            },
+            (error) => {
+                setLocationLoading(false);
+
+                if (error.code === error.PERMISSION_DENIED) {
+                    setGeoPermission("denied");
+                    setLocationMessage("Location permission denied");
+                    return;
+                }
+
+                setLocationMessage("Unable to get your current location");
+            },
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000,
+            }
+        );
+    };
+
+    const locationButtonLabel = locationLoading
+        ? "Getting location..."
+        : geoPermission === "granted"
+            ? "Refresh location"
+            : "Use my location";
+
     return (
         <AppLayout>
             <Flex
@@ -280,6 +419,27 @@ export function Outfits() {
                         >
                             Get a smart outfit suggestion based on your weather
                         </Text>
+                        <Flex mt={4} align={{ base: "stretch", md: "center" }} gap={3} direction={{ base: "column", md: "row" }}>
+                            <Button
+                                bg="#efe3d9"
+                                color="#241f1a"
+                                borderRadius="22px"
+                                h="46px"
+                                px={5}
+                                fontWeight="700"
+                                boxShadow="0 12px 30px rgba(131, 102, 81, 0.12)"
+                                _hover={{ bg: "#e8d8cb" }}
+                                onClick={requestLocation}
+                                loading={locationLoading}
+                                disabled={locationLoading || geoPermission === "unsupported"}
+                            >
+                                <Icon as={FiMapPin} mr={2.5} boxSize={4.5} />
+                                {locationButtonLabel}
+                            </Button>
+                            <Text fontSize="sm" color="#6d645d" fontWeight="600">
+                                {locationMessage}
+                            </Text>
+                        </Flex>
                     </Box>
                     <Box alignSelf={{ base: "flex-start", md: "center" }}>
                         <CreateOutfitDialog />
@@ -314,14 +474,16 @@ export function Outfits() {
                                 <Icon as={FiCloud} color="#b5b8c6" boxSize={6} position="absolute" right="-2px" bottom="0" />
                             </Box>
                             <Text fontSize={{ base: "xl", md: "2xl" }} fontWeight="800" letterSpacing="-0.03em">
-                                San Francisco
+                                {weather.location}
                             </Text>
                         </Flex>
-                        <Text fontSize={{ base: "lg", md: "xl" }} color="#6a625b">68°F</Text>
-                        <Text fontSize={{ base: "lg", md: "xl" }} color="#6a625b">· Partly Cloudy</Text>
+                        <Text fontSize={{ base: "lg", md: "xl" }} color="#6a625b">{weather.temp}</Text>
+                        <Text fontSize={{ base: "lg", md: "xl" }} color="#6a625b">· {weather.condition}</Text>
                         <Flex align="center" gap={1.5} color="#84786e" ml={{ md: "auto" }}>
                             <Icon as={FiMapPin} />
-                            <Text fontSize="s" fontWeight="600">Weather-based pick</Text>
+                            <Text fontSize="xs" fontWeight="600">
+                                {geoPermission === "granted" ? "Using your location" : "Weather-based pick"}
+                            </Text>
                         </Flex>
                     </Flex>
 
@@ -356,7 +518,7 @@ export function Outfits() {
                                         <Flex key={item.label} align="center" gap={4} py={3}>
                                             <Text fontSize="xl" lineHeight="1">{item.icon}</Text>
                                             <Text
-                                                fontSize={{ base: "l", md: "l" }}
+                                                fontSize={{ base: "lg", md: "lg" }}
                                                 lineHeight="1.1"
                                                 color="#6b625b"
                                                 fontFamily="'Outfit', 'Nunito', system-ui, sans-serif"
