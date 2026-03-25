@@ -71,6 +71,17 @@ async function fetchWeatherForCoords(latitude: number, longitude: number): Promi
     };
 }
 
+function getCurrentPosition(options?: PositionOptions): Promise<GeolocationPosition> {
+    return new Promise((resolve, reject) => {
+        if (!("geolocation" in navigator)) {
+            reject(new Error("Geolocation not supported"));
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(resolve, reject, options);
+    });
+}
+
 function CreateOutfitDialog() {
     return (
         <Dialog.Root>
@@ -294,6 +305,39 @@ export function Outfits() {
     const [locationLoading, setLocationLoading] = useState(false);
     const [locationMessage, setLocationMessage] = useState("Using default weather");
 
+    const loadWeatherForCurrentLocation = async () => {
+        setLocationLoading(true);
+
+        try {
+            const position = await getCurrentPosition({
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 300000,
+            });
+
+            const { latitude, longitude } = position.coords;
+            const nextWeather = await fetchWeatherForCoords(latitude, longitude);
+
+            setGeoPermission("granted");
+            setWeather(nextWeather);
+            setLocationMessage("Weather updated from your current location");
+        } catch (error) {
+            if (error instanceof GeolocationPositionError) {
+                if (error.code === error.PERMISSION_DENIED) {
+                    setGeoPermission("denied");
+                    setLocationMessage("Location permission denied");
+                } else {
+                    setLocationMessage("Unable to get your current location");
+                }
+            } else {
+                console.error("Failed to fetch location-based weather", error);
+                setLocationMessage("Location granted, but live weather could not be loaded");
+            }
+        } finally {
+            setLocationLoading(false);
+        }
+    };
+
     //The basic workflow is:
     //1. On component mount, we check if geolocation is supported and what the current permission status is. We also set up a listener for changes to the permission status, so if the user grants or denies permission after the initial check, we can update our UI accordingly.
     //2. When the user clicks the "Use my location" button, we request their current position. If they grant permission and we successfully get their location, we fetch the weather for those coordinates and update our display. If they deny permission or if there's an error getting their location, we show an appropriate message.
@@ -341,6 +385,14 @@ export function Outfits() {
         };
     }, []);
 
+    useEffect(() => {
+        if (geoPermission !== "granted" || locationLoading || weather.location !== fallbackWeather.location) {
+            return;
+        }
+
+        loadWeatherForCurrentLocation();
+    }, [geoPermission, locationLoading, weather.location]);
+
     const requestLocation = () => {
         if (!("geolocation" in navigator)) {
             setGeoPermission("unsupported");
@@ -348,43 +400,8 @@ export function Outfits() {
             return;
         }
 
-        setLocationLoading(true);
         setLocationMessage("Requesting location permission...");
-
-        navigator.geolocation.getCurrentPosition(
-            async (position) => {
-                const { latitude, longitude } = position.coords;
-                setGeoPermission("granted");
-
-                try {
-                    const nextWeather = await fetchWeatherForCoords(latitude, longitude);
-
-                    setWeather(nextWeather);
-                    setLocationMessage("Weather updated from your current location");
-                } catch (error) {
-                    console.error("Failed to fetch location-based weather", error);
-                    setLocationMessage("Location granted, but live weather could not be loaded");
-                } finally {
-                    setLocationLoading(false);
-                }
-            },
-            (error) => {
-                setLocationLoading(false);
-
-                if (error.code === error.PERMISSION_DENIED) {
-                    setGeoPermission("denied");
-                    setLocationMessage("Location permission denied");
-                    return;
-                }
-
-                setLocationMessage("Unable to get your current location");
-            },
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 300000,
-            }
-        );
+        loadWeatherForCurrentLocation();
     };
 
     const locationButtonLabel = locationLoading
