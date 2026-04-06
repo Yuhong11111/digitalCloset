@@ -16,6 +16,7 @@ import AppLayout from "./AppLayout";
 import { pageBackgroundStyles } from "../theme";
 import { useEffect, useState } from "react";
 import { API_BASE_URL } from "../config";
+import axios from "axios";
 
 type GeoPermissionState = "idle" | "prompt" | "granted" | "denied" | "unsupported";
 
@@ -30,12 +31,6 @@ const fallbackWeather: WeatherDisplay = {
     temp: "68°F",
     condition: "Partly Cloudy",
 };
-
-const outfitItems = [
-    { icon: "🧥", label: "Light Jacket" },
-    { icon: "👕", label: "White T-Shirt" },
-    { icon: "👖", label: "Jeans" },
-];
 
 const insightCards = [
     {
@@ -53,16 +48,10 @@ const insightCards = [
 ];
 
 async function fetchWeatherForCoords(latitude: number, longitude: number): Promise<WeatherDisplay> {
-    const response = await fetch(
-        `${API_BASE_URL}/weather/current?lat=${latitude}&lon=${longitude}`,
-        { credentials: "include" }
-    );
-
-    if (!response.ok) {
-        throw new Error("Unable to fetch weather");
-    }
-
-    const data = await response.json();
+    const response = await axios.get(`${API_BASE_URL}/weather/current`, {
+        params: { lat: latitude, lon: longitude },
+    });
+    const data = response.data;
 
     return {
         location: typeof data?.location === "string" && data.location.trim() ? data.location : fallbackWeather.location,
@@ -82,6 +71,8 @@ function getCurrentPosition(options?: PositionOptions): Promise<GeolocationPosit
     });
 }
 
+// for create outfit dialog, we can just have some basic inputs for now - outfit name, season, occasion, and a button to start creating.
+// The actual outfit creation flow can be built out later, but this will give us a starting point for the UI and allow us to test the dialog component.
 function CreateOutfitDialog() {
     return (
         <Dialog.Root>
@@ -184,126 +175,148 @@ function CreateOutfitDialog() {
     );
 }
 
-function OutfitVisual() {
-    return (
-        <Box
-            flex="1"
-            minH={{ base: "340px", lg: "400px" }}
-            borderRadius="28px"
-            position="relative"
-            overflow="hidden"
-            bg="linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(247,240,232,0.95) 100%)"
-        >
-            <Box
-                position="absolute"
-                inset={0}
-                bg="radial-gradient(circle at 20% 20%, rgba(255,255,255,0.95), transparent 35%), radial-gradient(circle at 70% 30%, rgba(204, 231, 230, 0.45), transparent 34%), radial-gradient(circle at 50% 85%, rgba(232, 219, 207, 0.75), transparent 36%)"
-            />
-            <Box
-                position="absolute"
-                left={{ base: "16%", md: "22%" }}
-                top={{ base: "8%", md: "6%" }}
-                w={{ base: "26%", md: "22%" }}
-                h={{ base: "60%", md: "68%" }}
-                borderRadius="100px 100px 28px 28px"
-                bg="linear-gradient(180deg, #6db8b6 0%, #5ea5a3 100%)"
-                boxShadow="0 24px 36px rgba(80, 140, 138, 0.22)"
-            >
-                <Box position="absolute" insetX="39%" top="-18px" w="22%" h="24px" border="3px solid #ccb4a2" borderBottom="0" borderRadius="full" />
-                <Box position="absolute" top="18%" left="-10%" w="18%" h="52%" borderRadius="full" bg="#69b1ae" transform="rotate(10deg)" />
-                <Box position="absolute" top="18%" right="-10%" w="18%" h="52%" borderRadius="full" bg="#69b1ae" transform="rotate(-10deg)" />
-                <Box position="absolute" top="9%" left="33%" w="34%" h="18%" borderRadius="0 0 24px 24px" borderTop="3px solid rgba(255,255,255,0.55)" />
-                <Box position="absolute" top="26%" left="49%" w="3px" h="44%" bg="rgba(255,255,255,0.38)" />
-                {[0, 1, 2, 3, 4].map((index) => (
-                    <Box
-                        key={index}
-                        position="absolute"
-                        left="calc(49% - 4px)"
-                        top={`calc(31% + ${index * 8}%)`}
-                        w="8px"
-                        h="8px"
-                        borderRadius="full"
-                        bg="#ead7cb"
-                    />
-                ))}
-            </Box>
-            <Box
-                position="absolute"
-                left={{ base: "48%", md: "49%" }}
-                top={{ base: "9%", md: "10%" }}
-                w={{ base: "24%", md: "21%" }}
-                h={{ base: "42%", md: "46%" }}
-                borderRadius="36px 36px 22px 22px"
-                bg="linear-gradient(180deg, #63b7b7 0%, #57a8a9 100%)"
-                boxShadow="0 24px 36px rgba(80, 140, 138, 0.18)"
-            >
-                <Box position="absolute" top="5%" left="30%" w="40%" h="14%" borderRadius="0 0 24px 24px" borderTop="3px solid rgba(255,255,255,0.48)" />
-                <Box position="absolute" top="18%" left="-12%" w="22%" h="35%" borderRadius="full" bg="#63b7b7" transform="rotate(14deg)" />
-                <Box position="absolute" top="18%" right="-12%" w="22%" h="35%" borderRadius="full" bg="#63b7b7" transform="rotate(-14deg)" />
-            </Box>
-            <Box
-                position="absolute"
-                right={{ base: "10%", md: "13%" }}
-                top={{ base: "43%", md: "44%" }}
-                w={{ base: "16%", md: "15%" }}
-                h={{ base: "33%", md: "36%" }}
-                borderRadius="18px 18px 12px 12px"
-                bg="linear-gradient(180deg, #8ccccc 0%, #78b7b8 100%)"
-                transform="rotate(4deg)"
-                boxShadow="0 20px 32px rgba(80, 140, 138, 0.16)"
-            >
-                <Box position="absolute" top="8%" left="14%" w="72%" h="10%" borderTop="2px solid rgba(110, 140, 140, 0.55)" />
-                <Box position="absolute" top="18%" left="18%" w="18%" h="10%" borderRadius="full" border="2px solid rgba(110, 140, 140, 0.45)" />
-                <Box position="absolute" top="18%" right="18%" w="18%" h="10%" borderRadius="full" border="2px solid rgba(110, 140, 140, 0.45)" />
-            </Box>
-            <Box
-                position="absolute"
-                left={{ base: "9%", md: "12%" }}
-                bottom={{ base: "7%", md: "6%" }}
-                w={{ base: "20%", md: "18%" }}
-                h={{ base: "19%", md: "21%" }}
-                borderRadius="28px 28px 16px 16px"
-                bg="linear-gradient(180deg, #5f9ea0 0%, #538a8d 100%)"
-                boxShadow="0 18px 28px rgba(80, 140, 138, 0.2)"
-            >
-                <Box position="absolute" left="12%" right="12%" top="18%" h="14%" borderTop="3px solid rgba(255,255,255,0.35)" borderRadius="full" />
-                <Box position="absolute" left="20%" right="20%" top="-28%" h="48%" border="4px solid #4d8285" borderBottom="0" borderRadius="full" />
-                <Box position="absolute" right="-8%" bottom="5%" w="14%" h="50%" borderRadius="full" border="4px solid #4d8285" borderLeft="0" />
-                <Box position="absolute" left="44%" top="40%" w="18%" h="16%" borderRadius="6px" bg="#dec2a8" />
-            </Box>
-            <Flex
-                position="absolute"
-                right={{ base: "16%", md: "20%" }}
-                bottom={{ base: "6%", md: "7%" }}
-                gap={3}
-                align="flex-end"
-            >
-                <Box
-                    w={{ base: "48px", md: "56px" }}
-                    h={{ base: "74px", md: "82px" }}
-                    borderRadius="18px 18px 10px 10px"
-                    bg="linear-gradient(180deg, #78c6c6 0%, #69b1b0 100%)"
-                    transform="rotate(8deg)"
-                    boxShadow="0 12px 24px rgba(80, 140, 138, 0.18)"
-                />
-                <Box
-                    w={{ base: "48px", md: "56px" }}
-                    h={{ base: "74px", md: "82px" }}
-                    borderRadius="18px 18px 10px 10px"
-                    bg="linear-gradient(180deg, #85d0d0 0%, #74bbbc 100%)"
-                    transform="rotate(-8deg)"
-                    boxShadow="0 12px 24px rgba(80, 140, 138, 0.18)"
-                />
-            </Flex>
-        </Box>
-    );
-}
+// function OutfitVisual() {
+//     return (
+//         <Box
+//             flex="1"
+//             minH={{ base: "340px", lg: "400px" }}
+//             borderRadius="28px"
+//             position="relative"
+//             overflow="hidden"
+//             bg="linear-gradient(180deg, rgba(255,255,255,0.72) 0%, rgba(247,240,232,0.95) 100%)"
+//         >
+//             <Box
+//                 position="absolute"
+//                 inset={0}
+//                 bg="radial-gradient(circle at 20% 20%, rgba(255,255,255,0.95), transparent 35%), radial-gradient(circle at 70% 30%, rgba(204, 231, 230, 0.45), transparent 34%), radial-gradient(circle at 50% 85%, rgba(232, 219, 207, 0.75), transparent 36%)"
+//             />
+//             <Box
+//                 position="absolute"
+//                 left={{ base: "16%", md: "22%" }}
+//                 top={{ base: "8%", md: "6%" }}
+//                 w={{ base: "26%", md: "22%" }}
+//                 h={{ base: "60%", md: "68%" }}
+//                 borderRadius="100px 100px 28px 28px"
+//                 bg="linear-gradient(180deg, #6db8b6 0%, #5ea5a3 100%)"
+//                 boxShadow="0 24px 36px rgba(80, 140, 138, 0.22)"
+//             >
+//                 <Box position="absolute" insetX="39%" top="-18px" w="22%" h="24px" border="3px solid #ccb4a2" borderBottom="0" borderRadius="full" />
+//                 <Box position="absolute" top="18%" left="-10%" w="18%" h="52%" borderRadius="full" bg="#69b1ae" transform="rotate(10deg)" />
+//                 <Box position="absolute" top="18%" right="-10%" w="18%" h="52%" borderRadius="full" bg="#69b1ae" transform="rotate(-10deg)" />
+//                 <Box position="absolute" top="9%" left="33%" w="34%" h="18%" borderRadius="0 0 24px 24px" borderTop="3px solid rgba(255,255,255,0.55)" />
+//                 <Box position="absolute" top="26%" left="49%" w="3px" h="44%" bg="rgba(255,255,255,0.38)" />
+//                 {[0, 1, 2, 3, 4].map((index) => (
+//                     <Box
+//                         key={index}
+//                         position="absolute"
+//                         left="calc(49% - 4px)"
+//                         top={`calc(31% + ${index * 8}%)`}
+//                         w="8px"
+//                         h="8px"
+//                         borderRadius="full"
+//                         bg="#ead7cb"
+//                     />
+//                 ))}
+//             </Box>
+//             <Box
+//                 position="absolute"
+//                 left={{ base: "48%", md: "49%" }}
+//                 top={{ base: "9%", md: "10%" }}
+//                 w={{ base: "24%", md: "21%" }}
+//                 h={{ base: "42%", md: "46%" }}
+//                 borderRadius="36px 36px 22px 22px"
+//                 bg="linear-gradient(180deg, #63b7b7 0%, #57a8a9 100%)"
+//                 boxShadow="0 24px 36px rgba(80, 140, 138, 0.18)"
+//             >
+//                 <Box position="absolute" top="5%" left="30%" w="40%" h="14%" borderRadius="0 0 24px 24px" borderTop="3px solid rgba(255,255,255,0.48)" />
+//                 <Box position="absolute" top="18%" left="-12%" w="22%" h="35%" borderRadius="full" bg="#63b7b7" transform="rotate(14deg)" />
+//                 <Box position="absolute" top="18%" right="-12%" w="22%" h="35%" borderRadius="full" bg="#63b7b7" transform="rotate(-14deg)" />
+//             </Box>
+//             <Box
+//                 position="absolute"
+//                 right={{ base: "10%", md: "13%" }}
+//                 top={{ base: "43%", md: "44%" }}
+//                 w={{ base: "16%", md: "15%" }}
+//                 h={{ base: "33%", md: "36%" }}
+//                 borderRadius="18px 18px 12px 12px"
+//                 bg="linear-gradient(180deg, #8ccccc 0%, #78b7b8 100%)"
+//                 transform="rotate(4deg)"
+//                 boxShadow="0 20px 32px rgba(80, 140, 138, 0.16)"
+//             >
+//                 <Box position="absolute" top="8%" left="14%" w="72%" h="10%" borderTop="2px solid rgba(110, 140, 140, 0.55)" />
+//                 <Box position="absolute" top="18%" left="18%" w="18%" h="10%" borderRadius="full" border="2px solid rgba(110, 140, 140, 0.45)" />
+//                 <Box position="absolute" top="18%" right="18%" w="18%" h="10%" borderRadius="full" border="2px solid rgba(110, 140, 140, 0.45)" />
+//             </Box>
+//             <Box
+//                 position="absolute"
+//                 left={{ base: "9%", md: "12%" }}
+//                 bottom={{ base: "7%", md: "6%" }}
+//                 w={{ base: "20%", md: "18%" }}
+//                 h={{ base: "19%", md: "21%" }}
+//                 borderRadius="28px 28px 16px 16px"
+//                 bg="linear-gradient(180deg, #5f9ea0 0%, #538a8d 100%)"
+//                 boxShadow="0 18px 28px rgba(80, 140, 138, 0.2)"
+//             >
+//                 <Box position="absolute" left="12%" right="12%" top="18%" h="14%" borderTop="3px solid rgba(255,255,255,0.35)" borderRadius="full" />
+//                 <Box position="absolute" left="20%" right="20%" top="-28%" h="48%" border="4px solid #4d8285" borderBottom="0" borderRadius="full" />
+//                 <Box position="absolute" right="-8%" bottom="5%" w="14%" h="50%" borderRadius="full" border="4px solid #4d8285" borderLeft="0" />
+//                 <Box position="absolute" left="44%" top="40%" w="18%" h="16%" borderRadius="6px" bg="#dec2a8" />
+//             </Box>
+//             <Flex
+//                 position="absolute"
+//                 right={{ base: "16%", md: "20%" }}
+//                 bottom={{ base: "6%", md: "7%" }}
+//                 gap={3}
+//                 align="flex-end"
+//             >
+//                 <Box
+//                     w={{ base: "48px", md: "56px" }}
+//                     h={{ base: "74px", md: "82px" }}
+//                     borderRadius="18px 18px 10px 10px"
+//                     bg="linear-gradient(180deg, #78c6c6 0%, #69b1b0 100%)"
+//                     transform="rotate(8deg)"
+//                     boxShadow="0 12px 24px rgba(80, 140, 138, 0.18)"
+//                 />
+//                 <Box
+//                     w={{ base: "48px", md: "56px" }}
+//                     h={{ base: "74px", md: "82px" }}
+//                     borderRadius="18px 18px 10px 10px"
+//                     bg="linear-gradient(180deg, #85d0d0 0%, #74bbbc 100%)"
+//                     transform="rotate(-8deg)"
+//                     boxShadow="0 12px 24px rgba(80, 140, 138, 0.18)"
+//                 />
+//             </Flex>
+//         </Box>
+//     );
+// }
 
 export function Outfits() {
     const [weather, setWeather] = useState<WeatherDisplay>(fallbackWeather);
     const [geoPermission, setGeoPermission] = useState<GeoPermissionState>("idle");
     const [locationLoading, setLocationLoading] = useState(false);
     const [locationMessage, setLocationMessage] = useState("Using default weather");
+    const [outfitItems, setOutfitItems] = useState([
+        { icon: "🧥", label: "Light Jacket" },
+        { icon: "👕", label: "White T-Shirt" },
+        { icon: "👖", label: "Jeans" },
+    ]);
+
+
+    async function fetchOutfitSuggestion(weather: WeatherDisplay) {
+        try {
+            const response = await axios.post(`${API_BASE_URL}/outfit/suggest`, { weather });
+            const data = response.data;
+
+            // Assuming the API returns an array of items with 'icon' and 'label' properties
+            if (Array.isArray(data?.items)) {
+                setOutfitItems(data.items);
+            } else {
+                console.warn("Unexpected outfit suggestion format", data);
+            }
+        } catch (error) {
+            console.error("Error fetching outfit suggestion", error);
+        }
+    }
 
     const loadWeatherForCurrentLocation = async () => {
         setLocationLoading(true);
@@ -321,6 +334,10 @@ export function Outfits() {
             setGeoPermission("granted");
             setWeather(nextWeather);
             setLocationMessage("Weather updated from your current location");
+
+            // call the outfit suggestion API after we successfully get the weather for the user's location, so we can provide a more relevant outfit recommendation based on the current weather conditions.
+            // We can also consider passing the weather data to the outfit suggestion API if it supports that, so it can generate suggestions that are even more tailored to the user's current environment.
+            fetchOutfitSuggestion(nextWeather);
         } catch (error) {
             if (error instanceof GeolocationPositionError) {
                 if (error.code === error.PERMISSION_DENIED) {
@@ -577,7 +594,7 @@ export function Outfits() {
                             </Flex>
                         </Flex>
 
-                        <OutfitVisual />
+                        {/* <OutfitVisual /> */}
                     </Flex>
                 </Box>
 
