@@ -12,6 +12,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql+psycopg2://user:password@localhost:5432/closet_db")
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "your-openai-api-key")
+    WEATHER_API_KEY: str = os.getenv("WEATHER_API_KEY", "9e50f4590293402bb3c215041262403")
     CORS_ORIGINS: str = os.getenv("CORS_ORIGINS", "http://localhost:3000")
 
 settings = Settings()

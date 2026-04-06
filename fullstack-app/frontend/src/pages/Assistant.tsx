@@ -284,7 +284,8 @@ export function Assistant() {
                                                     if (item.material) formData.append("material", item.material);
                                                     if (item.brand) formData.append("brand", item.brand);
                                                     if (msg.imageDataUrl) {
-                                                        const blob = await fetch(msg.imageDataUrl).then(res => res.blob());
+                                                        const blobResponse = await axios.get(msg.imageDataUrl, { responseType: "blob" });
+                                                        const blob = blobResponse.data;
                                                         const file = new File([blob], "assistant-upload.png", { type: blob.type || "image/png" });
                                                         formData.append("image", file);
                                                     }

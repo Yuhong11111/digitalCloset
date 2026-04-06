@@ -134,9 +134,8 @@ export default function AddItem() {
         if (draft?.imageDataUrl) {
             setImagePreview(draft.imageDataUrl);
             setImageFileName("assistant-upload");
-            fetch(draft.imageDataUrl)
-                .then(res => res.blob())
-                .then(blob => {
+            axios.get(draft.imageDataUrl, { responseType: "blob" })
+                .then(({ data: blob }) => {
                     const file = new File([blob], "assistant-upload.png", { type: blob.type || "image/png" });
                     setImageFile(file);
                 })

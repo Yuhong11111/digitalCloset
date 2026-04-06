@@ -24,16 +24,22 @@ The frontend communicates with the backend via RESTful JSON APIs.
 
 ```bash
 cd fullstack-app/backend
-python -m venv .venv
+python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
 # Create .env in fullstack-app/backend before running init_db.py
-# First-time DB init (run from the backend folder)
+# First-time DB init
 python ../../init_db.py
 
 uvicorn app.main:app --reload
 ```
+
+Backend runs at `http://localhost:8000`.
+
+Useful URLs:
+- Swagger UI: `http://localhost:8000/docs`
+- OpenAPI schema: `http://localhost:8000/openapi.json`
 
 ### Frontend
 
@@ -43,11 +49,15 @@ npm install
 npm start
 ```
 
+Frontend runs at `http://localhost:3000`.
+
+Run backend and frontend in separate terminals.
+
 ## Authentication
 
 - Users authenticate using email and password
-- On successful login, the backend issues a JWT
-- The frontend stores the token and includes it in the `Authorization` header
+- On successful login, the backend issues a JWT in an HTTP cookie
+- The frontend sends authenticated requests with credentials/cookies
 - Protected routes require a valid JWT
 
 
@@ -58,7 +68,15 @@ Create a `.env` file in the backend directory with:
 ```
 DATABASE_URL=postgresql+psycopg2://user:password@localhost:5432/closet_db
 JWT_SECRET=your_jwt_secret
+OPENAI_API_KEY=your_openai_api_key
+WEATHER_API_KEY=your_weatherapi_key
+CORS_ORIGINS=http://localhost:3000
 ```
+
+Notes:
+- `OPENAI_API_KEY` is required for the assistant and outfit suggestion endpoints.
+- `WEATHER_API_KEY` is required for `/weather/current`.
+- If you change `CORS_ORIGINS`, restart the backend.
 
 ## Testing
 
@@ -137,6 +155,7 @@ Optional env vars:
 - User authentication (login/signup)
 - Closet inventory with photos, notes, and favorites
 - AI stylist assistant for outfit suggestions
+- Weather-aware outfit suggestions from the closet
 - Outfit planning (create and manage looks)
 
 ## Screenshots
@@ -151,7 +170,7 @@ Optional env vars:
 ![AI Assistant](images/ai%20assistant.png)
 
 ### Outfits
-![Outfits](images/outfir.png)
+![Outfits](images/outfit.png)
 
 
 ## Roadmap

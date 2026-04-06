@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
 from app.db.database import get_db
-from app.schemas.message import AIResponse, AIRequest
+from app.schemas.message import AIResponse, AIRequest, OutfitSuggestRequest
 from app.schemas.item import ItemClosetResponse
 
 router = APIRouter(prefix="/assistant", tags=["assistant"])
@@ -117,6 +117,42 @@ def get_cloth(db: Session, owner_id: Optional[str]) -> List[Dict[str, Any]]:
 
     return items_structured
 
+
+def get_closet_items(db: Session, owner_id: Optional[str]) -> List[Dict[str, Any]]:
+    if not owner_id:
+        return []
+
+    try:
+        owner_uuid = uuid.UUID(owner_id)
+    except ValueError:
+        return []
+
+    query = text(
+        "SELECT id, name, category, color, season, image_url, favorite, tags, notes "
+        "FROM cloth_items WHERE owner_id = :owner_id "
+        "ORDER BY favorite DESC, created_at DESC"
+    )
+    results = db.execute(query, {"owner_id": owner_uuid}).fetchall()
+
+    items_structured = []
+    for item in results:
+        row = item._mapping
+        items_structured.append(
+            {
+                "_id": str(row["id"]),
+                "name": row["name"] or "Unnamed item",
+                "category": row["category"],
+                "color": row["color"],
+                "season": row["season"],
+                "imageUrl": row["image_url"],
+                "favorite": row["favorite"],
+                "tags": row["tags"],
+                "notes": row["notes"] or "",
+            }
+        )
+
+    return items_structured
+
 # def clothToString(items: list[str]) -> str:
 #     if not items:
 #         return "No closet items found for this user."
@@ -218,3 +254,81 @@ async def get_ai_assistance(
     except Exception as e:
         # you might want to log e here
         raise HTTPException(status_code=500, detail=str(e))
+    
+
+# for outfit suggestion, we can have a separate endpoint that takes weather info and returns a suggested outfit based on the user's closet items and the weather conditions. 
+# This would likely involve another call to the OpenAI API with a prompt specifically designed for outfit suggestions.
+@router.post("/outfit/suggest", response_model=List[ItemClosetResponse], response_model_by_alias=True)
+async def get_outfit_suggest(
+    request: OutfitSuggestRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    try:
+        user_id = current_user.get("userId")
+        closet_list = get_closet_items(db, user_id)
+        if not closet_list:
+            return []
+
+        weather = request.weather.model_dump()
+        prompt = {
+            "weather": weather,
+            "closet_items": [
+                {
+                    "id": item["_id"],
+                    "name": item["name"],
+                    "category": item["category"],
+                    "color": item["color"],
+                    "season": item["season"],
+                    "tags": item["tags"],
+                    "favorite": item["favorite"],
+                    "notes": item["notes"],
+                }
+                for item in closet_list
+            ],
+        }
+
+        response = client.responses.create(
+            model="gpt-4o-mini",
+            instructions="""
+                You are a fashion assistant that selects clothing items for an outfit.
+
+                Return ONLY valid JSON in this format:
+                {
+                "selected_item_ids": ["item-id-1", "item-id-2", "item-id-3"]
+                }
+
+                Rules:
+                - Use only ids that appear in closet_items.
+                - Choose 2 to 5 items that make sense together as one outfit.
+                - Prefer items appropriate for the reported temperature and condition.
+                - If there is no good match, return an empty array.
+                """,
+            input=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "input_text",
+                            "text": json.dumps(prompt),
+                        }
+                    ],
+                }
+            ],
+            temperature=0.4,
+            max_output_tokens=300,
+        )
+
+        raw_json = response.output_text
+        try:
+            data = json.loads(raw_json)
+        except json.JSONDecodeError:
+            data = json.loads(repair_json(raw_json))
+
+        selected_ids = set(data.get("selected_item_ids", []))
+        selected_items = [item for item in closet_list if item["_id"] in selected_ids]
+        return [ItemClosetResponse(**item) for item in selected_items]
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to generate outfit suggestion: {type(exc).__name__}: {exc}")

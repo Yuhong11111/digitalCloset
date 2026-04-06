@@ -29,3 +29,13 @@ class AIResponse(BaseModel):
     missingFields: List[str] = []
     referencedItems: List[ItemClosetResponse] = []
     mode : str = "chat"
+
+
+class WeatherDisplay(BaseModel):
+    location: str
+    temp: str
+    condition: str
+
+
+class OutfitSuggestRequest(BaseModel):
+    weather: WeatherDisplay
