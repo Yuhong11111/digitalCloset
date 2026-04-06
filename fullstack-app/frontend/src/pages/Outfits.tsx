@@ -304,12 +304,16 @@ export function Outfits() {
 
     async function fetchOutfitSuggestion(weather: WeatherDisplay) {
         try {
-            const response = await axios.post(`${API_BASE_URL}/outfit/suggest`, { weather });
+            const response = await axios.post(`${API_BASE_URL}/assistant/outfit/suggest`, { weather });
             const data = response.data;
 
-            // Assuming the API returns an array of items with 'icon' and 'label' properties
-            if (Array.isArray(data?.items)) {
-                setOutfitItems(data.items);
+            if (Array.isArray(data)) {
+                setOutfitItems(
+                    data.map((item) => ({
+                        icon: "👗",
+                        label: item.name,
+                    }))
+                );
             } else {
                 console.warn("Unexpected outfit suggestion format", data);
             }
