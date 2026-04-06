@@ -170,7 +170,7 @@ Optional env vars:
 ![AI Assistant](images/ai%20assistant.png)
 
 ### Outfits
-![Outfits](images/outfir.png)
+![Outfits](images/outfit.png)
 
 
 ## Roadmap
