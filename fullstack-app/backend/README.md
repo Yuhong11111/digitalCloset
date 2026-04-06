@@ -1,44 +1,48 @@
-# README for the Backend of the Fullstack Application
+# Backend README
 
-This is the backend part of the Fullstack Application built with FastAPI. 
+This backend is a FastAPI app for auth, closet items, assistant chat, weather lookup, and outfit suggestions.
 
-## Overview
-
-The backend is responsible for handling API requests and managing data. It is built using FastAPI, which allows for fast and efficient development of APIs.
-
-## Project Structure
-
-- `app/`: Contains the main application code.
-  - `api/`: Contains the API route definitions.
-  - `models/`: Contains the data models used in the application.
-  - `main.py`: The entry point for the FastAPI application.
-
-## Installation
-
-To set up the backend, ensure you have Python installed, then install the required dependencies:
+## Setup
 
 ```bash
+cd fullstack-app/backend
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Running the Application
+Create `fullstack-app/backend/.env` with:
 
-To run the FastAPI application, execute the following command:
+```env
+DATABASE_URL=postgresql+psycopg2://user:password@localhost:5432/closet_db
+JWT_SECRET=your_jwt_secret
+OPENAI_API_KEY=your_openai_api_key
+WEATHER_API_KEY=your_weatherapi_key
+CORS_ORIGINS=http://localhost:3000
+```
+
+Initialize the database once:
+
+```bash
+python ../../init_db.py
+```
+
+## Run
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-This will start the server and you can access the API at `http://127.0.0.1:8000`.
+The backend listens on `http://localhost:8000`.
 
-## API Documentation
+## Docs
 
-FastAPI automatically generates documentation for your API. You can access it at `http://127.0.0.1:8000/docs`.
+- Swagger UI: `http://localhost:8000/docs`
+- OpenAPI schema: `http://localhost:8000/openapi.json`
 
-## Contributing
+## Notes
 
-Feel free to contribute to this project by submitting issues or pull requests. 
-
-## License
-
-This project is licensed under the MIT License.
+- Authentication uses a JWT stored in an HTTP cookie.
+- `/assistant/outfit/suggest` expects a JSON body with weather data.
+- `/weather/current` requires valid `lat` and `lon` query params.
+- If you update `.env`, restart the backend.
