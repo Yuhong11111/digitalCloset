@@ -20,6 +20,8 @@ import {
 } from "react-icons/fi";
 import AppLayout from "./AppLayout";
 import { pageBackgroundStyles } from "../theme";
+import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 type QuizSection = {
     id: "colors" | "fits" | "occasions" | "climate" | "styleTags";
@@ -146,9 +148,13 @@ const climateIcons = {
 export function StyleProfile() {
     const [selections, setSelections] = useState(initialSelections);
     const [customInputs, setCustomInputs] = useState(initialCustomInputs);
+    const [savedSelections, setSavedSelections] = useState(initialSelections);
+    const [saveMessage, setSaveMessage] = useState("Preferences are up to date.");
+    const [isSaving, setIsSaving] = useState(false);
 
     const completedSections = quizSections.filter((section) => selections[section.id].length > 0).length;
     const progress = Math.round((completedSections / quizSections.length) * 100);
+    const hasUnsavedChanges = JSON.stringify(selections) !== JSON.stringify(savedSelections);
 
     const totalSelections = useMemo(
         () => Object.values(selections).reduce((count, entry) => count + entry.length, 0),
@@ -172,6 +178,32 @@ export function StyleProfile() {
             styleTags: [],
         });
         setCustomInputs(initialCustomInputs);
+    };
+
+    const savePreferences = async () => {
+        const payload = {
+            preferred_colors: selections.colors,
+            preferred_fits: selections.fits,
+            preferred_occasions: selections.occasions,
+            preferred_climate: selections.climate,
+            preferred_style_tags: selections.styleTags,
+        };
+
+        setIsSaving(true);
+        try {
+            const res = await axios.post(`${API_BASE_URL}/preferences`, payload);
+            if (res.status === 200) {
+                setSavedSelections(selections);
+                setSaveMessage("Preferences saved.");
+            } else {
+                setSaveMessage("Failed to save preferences.");
+            }
+        } catch (error) {
+            console.error("Error saving preferences:", error);
+            setSaveMessage("Failed to save preferences.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     const toggleOption = (sectionId: QuizSection["id"], option: string) => {
@@ -360,6 +392,34 @@ export function StyleProfile() {
                         <Text mt={5} color="whiteAlpha.800" fontSize="md">
                             {summaryText}
                         </Text>
+
+                        <Flex
+                            mt={5}
+                            gap={3}
+                            direction={{ base: "column", md: "row" }}
+                            align={{ base: "stretch", md: "center" }}
+                        >
+                            <Button
+                                onClick={savePreferences}
+                                borderRadius="full"
+                                h="48px"
+                                px={5}
+                                bg="#ead7c7"
+                                color="#1f1b18"
+                                fontWeight="800"
+                                disabled={!hasUnsavedChanges || isSaving}
+                                _hover={{ bg: "#dec4af" }}
+                            >
+                                {isSaving ? "Saving..." : "Save Preferences"}
+                            </Button>
+                            <Text
+                                fontSize="sm"
+                                color={hasUnsavedChanges ? "#f2d6bc" : "whiteAlpha.700"}
+                                data-testid="save-status"
+                            >
+                                {hasUnsavedChanges ? "You have unsaved changes. Click save to update your profile." : saveMessage}
+                            </Text>
+                        </Flex>
 
                         <Stack mt={8} gap={5}>
                             <Box>
