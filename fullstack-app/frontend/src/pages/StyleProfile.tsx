@@ -143,7 +143,7 @@ const climateIcons = {
     "Windy": FiWind,
 };
 
-export function Settings() {
+export function StyleProfile() {
     const [selections, setSelections] = useState(initialSelections);
     const [customInputs, setCustomInputs] = useState(initialCustomInputs);
 
@@ -552,4 +552,4 @@ export function Settings() {
     );
 }
 
-export default Settings;
+export default StyleProfile;

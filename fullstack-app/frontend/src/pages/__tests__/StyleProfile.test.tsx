@@ -1,10 +1,10 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import Settings from "../Settings";
+import StyleProfile from "../StyleProfile";
 import { renderWithProviders } from "../../test-utils/renderWithProviders";
 
 test("renders the style quiz sections", () => {
-    renderWithProviders(<Settings />);
+    renderWithProviders(<StyleProfile />);
 
     expect(screen.getByText("Style Identity Quiz")).toBeInTheDocument();
     expect(screen.getByText("Color Palette")).toBeInTheDocument();
@@ -16,7 +16,7 @@ test("renders the style quiz sections", () => {
 
 test("allows selection changes and reset", async () => {
     const user = userEvent.setup();
-    renderWithProviders(<Settings />);
+    renderWithProviders(<StyleProfile />);
 
     const navyButton = screen.getByRole("button", { name: "Navy" });
     await user.click(navyButton);

@@ -6,7 +6,7 @@ import Login from './pages/login';
 import Closet from './pages/Closet';
 import Outfits from './pages/Outfits';
 import Assistant from './pages/Assistant';
-import Settings from './pages/Settings';
+import StyleProfile from './pages/StyleProfile';
 import ClothesView from './pages/ClothesView';
 import { UserContextProvider } from './components/UserContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -56,10 +56,10 @@ function App() {
               }
             />
             <Route
-              path="/settings"
+              path="/style-profile"
               element={
                 <ProtectedRoute>
-                  <Settings />
+                  <StyleProfile />
                 </ProtectedRoute>
               }
             />

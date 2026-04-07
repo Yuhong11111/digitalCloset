@@ -45,7 +45,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                         <NavLink to="/closet" style={linkStyles}>Closet</NavLink>
                         <NavLink to="/outfits" style={linkStyles}>Outfits</NavLink>
                         <NavLink to="/assistant" style={linkStyles}>Assistant</NavLink>
-                        <NavLink to="/settings" style={linkStyles}>Settings</NavLink>
+                        <NavLink to="/style-profile" style={linkStyles}>Style Profile</NavLink>
                     </Box>
                     <Box ml="auto" p={4}>
                         <Menu.Root positioning={{ placement: "bottom-end" }}>
@@ -58,7 +58,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                                 <Menu.Positioner>
                                     <Menu.Content>
                                         <Menu.Item value="account">Account</Menu.Item>
-                                        <Menu.Item value="settings">Settings</Menu.Item>
+                                        <Menu.Item value="style-profile">Style Profile</Menu.Item>
                                         <Menu.Item value="logout" onClick={handleLogout}>
                                             Logout
                                         </Menu.Item>
