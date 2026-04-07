@@ -2,7 +2,7 @@
 * WardrobePage – a post-login homepage for the Digital Closet app.
 *
 * Features
-* - Top navigation (Wardrobe, Outfits, Assistant, Settings)
+* - Top navigation (Wardrobe, Outfits, Assistant, Style Profile)
 * - Search, Filter (by type), Sort controls
 * - Responsive grid of item cards
 * - Add Item modal (name, type, color, season, image URL)

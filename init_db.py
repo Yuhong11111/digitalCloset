@@ -13,7 +13,7 @@ sys.path.insert(0, backend_path)
 os.chdir(backend_path)
 
 from app.db.database import Base, engine
-from app.db.models import User, ClothItem
+from app.db.models import User, ClothItem, StylePreference
 
 
 def init_db():
@@ -24,6 +24,7 @@ def init_db():
     print("\nCreated tables:")
     print("  - users")
     print("  - cloth_items")
+    print("  - style_preferences")
 
 
 if __name__ == "__main__":

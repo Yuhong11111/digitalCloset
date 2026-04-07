@@ -36,8 +36,32 @@ function renderUserContext() {
 }
 
 describe("UserContextProvider", () => {
+  let responseErrorHandler: ((error: unknown) => Promise<never>) | undefined;
+  let ejectMock: jest.Mock;
+
   beforeEach(() => {
     jest.clearAllMocks();
+    ejectMock = jest.fn();
+    responseErrorHandler = undefined;
+
+    const mockedAxios = axios as jest.Mocked<typeof axios> & {
+      interceptors: {
+        response: {
+          use: jest.Mock;
+          eject: jest.Mock;
+        };
+      };
+    };
+
+    mockedAxios.interceptors = {
+      response: {
+        use: jest.fn((onSuccess, onError) => {
+          responseErrorHandler = onError;
+          return 1;
+        }),
+        eject: ejectMock,
+      },
+    };
   });
 
   test("starts in loading state and fetches the user profile", async () => {
@@ -104,6 +128,41 @@ describe("UserContextProvider", () => {
     );
 
     expect(screen.getByTestId("username")).toHaveTextContent("null");
+    expect(screen.getByTestId("user-id")).toHaveTextContent("null");
+  });
+
+  test("clears user data when a later request returns 401", async () => {
+    const getMock = axios.get as jest.Mock;
+    getMock.mockResolvedValue({
+      data: {
+        username: "alice",
+        userId: "user-123",
+      },
+    });
+
+    renderUserContext();
+
+    await waitFor(() =>
+      expect(screen.getByTestId("loading")).toHaveTextContent("false")
+    );
+
+    expect(screen.getByTestId("username")).toHaveTextContent("alice");
+
+    await expect(
+      responseErrorHandler?.({
+        response: {
+          status: 401,
+        },
+      })
+    ).rejects.toEqual({
+      response: {
+        status: 401,
+      },
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("username")).toHaveTextContent("null")
+    );
     expect(screen.getByTestId("user-id")).toHaveTextContent("null");
   });
 });
