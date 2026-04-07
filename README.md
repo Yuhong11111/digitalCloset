@@ -182,7 +182,7 @@ Planned improvements and future iterations:
   Provide feedback on selected outfits (e.g., color balance, seasonality, formality).
 - **AI Style Preferences**  
   Learn and persist user style preferences (colors, fits, occasions, climate) to personalize recommendations.
-- **AI Upload Intelligence**  
+- **AI Upload Intelligence** (DONE) 
   Automatically analyze uploaded clothing images to detect:
   - Garment type (e.g., hoodie, jacket)
   - Primary and secondary colors
@@ -197,6 +197,6 @@ Planned improvements and future iterations:
 - **Gesture-Friendly Browsing**  
   Swipe and touch-optimized filtering and navigation.
 
-### Core Platform Enhancements
+### Core Platform Enhancements (DONE)
 - **Outfit History & Usage Tracking**  
   Track outfit frequency to surface underused items.

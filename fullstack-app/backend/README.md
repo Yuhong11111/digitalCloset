@@ -6,10 +6,14 @@ This backend is a FastAPI app for auth, closet items, assistant chat, weather lo
 
 ```bash
 cd fullstack-app/backend
-python3 -m venv .venv
+/usr/bin/python3 -m venv .venv
 source .venv/bin/activate
+python -c "import platform; print(platform.machine())"  # should print arm64 on Apple Silicon
+python -m pip install --upgrade pip setuptools wheel
 pip install -r requirements.txt
 ```
+
+If you already created `.venv` from an Intel/Anaconda Python on an Apple Silicon Mac, recreate it with the system Python above before installing packages. A mismatched `x86_64` environment can force `greenlet` to build from source and fail with errors like `'cstdlib' file not found`.
 
 Create `fullstack-app/backend/.env` with:
 
