@@ -22,6 +22,12 @@ test("allows selection changes and reset", async () => {
     await user.click(navyButton);
     expect(navyButton).toHaveAttribute("aria-pressed", "true");
 
+    const customColorInput = screen.getByPlaceholderText("Add a custom color palette choice");
+    await user.type(customColorInput, "Charcoal");
+    await user.click(screen.getAllByRole("button", { name: "Add Custom" })[0]);
+
+    expect(screen.getByRole("button", { name: "Charcoal" })).toHaveAttribute("aria-pressed", "true");
+
     await user.click(screen.getByRole("button", { name: "Reset" }));
 
     expect(screen.getByText("No colors selected yet.")).toBeInTheDocument();

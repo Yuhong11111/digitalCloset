@@ -5,6 +5,7 @@ import {
     Button,
     Flex,
     Heading,
+    Input,
     SimpleGrid,
     Stack,
     Text,
@@ -125,6 +126,14 @@ const initialSelections: Record<QuizSection["id"], string[]> = {
     styleTags: ["Minimal", "Classic"],
 };
 
+const initialCustomInputs: Record<QuizSection["id"], string> = {
+    colors: "",
+    fits: "",
+    occasions: "",
+    climate: "",
+    styleTags: "",
+};
+
 const climateIcons = {
     "Hot & Humid": FiSun,
     "Four Seasons": FiCompass,
@@ -136,6 +145,7 @@ const climateIcons = {
 
 export function Settings() {
     const [selections, setSelections] = useState(initialSelections);
+    const [customInputs, setCustomInputs] = useState(initialCustomInputs);
 
     const completedSections = quizSections.filter((section) => selections[section.id].length > 0).length;
     const progress = Math.round((completedSections / quizSections.length) * 100);
@@ -161,6 +171,7 @@ export function Settings() {
             climate: [],
             styleTags: [],
         });
+        setCustomInputs(initialCustomInputs);
     };
 
     const toggleOption = (sectionId: QuizSection["id"], option: string) => {
@@ -184,6 +195,36 @@ export function Settings() {
                 [sectionId]: [...currentValues, option],
             };
         });
+    };
+
+    const addCustomOption = (sectionId: QuizSection["id"]) => {
+        const value = customInputs[sectionId].trim();
+
+        if (!value) {
+            return;
+        }
+
+        const alreadyExists = quizSections
+            .find((section) => section.id === sectionId)
+            ?.options.some((option) => option.toLowerCase() === value.toLowerCase());
+
+        const alreadySelected = selections[sectionId].some(
+            (option) => option.toLowerCase() === value.toLowerCase()
+        );
+
+        if (alreadyExists || alreadySelected || selections[sectionId].length >= selectionLimits[sectionId]) {
+            return;
+        }
+
+        setSelections((current) => ({
+            ...current,
+            [sectionId]: [...current[sectionId], value],
+        }));
+
+        setCustomInputs((current) => ({
+            ...current,
+            [sectionId]: "",
+        }));
     };
 
     const summaryText = `A ${dominantMood} wardrobe built around ${selections.colors.join(", ") || "your core neutrals"}, ${selections.fits.join(", ").toLowerCase() || "easy proportions"}, and outfits that cover ${selections.occasions.join(", ").toLowerCase() || "daily life"}.`;
@@ -432,7 +473,13 @@ export function Settings() {
                             </Text>
 
                             <Flex wrap="wrap" gap={3}>
-                                {section.options.map((option) => {
+                                {[...section.options, ...selections[section.id].filter(
+                                    (option) =>
+                                        !section.options.some(
+                                            (defaultOption) =>
+                                                defaultOption.toLowerCase() === option.toLowerCase()
+                                        )
+                                )].map((option) => {
                                     const isSelected = selections[section.id].includes(option);
 
                                     return (
@@ -456,6 +503,46 @@ export function Settings() {
                                         </Button>
                                     );
                                 })}
+                            </Flex>
+
+                            <Flex
+                                mt={4}
+                                gap={3}
+                                direction={{ base: "column", md: "row" }}
+                                align={{ base: "stretch", md: "center" }}
+                            >
+                                <Input
+                                    value={customInputs[section.id]}
+                                    onChange={(event) =>
+                                        setCustomInputs((current) => ({
+                                            ...current,
+                                            [section.id]: event.target.value,
+                                        }))
+                                    }
+                                    onKeyDown={(event) => {
+                                        if (event.key === "Enter") {
+                                            addCustomOption(section.id);
+                                        }
+                                    }}
+                                    placeholder={`Add a custom ${section.title.toLowerCase()} choice`}
+                                    bg="white"
+                                    borderRadius="full"
+                                    h="48px"
+                                    borderColor="#e8ddd2"
+                                    _placeholder={{ color: "gray.400" }}
+                                />
+                                <Button
+                                    onClick={() => addCustomOption(section.id)}
+                                    borderRadius="full"
+                                    h="48px"
+                                    px={5}
+                                    bg="#ead7c7"
+                                    color="#2d241d"
+                                    fontWeight="700"
+                                    _hover={{ bg: "#dfc5b0" }}
+                                >
+                                    Add Custom
+                                </Button>
                             </Flex>
                         </Box>
                     ))}
