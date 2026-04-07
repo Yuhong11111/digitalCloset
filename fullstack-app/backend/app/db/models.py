@@ -55,3 +55,22 @@ class ClothItem(Base):
 
     def __repr__(self):
         return f"<ClothItem {self.name}>"
+
+
+class StylePreference(Base):
+    """Style preference model"""
+    __tablename__ = "style_preferences"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    preferred_colors = Column(ARRAY(String), nullable=True)
+    preferred_fits = Column(ARRAY(String), nullable=True)
+    preferred_occasions = Column(ARRAY(String), nullable=True)
+    preferred_climate = Column(ARRAY(String), nullable=True)
+    preferred_style_tags = Column(ARRAY(String), nullable=True)
+
+    # Relationships
+    user = relationship("User")
+
+    def __repr__(self):
+        return f"<StylePreference for User {self.user_id}>"
