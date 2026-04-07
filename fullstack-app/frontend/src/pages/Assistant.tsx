@@ -21,6 +21,8 @@ import { pageBackgroundStyles } from "../theme";
 import { useNavigate } from 'react-router-dom';
 import { useClothContext } from "../hooks/useClothContext";
 
+const RECOMMENDATION_PREFERENCE_KEY = "assistantRecommendationPreference";
+
 // leave last 6 messages + new user input
 function getMessages(messages: Message[], newUserInput: string): Message[] {
     const contextMessages = messages.slice(-6);
@@ -58,6 +60,10 @@ export function Assistant() {
     const [isAddMenuOpen, setIsAddMenuOpen] = useState(false);
     const addMenuRef = useRef<HTMLDivElement | null>(null);
     const addFileInputRef = useRef<HTMLInputElement | null>(null);
+    const [recommendationsEnabled, setRecommendationsEnabled] = useState<boolean>(() => {
+        if (typeof window === "undefined") return true;
+        return window.localStorage.getItem(RECOMMENDATION_PREFERENCE_KEY) !== "off";
+    });
 
     // run once then the component mounts
     useEffect(() => {
@@ -90,6 +96,16 @@ export function Assistant() {
         return () => document.removeEventListener("mousedown", handleOutsideClick);
     }, [isAddMenuOpen]);
 
+    useEffect(() => {
+        window.localStorage.setItem(
+            RECOMMENDATION_PREFERENCE_KEY,
+            recommendationsEnabled ? "on" : "off"
+        );
+        if (!recommendationsEnabled) {
+            setSuggestedItems([]);
+        }
+    }, [recommendationsEnabled]);
+
     async function sendMessage() {
         // Don’t send if a request is already in progress.
         if (!input.trim() || isLoading) return;
@@ -114,6 +130,7 @@ export function Assistant() {
             formData.append("message", messagesToPrompt(getMessages(messages, userInput)));
             formData.append("max_tokens", "200");
             formData.append("mode", mode ?? "chat");
+            formData.append("recommendations_enabled", String(recommendationsEnabled));
             if (selectedImage) {
                 formData.append("image", selectedImage);
             }
@@ -205,12 +222,58 @@ export function Assistant() {
                             p={4}
                             display="flex"
                             alignItems="center"
+                            justifyContent="space-between"
                             gap={3}
+                            flexWrap="wrap"
                         >
-                            <Icon as={FiMessageCircle} color="#8b6f5a" />
-                            <Text color="gray.700">
-                                Style Tip: Ask for a weekend look, a work outfit, or how to style a specific color. You can also attach an image of a clothing item to add it!
-                            </Text>
+                            <Flex align="center" gap={3} flex="1" minW="260px">
+                                <Icon as={FiMessageCircle} color="#8b6f5a" />
+                                <Text color="gray.700">
+                                    Style Tip: Ask for a weekend look, a work outfit, or how to style a specific color. You can also attach an image of a clothing item to add it!
+                                </Text>
+                            </Flex>
+                            <Button
+                                variant="ghost"
+                                onClick={() => setRecommendationsEnabled(prev => !prev)}
+                                aria-pressed={recommendationsEnabled}
+                                data-testid="recommendation-toggle"
+                                borderRadius="full"
+                                px={2}
+                                h="auto"
+                                minH="56px"
+                                _hover={{ bg: "#f7f1ec" }}
+                            >
+                                <Flex align="center" gap={3}>
+                                    <Box
+                                        w="46px"
+                                        h="26px"
+                                        borderRadius="full"
+                                        bg={recommendationsEnabled ? "#8b6f5a" : "gray.300"}
+                                        p="3px"
+                                        transition="background 0.2s ease"
+                                    >
+                                        <Box
+                                            w="20px"
+                                            h="20px"
+                                            borderRadius="full"
+                                            bg="white"
+                                            transform={recommendationsEnabled ? "translateX(20px)" : "translateX(0)"}
+                                            transition="transform 0.2s ease"
+                                            boxShadow="sm"
+                                        />
+                                    </Box>
+                                    <Box textAlign="left">
+                                        <Text fontWeight="700" color="gray.800">
+                                            Recommendations {recommendationsEnabled ? "On" : "Off"}
+                                        </Text>
+                                        <Text fontSize="sm" color="gray.600">
+                                            {recommendationsEnabled
+                                                ? "The assistant can proactively suggest looks."
+                                                : "The assistant will avoid unsolicited suggestions."}
+                                        </Text>
+                                    </Box>
+                                </Flex>
+                            </Button>
                         </Box>
                         <Flex
                             direction="column"
@@ -543,7 +606,11 @@ export function Assistant() {
                             Outfit Suggestions
                         </Heading>
                         {suggestedItems.length === 0 ? (
-                            <Text color="gray.500">Ask about a color or item to see matching pieces.</Text>
+                            <Text color="gray.500">
+                                {recommendationsEnabled
+                                    ? "Ask about a color or item to see matching pieces."
+                                    : "Recommendations are off. Turn them on to see suggested matching pieces here."}
+                            </Text>
                         ) : (
                             <Stack gap={3}>
                                 {suggestedItems.map((item, idx) => (

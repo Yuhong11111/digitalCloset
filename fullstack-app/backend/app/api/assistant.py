@@ -9,6 +9,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
+from app.api.preference import get_user_preferences
 from app.db.database import get_db
 from app.schemas.message import AIResponse, AIRequest, OutfitSuggestRequest
 from app.schemas.item import ItemClosetResponse
@@ -171,6 +172,7 @@ async def get_ai_assistance(
         user_id = current_user.get("userId")
         # get mode to decide which system prompt to use
         mode = request.mode
+        recommendations_enabled = request.recommendations_enabled
         cloth_list: List[Dict[str, Any]] = []
         # if mode == "command" and image is not None: def command mode system
         # if mode == "chat": def chat mode system (more casual, less strict on response format)
@@ -187,16 +189,48 @@ async def get_ai_assistance(
 
         elif mode == "chat":
             cloth_list = get_cloth(db, user_id)
+            user_preferences = None
+            if recommendations_enabled and user_id:
+                try:
+                    user_preferences = get_user_preferences(uuid.UUID(user_id), db)
+                except ValueError:
+                    user_preferences = None
+
+            has_preferences = bool(
+                user_preferences
+                and any(
+                    [
+                        user_preferences.preferred_colors,
+                        user_preferences.preferred_fits,
+                        user_preferences.preferred_occasions,
+                        user_preferences.preferred_climate,
+                        user_preferences.preferred_style_tags,
+                    ]
+                )
+            )
             payload = {
                 "closet_items": cloth_list,
-                "question": request.message
+                "question": request.message,
+                "recommendations_enabled": recommendations_enabled,
+                "style_preferences": user_preferences.model_dump() if user_preferences else None,
             }
+            if recommendations_enabled:
+                recommendation_rules = (
+                    "Recommendations are enabled. Offer outfit or styling suggestions when they are useful. Use the user's style preferences to inform your suggestions. If the preference is empty, you can proactively suggest user to update their style preferences to get better recommendations."
+                    if has_preferences
+                    else "Recommendations are enabled. Offer outfit or styling suggestions when they are useful. If the preference is empty, you can proactively suggest user to update their style preferences to get better recommendations."
+                )
+            else:
+                recommendation_rules = (
+                    "Recommendations are disabled. Do not proactively suggest outfits, clothing items, or styling ideas unless the user explicitly asks for recommendations. Provide general and helpful responses to the user's questions about their closet and fashion choices without offering unsolicited recommendations."
+                )
             instructions = f"""{SYSTEM_PROMPT}
             You are in CHAT MODE.
             
             You are given the payload with the user's closet items and their question.{payload}
 
             you are having a friendly conversation with the user about their closet and fashion choices.
+            {recommendation_rules}
             Provide a natural language message, set type="chat_response", and include any relevant selected_item_ids.
             """
         else:

@@ -11,6 +11,26 @@ from app.schemas.preference import PreferenceRequest, PreferenceResponse
 
 router = APIRouter(prefix="/preferences", tags=["preferences"])
 
+def get_user_preferences(user_id: uuid.UUID, db: Session) -> PreferenceRequest:
+    query = text(
+        """
+        SELECT preferred_colors, preferred_fits, preferred_occasions, preferred_climate, preferred_style_tags
+        FROM style_preferences
+        WHERE user_id = :user_id
+        """
+    )
+    result = db.execute(query, {"user_id": user_id}).fetchone()
+    if result:
+        row = result._mapping
+        return PreferenceRequest(
+            preferred_colors=row["preferred_colors"],
+            preferred_fits=row["preferred_fits"],
+            preferred_occasions=row["preferred_occasions"],
+            preferred_climate=row["preferred_climate"],
+            preferred_style_tags=row["preferred_style_tags"],
+        )
+    return PreferenceRequest()  # Return empty preferences if not found
+
 
 @router.post("/", response_model=PreferenceResponse)
 async def save_preferences(
