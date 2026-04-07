@@ -2,6 +2,7 @@ import axios from "axios";
 import { API_BASE_URL } from "../config";
 import { createContext, useEffect, PropsWithChildren } from "react";
 import { useState } from "react"
+import type { AxiosError } from "axios";
 
 // Define the context type
 interface UserContextType {
@@ -26,6 +27,12 @@ export function UserContextProvider({ children }: PropsWithChildren) {
     const [id, setId] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
+    const clearSession = () => {
+        setUsername(null);
+        setId(null);
+        setLoading(false);
+    };
+
     useEffect(() => {
         const fetchProfile = async () => {
             try {
@@ -33,8 +40,7 @@ export function UserContextProvider({ children }: PropsWithChildren) {
                 setUsername(response.data?.username ?? null);
                 setId(response.data?.userId ?? null);
             } catch {
-                setUsername(null);
-                setId(null);
+                clearSession();
             } finally {
                 setLoading(false);
             }
@@ -42,6 +48,24 @@ export function UserContextProvider({ children }: PropsWithChildren) {
 
         fetchProfile();
     }, [])
+
+    // any 401 response from the server will trigger session clearing, which logs the user out
+    useEffect(() => {
+        const interceptorId = axios.interceptors.response.use(
+            (response) => response,
+            (error: AxiosError) => {
+                if (error.response?.status === 401) {
+                    clearSession();
+                }
+
+                return Promise.reject(error);
+            }
+        );
+
+        return () => {
+            axios.interceptors.response.eject(interceptorId);
+        };
+    }, []);
 
     return (
         <UserContext.Provider value={{ username, setUsername, id, setId, loading }}>
